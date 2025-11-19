@@ -28,7 +28,7 @@ export default function LoginPage() {
       } else {
         router.push('/dashboard');
       }
-    } catch (err) {
+    } catch {
       setErrorMessage('ログインに失敗しました');
     } finally {
       setLoading(false);
