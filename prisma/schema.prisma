@@ -19,3 +19,27 @@ model User {
 
   @@map("users")
 }
+
+model Training {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  modules     Module[]
+
+  @@map("trainings")
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  order       Int
+  trainingId  String   @map("training_id")
+  training    Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("modules")
+}
