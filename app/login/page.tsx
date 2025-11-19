@@ -8,12 +8,12 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErrorMessage('');
     setLoading(true);
 
     try {
@@ -24,12 +24,12 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('メールアドレスまたはパスワードが正しくありません');
+        setErrorMessage('メールアドレスまたはパスワードが正しくありません');
       } else {
         router.push('/dashboard');
       }
-    } catch (error) {
-      setError('ログインに失敗しました');
+    } catch (err) {
+      setErrorMessage('ログインに失敗しました');
     } finally {
       setLoading(false);
     }
@@ -47,9 +47,9 @@ export default function LoginPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
+          {errorMessage && (
             <div className="bg-red-50 text-red-600 p-3 rounded text-sm">
-              {error}
+              {errorMessage}
             </div>
           )}
           <div className="space-y-4">
