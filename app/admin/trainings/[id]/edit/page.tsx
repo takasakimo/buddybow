@@ -1,0 +1,43 @@
+import { getServerSession } from 'next-auth';
+import { redirect, notFound } from 'next/navigation';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import TrainingForm from '../../components/TrainingForm';
+
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default async function EditTrainingPage({ params }: PageProps) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== 'admin') {
+    redirect('/dashboard');
+  }
+
+  const training = await prisma.training.findUnique({
+    where: {
+      id: params.id,
+    },
+  });
+
+  if (!training) {
+    notFound();
+  }
+
+  return (
+    <DashboardLayout>
+      <div className="max-w-3xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            研修編集
+          </h1>
+        </header>
+        <TrainingForm initialData={training} />
+      </div>
+    </DashboardLayout>
+  );
+}
