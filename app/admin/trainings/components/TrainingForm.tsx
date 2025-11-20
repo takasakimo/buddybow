@@ -19,7 +19,49 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
   const [description, setDescription] = useState(initialData?.description || '');
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 画像ファイルかチェック
+    if (!file.type.startsWith('image/')) {
+      setError('画像ファイルを選択してください');
+      return;
+    }
+
+    // ファイルサイズチェック (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('ファイルサイズは5MB以下にしてください');
+      return;
+    }
+
+    setIsUploading(true);
+    setError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('アップロードに失敗しました');
+      }
+
+      const data = await response.json();
+      setImageUrl(data.url);
+    } catch {
+      setError('画像のアップロードに失敗しました');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,36 +137,72 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
       </div>
 
       <div className="mb-6">
-        <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-2">
-          サムネイル画像URL
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          サムネイル画像
         </label>
-        <input
-          type="url"
-          id="imageUrl"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="https://example.com/image.jpg"
-        />
-        {imageUrl && (
-          <div className="mt-4">
-            <p className="text-sm text-gray-600 mb-2">プレビュー:</p>
-            <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
-              <Image
-                src={imageUrl}
-                alt="サムネイルプレビュー"
-                fill
-                className="object-cover"
-              />
-            </div>
+        
+        <div className="space-y-4">
+          {/* ファイルアップロード */}
+          <div>
+            <label
+              htmlFor="fileUpload"
+              className="inline-block px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
+            >
+              {isUploading ? 'アップロード中...' : 'ファイルを選択'}
+            </label>
+            <input
+              type="file"
+              id="fileUpload"
+              accept="image/*"
+              onChange={handleFileUpload}
+              disabled={isUploading}
+              className="hidden"
+            />
+            <p className="mt-2 text-sm text-gray-500">
+              JPG, PNG, GIF (最大5MB)
+            </p>
           </div>
-        )}
+
+          {/* URLから入力 */}
+          <div>
+            <p className="text-sm text-gray-600 mb-2">または画像URLを入力:</p>
+            <input
+              type="url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+
+          {/* プレビュー */}
+          {imageUrl && (
+            <div>
+              <p className="text-sm text-gray-600 mb-2">プレビュー:</p>
+              <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+                <Image
+                  src={imageUrl}
+                  alt="サムネイルプレビュー"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setImageUrl('')}
+                className="mt-2 text-sm text-red-600 hover:text-red-800"
+              >
+                画像を削除
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-4">
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isUploading}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
         >
           {isSubmitting ? '保存中...' : initialData ? '更新' : '作成'}
