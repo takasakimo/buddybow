@@ -13,9 +13,15 @@ const menuItems = [
     allowedRoles: ['admin', 'user'],
   },
   {
+    label: '研修一覧',
+    href: '/trainings',
+    icon: '📚',
+    allowedRoles: ['admin', 'user'],
+  },
+  {
     label: '研修管理',
     href: '/admin/trainings',
-    icon: '📚',
+    icon: '⚙️',
     allowedRoles: ['admin'],
   },
 ];
