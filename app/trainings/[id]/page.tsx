@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 interface PageProps {
   params: {
@@ -17,7 +18,6 @@ export default async function TrainingDetailPage({ params }: PageProps) {
     redirect('/login');
   }
 
-  // 研修データを取得
   const training = await prisma.training.findUnique({
     where: {
       id: params.id,
@@ -33,16 +33,10 @@ export default async function TrainingDetailPage({ params }: PageProps) {
 
   if (!training) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <h1 className="text-3xl font-bold text-gray-900">
-              研修が見つかりません
-            </h1>
-          </div>
-        </header>
-        <main className="max-w-7xl mx-auto px-4 py-6">
+      <DashboardLayout>
+        <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-lg shadow p-6">
+            <h1 className="text-2xl font-bold mb-4">研修が見つかりません</h1>
             <p className="text-gray-600 mb-4">
               指定された研修は存在しません。
             </p>
@@ -53,70 +47,88 @@ export default async function TrainingDetailPage({ params }: PageProps) {
               ダッシュボードに戻る
             </Link>
           </div>
-        </main>
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
+  const isAdmin = session.user.role === 'admin';
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <Link
-            href="/dashboard"
-            className="text-blue-600 hover:text-blue-800 mb-2 inline-block"
-          >
-            ← ダッシュボードに戻る
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900">
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {training.title}
           </h1>
-        </div>
-      </header>
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">研修概要</h2>
-          <p className="text-gray-600 whitespace-pre-wrap">
-            {training.description}
-          </p>
-        </div>
+          {training.description && (
+            <p className="text-gray-600">{training.description}</p>
+          )}
+        </header>
 
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">モジュール一覧</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold">チャプター一覧</h2>
+            {isAdmin && (
+              <Link
+                href={`/admin/trainings/${training.id}/modules/new`}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                チャプター追加
+              </Link>
+            )}
+          </div>
+
           {training.modules.length === 0 ? (
             <p className="text-gray-600">
-              この研修にはまだモジュールが登録されていません。
+              この研修にはまだチャプターが登録されていません。
             </p>
           ) : (
             <div className="space-y-4">
-              {training.modules.map((module) => (
+              {training.modules.map((module, index) => (
                 <div
                   key={module.id}
                   className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
                 >
-                  <h3 className="font-semibold text-lg mb-2">
-                    {module.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {module.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
-                      順序: {module.order}
-                    </span>
-                    <Link
-                      href={`/trainings/${training.id}/modules/${module.id}`}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      開始する
-                    </Link>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-sm font-medium text-gray-500">
+                          チャプター {index + 1}
+                        </span>
+                        <h3 className="font-semibold text-lg">
+                          {module.title}
+                        </h3>
+                      </div>
+                      {module.description && (
+                        <p className="text-gray-600 text-sm">
+                          {module.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      {isAdmin && (
+                        <Link
+                          href={`/admin/trainings/${training.id}/modules/${module.id}/edit`}
+                          className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                        >
+                          編集
+                        </Link>
+                      )}
+                      <Link
+                        href={`/trainings/${training.id}/modules/${module.id}`}
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        開始
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
