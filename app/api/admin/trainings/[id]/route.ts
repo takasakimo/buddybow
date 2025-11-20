@@ -27,7 +27,6 @@ export async function PUT(
       );
     }
 
-    // 既存のモジュールを削除して新しいものを作成
     await prisma.module.deleteMany({
       where: {
         trainingId: params.id,
@@ -43,9 +42,17 @@ export async function PUT(
         description: description || null,
         imageUrl: imageUrl || null,
         modules: modules && modules.length > 0 ? {
-          create: modules.map((mod: { title: string; description: string; order: number }) => ({
+          create: modules.map((mod: { 
+            title: string; 
+            description: string | null;
+            imageUrl: string | null;
+            videoUrl: string | null;
+            order: number;
+          }) => ({
             title: mod.title,
             description: mod.description || null,
+            imageUrl: mod.imageUrl || null,
+            videoUrl: mod.videoUrl || null,
             order: mod.order,
           })),
         } : undefined,

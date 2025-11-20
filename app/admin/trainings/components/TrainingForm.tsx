@@ -8,6 +8,8 @@ interface Module {
   id?: string;
   title: string;
   description: string | null;
+  imageUrl: string | null;
+  videoUrl: string | null;
   order: number;
 }
 
@@ -31,11 +33,14 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
       id: m.id,
       title: m.title,
       description: m.description || '',
+      imageUrl: m.imageUrl || '',
+      videoUrl: m.videoUrl || '',
       order: m.order,
     })) || []
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadingModuleIndex, setUploadingModuleIndex] = useState<number | null>(null);
   const [error, setError] = useState('');
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,8 +99,70 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
     }
   };
 
+  const handleModuleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, moduleIndex: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('画像ファイルを選択してください');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('ファイルサイズは5MB以下にしてください');
+      return;
+    }
+
+    setUploadingModuleIndex(moduleIndex);
+    setError('');
+
+    try {
+      const img = new window.Image();
+      const imageUrl = URL.createObjectURL(file);
+      
+      await new Promise((resolve, reject) => {
+        img.onload = () => {
+          if (img.width !== 1280 || img.height !== 720) {
+            reject(new Error('画像サイズは1280×720pxである必要があります'));
+          } else {
+            resolve(true);
+          }
+        };
+        img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
+        img.src = imageUrl;
+      });
+
+      URL.revokeObjectURL(imageUrl);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('アップロードに失敗しました');
+      }
+
+      const data = await response.json();
+      updateModule(moduleIndex, 'imageUrl', data.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '画像のアップロードに失敗しました');
+    } finally {
+      setUploadingModuleIndex(null);
+    }
+  };
+
   const addModule = () => {
-    setModules([...modules, { title: '', description: '', order: modules.length + 1 }]);
+    setModules([...modules, { 
+      title: '', 
+      description: '', 
+      imageUrl: '',
+      videoUrl: '',
+      order: modules.length + 1 
+    }]);
   };
 
   const removeModule = (index: number) => {
@@ -136,6 +203,8 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
           modules: modules.map(m => ({
             title: m.title,
             description: m.description || null,
+            imageUrl: m.imageUrl || null,
+            videoUrl: m.videoUrl || null,
             order: m.order,
           })),
         }),
@@ -271,11 +340,11 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
             チャプターを追加してください
           </p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {modules.map((mod, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
+              <div key={index} className="border border-gray-200 rounded-lg p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="font-medium text-gray-900">
+                  <h3 className="font-medium text-gray-900 text-lg">
                     チャプター {index + 1}
                   </h3>
                   <button
@@ -314,6 +383,74 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
                       placeholder="チャプターの概要"
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      サムネイル画像 (1280×720px)
+                    </label>
+                    <div className="space-y-4">
+                      <div>
+                        <label
+                          htmlFor={`moduleFileUpload-${index}`}
+                          className="inline-block px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
+                        >
+                          {uploadingModuleIndex === index ? 'アップロード中...' : 'ファイルを選択'}
+                        </label>
+                        <input
+                          type="file"
+                          id={`moduleFileUpload-${index}`}
+                          accept="image/*"
+                          onChange={(e) => handleModuleFileUpload(e, index)}
+                          disabled={uploadingModuleIndex === index}
+                          className="hidden"
+                        />
+                        <p className="mt-2 text-sm text-gray-500">
+                          JPG, PNG, GIF (1280×720px、最大5MB)
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-gray-600 mb-2">または画像URLを入力:</p>
+                        <input
+                          type="url"
+                          value={mod.imageUrl || ''}
+                          onChange={(e) => updateModule(index, 'imageUrl', e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="https://example.com/image.jpg"
+                        />
+                      </div>
+
+                      {mod.imageUrl && (
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">プレビュー:</p>
+                          <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                            <Image
+                              src={mod.imageUrl}
+                              alt="チャプターサムネイル"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      動画URL
+                    </label>
+                    <input
+                      type="url"
+                      value={mod.videoUrl || ''}
+                      onChange={(e) => updateModule(index, 'videoUrl', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                    <p className="mt-2 text-sm text-gray-500">
+                      YouTube、Vimeoなどの動画URLを入力してください
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -324,7 +461,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
       <div className="flex gap-4">
         <button
           type="submit"
-          disabled={isSubmitting || isUploading}
+          disabled={isSubmitting || isUploading || uploadingModuleIndex !== null}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
         >
           {isSubmitting ? '保存中...' : initialData ? '更新' : '作成'}

@@ -71,7 +71,7 @@ export default async function AdminTrainingsPage() {
                     {training.description || '説明なし'}
                   </p>
                   <p className="text-sm text-gray-500 mb-4">
-                    モジュール数: {training.modules.length}
+                    チャプター数: {training.modules.length}
                   </p>
                   <div className="flex gap-2">
                     <Link
