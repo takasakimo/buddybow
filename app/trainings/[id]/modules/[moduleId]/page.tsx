@@ -56,7 +56,14 @@ export default async function ModuleDetailPage({ params }: PageProps) {
       return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
     }
     
-    // Vimeo
+    // Vimeo (限定公開対応)
+    // https://vimeo.com/1138786209/32ff031622 形式
+    const vimeoPrivateMatch = url.match(/vimeo\.com\/(\d+)\/([a-zA-Z0-9]+)/);
+    if (vimeoPrivateMatch) {
+      return `https://player.vimeo.com/video/${vimeoPrivateMatch[1]}?h=${vimeoPrivateMatch[2]}`;
+    }
+    
+    // Vimeo (通常)
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
     if (vimeoMatch) {
       return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
