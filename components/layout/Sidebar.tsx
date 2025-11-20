@@ -31,10 +31,10 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ハンバーガーメニューボタン (スマホのみ) */}
+      {/* ハンバーガーメニューボタン */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg"
+        className="fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50"
       >
         <div className="w-6 h-5 flex flex-col justify-between">
           <span className={`block h-0.5 w-full bg-gray-600 transition-transform ${isOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
@@ -43,11 +43,11 @@ export default function Sidebar() {
         </div>
       </button>
 
-      {/* オーバーレイ (スマホのみ) */}
+      {/* オーバーレイ */}
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="fixed inset-0 bg-black bg-opacity-50 z-30"
         />
       )}
 
@@ -55,7 +55,7 @@ export default function Sidebar() {
       <aside
         className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0`}
+        }`}
       >
         <div className="flex flex-col h-full">
           {/* ヘッダー */}
