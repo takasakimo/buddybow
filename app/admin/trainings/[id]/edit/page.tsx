@@ -22,6 +22,13 @@ export default async function EditTrainingPage({ params }: PageProps) {
     where: {
       id: params.id,
     },
+    include: {
+      modules: {
+        orderBy: {
+          order: 'asc',
+        },
+      },
+    },
   });
 
   if (!training) {

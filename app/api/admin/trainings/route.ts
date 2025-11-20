@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, description, imageUrl } = body;
+    const { title, description, imageUrl, modules } = body;
 
     if (!title) {
       return NextResponse.json(
@@ -29,6 +29,16 @@ export async function POST(request: Request) {
         title,
         description: description || null,
         imageUrl: imageUrl || null,
+        modules: modules && modules.length > 0 ? {
+          create: modules.map((mod: { title: string; description: string; order: number }) => ({
+            title: mod.title,
+            description: mod.description || null,
+            order: mod.order,
+          })),
+        } : undefined,
+      },
+      include: {
+        modules: true,
       },
     });
 

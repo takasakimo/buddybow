@@ -18,7 +18,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { title, description, imageUrl } = body;
+    const { title, description, imageUrl, modules } = body;
 
     if (!title) {
       return NextResponse.json(
@@ -26,6 +26,13 @@ export async function PUT(
         { status: 400 }
       );
     }
+
+    // 既存のモジュールを削除して新しいものを作成
+    await prisma.module.deleteMany({
+      where: {
+        trainingId: params.id,
+      },
+    });
 
     const training = await prisma.training.update({
       where: {
@@ -35,6 +42,16 @@ export async function PUT(
         title,
         description: description || null,
         imageUrl: imageUrl || null,
+        modules: modules && modules.length > 0 ? {
+          create: modules.map((mod: { title: string; description: string; order: number }) => ({
+            title: mod.title,
+            description: mod.description || null,
+            order: mod.order,
+          })),
+        } : undefined,
+      },
+      include: {
+        modules: true,
       },
     });
 
