@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface TrainingFormProps {
   initialData?: {
     id: string;
     title: string;
     description: string | null;
+    imageUrl: string | null;
   };
 }
 
@@ -15,6 +17,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
+  const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -38,6 +41,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
         body: JSON.stringify({
           title,
           description,
+          imageUrl,
         }),
       });
 
@@ -88,6 +92,33 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="研修の概要を入力してください"
         />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-2">
+          サムネイル画像URL
+        </label>
+        <input
+          type="url"
+          id="imageUrl"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="https://example.com/image.jpg"
+        />
+        {imageUrl && (
+          <div className="mt-4">
+            <p className="text-sm text-gray-600 mb-2">プレビュー:</p>
+            <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+              <Image
+                src={imageUrl}
+                alt="サムネイルプレビュー"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-4">

@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, description } = body;
+    const { title, description, imageUrl } = body;
 
     if (!title) {
       return NextResponse.json(
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
       data: {
         title,
         description: description || null,
+        imageUrl: imageUrl || null,
       },
     });
 

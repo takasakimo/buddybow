@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default async function AdminTrainingsPage() {
@@ -42,34 +43,46 @@ export default async function AdminTrainingsPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trainings.map((training) => (
               <div
                 key={training.id}
-                className="bg-white rounded-lg shadow p-6"
+                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold mb-2">
-                      {training.title}
-                    </h2>
-                    <p className="text-gray-600 mb-4">
-                      {training.description}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      モジュール数: {training.modules.length}
-                    </p>
+                {training.imageUrl ? (
+                  <div className="relative w-full h-48 bg-gray-100 rounded-t-lg overflow-hidden">
+                    <Image
+                      src={training.imageUrl}
+                      alt={training.title}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
+                ) : (
+                  <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
+                    <span className="text-4xl text-gray-400">📚</span>
+                  </div>
+                )}
+                <div className="p-6">
+                  <h2 className="text-xl font-semibold mb-2">
+                    {training.title}
+                  </h2>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {training.description || '説明なし'}
+                  </p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    モジュール数: {training.modules.length}
+                  </p>
                   <div className="flex gap-2">
                     <Link
                       href={`/admin/trainings/${training.id}/edit`}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 text-center rounded-lg hover:bg-gray-300"
                     >
                       編集
                     </Link>
                     <Link
                       href={`/trainings/${training.id}`}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                      className="flex-1 px-4 py-2 bg-green-600 text-white text-center rounded-lg hover:bg-green-700"
                     >
                       表示
                     </Link>
