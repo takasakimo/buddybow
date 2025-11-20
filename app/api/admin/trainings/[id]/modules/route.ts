@@ -27,7 +27,7 @@ export async function POST(
       );
     }
 
-    const module = await prisma.module.create({
+    const newModule = await prisma.module.create({
       data: {
         title,
         description: description || null,
@@ -36,7 +36,7 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(module, { status: 201 });
+    return NextResponse.json(newModule, { status: 201 });
   } catch (error) {
     console.error('Module creation error:', error);
     return NextResponse.json(
