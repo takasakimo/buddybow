@@ -42,6 +42,24 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
     setError('');
 
     try {
+      // 画像のサイズをチェック
+      const img = new window.Image();
+      const imageUrl = URL.createObjectURL(file);
+      
+      await new Promise((resolve, reject) => {
+        img.onload = () => {
+          if (img.width !== 1280 || img.height !== 720) {
+            reject(new Error('画像サイズは1280×720pxである必要があります'));
+          } else {
+            resolve(true);
+          }
+        };
+        img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
+        img.src = imageUrl;
+      });
+
+      URL.revokeObjectURL(imageUrl);
+
       const formData = new FormData();
       formData.append('file', file);
 
@@ -56,8 +74,8 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
 
       const data = await response.json();
       setImageUrl(data.url);
-    } catch {
-      setError('画像のアップロードに失敗しました');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '画像のアップロードに失敗しました');
     } finally {
       setIsUploading(false);
     }
@@ -138,7 +156,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
 
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          サムネイル画像
+          サムネイル画像 (1280×720px) *
         </label>
         
         <div className="space-y-4">
@@ -159,7 +177,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
               className="hidden"
             />
             <p className="mt-2 text-sm text-gray-500">
-              JPG, PNG, GIF (最大5MB)
+              JPG, PNG, GIF (1280×720px、最大5MB)
             </p>
           </div>
 
@@ -179,7 +197,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
           {imageUrl && (
             <div>
               <p className="text-sm text-gray-600 mb-2">プレビュー:</p>
-              <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
                 <Image
                   src={imageUrl}
                   alt="サムネイルプレビュー"
