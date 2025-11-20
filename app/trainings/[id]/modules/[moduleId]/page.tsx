@@ -46,17 +46,26 @@ export default async function ModuleDetailPage({ params }: PageProps) {
   const prevModule = currentIndex > 0 ? training.modules[currentIndex - 1] : null;
   const nextModule = currentIndex < training.modules.length - 1 ? training.modules[currentIndex + 1] : null;
 
-  // YouTube URLの変換
-  const getYouTubeEmbedUrl = (url: string) => {
+  // 動画URLの変換
+  const getEmbedUrl = (url: string) => {
     if (!url) return null;
-    const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
-    if (videoIdMatch) {
-      return `https://www.youtube.com/embed/${videoIdMatch[1]}`;
+    
+    // YouTube
+    const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
     }
+    
+    // Vimeo
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+      return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    }
+    
     return url;
   };
 
-  const embedUrl = currentModule.videoUrl ? getYouTubeEmbedUrl(currentModule.videoUrl) : null;
+  const embedUrl = currentModule.videoUrl ? getEmbedUrl(currentModule.videoUrl) : null;
 
   return (
     <DashboardLayout>
@@ -100,7 +109,7 @@ export default async function ModuleDetailPage({ params }: PageProps) {
               <iframe
                 src={embedUrl}
                 className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="autoplay; fullscreen; picture-in-picture"
                 allowFullScreen
               />
             </div>
