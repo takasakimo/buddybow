@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default async function AdminTrainingsPage() {
   const session = await getServerSession(authOptions);
@@ -21,23 +22,19 @@ export default async function AdminTrainingsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">
-              研修管理
-            </h1>
-            <Link
-              href="/admin/trainings/new"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              新規作成
-            </Link>
-          </div>
-        </div>
-      </header>
-      <main className="max-w-7xl mx-auto px-4 py-6">
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-8 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">
+            研修管理
+          </h1>
+          <Link
+            href="/admin/trainings/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            新規作成
+          </Link>
+        </header>
         {trainings.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-6">
             <p className="text-gray-600">
@@ -82,7 +79,7 @@ export default async function AdminTrainingsPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
