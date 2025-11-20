@@ -58,6 +58,12 @@ export default async function TrainingDetailPage({ params }: PageProps) {
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
         <header className="mb-8">
+          <Link
+            href={isAdmin ? '/admin/trainings' : '/dashboard'}
+            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+          >
+            ← {isAdmin ? '研修管理' : 'ダッシュボード'}に戻る
+          </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {training.title}
           </h1>
@@ -85,9 +91,9 @@ export default async function TrainingDetailPage({ params }: PageProps) {
             </p>
           ) : (
             <div className="space-y-4">
-              {training.modules.map((module, index) => (
+              {training.modules.map((moduleData, index) => (
                 <div
-                  key={module.id}
+                  key={moduleData.id}
                   className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start justify-between">
@@ -97,26 +103,26 @@ export default async function TrainingDetailPage({ params }: PageProps) {
                           チャプター {index + 1}
                         </span>
                         <h3 className="font-semibold text-lg">
-                          {module.title}
+                          {moduleData.title}
                         </h3>
                       </div>
-                      {module.description && (
+                      {moduleData.description && (
                         <p className="text-gray-600 text-sm">
-                          {module.description}
+                          {moduleData.description}
                         </p>
                       )}
                     </div>
                     <div className="flex gap-2">
                       {isAdmin && (
                         <Link
-                          href={`/admin/trainings/${training.id}/modules/${module.id}/edit`}
+                          href={`/admin/trainings/${training.id}/modules/${moduleData.id}/edit`}
                           className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
                         >
                           編集
                         </Link>
                       )}
                       <Link
-                        href={`/trainings/${training.id}/modules/${module.id}`}
+                        href={`/trainings/${training.id}/modules/${moduleData.id}`}
                         className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
                       >
                         開始
