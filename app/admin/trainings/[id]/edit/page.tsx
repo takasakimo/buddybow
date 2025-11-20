@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth';
 import { redirect, notFound } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import TrainingForm from '../../components/TrainingForm';
 
@@ -39,6 +40,12 @@ export default async function EditTrainingPage({ params }: PageProps) {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto">
         <header className="mb-8">
+          <Link
+            href="/admin/trainings"
+            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+          >
+            ← 研修管理に戻る
+          </Link>
           <h1 className="text-3xl font-bold text-gray-900">
             研修編集
           </h1>
