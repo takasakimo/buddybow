@@ -47,7 +47,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
 
       router.push('/admin/trainings');
       router.refresh();
-    } catch (err) {
+    } catch {
       setError('保存に失敗しました');
       setIsSubmitting(false);
     }
