@@ -7,7 +7,7 @@ import Image from 'next/image';
 interface Module {
   id?: string;
   title: string;
-  description: string;
+  description: string | null;
   order: number;
 }
 
@@ -26,7 +26,14 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || '');
-  const [modules, setModules] = useState<Module[]>(initialData?.modules || []);
+  const [modules, setModules] = useState<Module[]>(
+    initialData?.modules?.map(m => ({
+      id: m.id,
+      title: m.title,
+      description: m.description || '',
+      order: m.order,
+    })) || []
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
@@ -93,7 +100,6 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
 
   const removeModule = (index: number) => {
     const newModules = modules.filter((_, i) => i !== index);
-    // 順序を再計算
     newModules.forEach((mod, i) => {
       mod.order = i + 1;
     });
@@ -127,7 +133,11 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
           title,
           description,
           imageUrl,
-          modules,
+          modules: modules.map(m => ({
+            title: m.title,
+            description: m.description || null,
+            order: m.order,
+          })),
         }),
       });
 
@@ -297,7 +307,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
                       説明
                     </label>
                     <textarea
-                      value={mod.description}
+                      value={mod.description || ''}
                       onChange={(e) => updateModule(index, 'description', e.target.value)}
                       rows={3}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
