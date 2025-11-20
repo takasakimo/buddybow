@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ModuleForm from '../components/ModuleForm';
 
@@ -37,6 +38,12 @@ export default async function NewModulePage({ params }: PageProps) {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto">
         <header className="mb-8">
+          <Link
+            href={`/trainings/${params.id}`}
+            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+          >
+            ← {training.title}に戻る
+          </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             チャプター追加
           </h1>
