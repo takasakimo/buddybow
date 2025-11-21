@@ -19,7 +19,6 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
   
-  // 日本時間で初期値を設定
   const getJSTDate = (isoString: string) => {
     const date = new Date(isoString);
     return new Date(date.getTime() + 9 * 60 * 60 * 1000);
@@ -50,7 +49,6 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
     setError('');
 
     try {
-      // 日本時間として解釈し、UTCに変換
       const startDateTime = new Date(`${date}T${startTime}:00+09:00`);
       const endDateTime = new Date(`${date}T${endTime}:00+09:00`);
 
@@ -109,6 +107,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
           type="text"
           id="title"
           name="title"
+          autoComplete="off"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -125,6 +124,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
           type="date"
           id="date"
           name="date"
+          autoComplete="off"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
@@ -141,6 +141,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
             type="time"
             id="startTime"
             name="startTime"
+            autoComplete="off"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             required
@@ -155,6 +156,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
             type="time"
             id="endTime"
             name="endTime"
+            autoComplete="off"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
             required
@@ -171,6 +173,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
           type="text"
           id="zoomId"
           name="zoomId"
+          autoComplete="off"
           value={zoomId}
           onChange={(e) => setZoomId(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
