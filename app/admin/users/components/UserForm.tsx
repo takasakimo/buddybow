@@ -33,7 +33,12 @@ export default function UserForm({ initialData }: UserFormProps) {
       
       const method = initialData ? 'PUT' : 'POST';
 
-      const body: any = {
+      const body: {
+        name: string;
+        email: string;
+        role: string;
+        password?: string;
+      } = {
         name,
         email,
         role,
