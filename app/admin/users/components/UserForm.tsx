@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 interface UserFormProps {
   initialData?: {
-    id: number;
+    id: string;
     name: string;
     email: string;
     role: string;
@@ -33,7 +33,7 @@ export default function UserForm({ initialData }: UserFormProps) {
       
       const method = initialData ? 'PUT' : 'POST';
 
-      const body: Record<string, string> = {
+      const body: any = {
         name,
         email,
         role,
@@ -41,8 +41,8 @@ export default function UserForm({ initialData }: UserFormProps) {
 
       // 新規作成時またはパスワード変更時のみパスワードを送信
       if (!initialData || password) {
-        if (!password) {
-          setError('パスワードを入力してください');
+        if (!password || password.length < 8) {
+          setError('パスワードは8文字以上で入力してください');
           setIsSubmitting(false);
           return;
         }
@@ -79,62 +79,70 @@ export default function UserForm({ initialData }: UserFormProps) {
       )}
 
       <div className="mb-6">
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-2">
           名前 *
         </label>
         <input
           type="text"
           id="name"
+          name="name"
+          autoComplete="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="山田太郎"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
         />
       </div>
 
       <div className="mb-6">
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
           メールアドレス *
         </label>
         <input
           type="email"
           id="email"
+          name="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="user@example.com"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
         />
       </div>
 
       <div className="mb-6">
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
           パスワード {initialData ? '(変更する場合のみ入力)' : '*'}
         </label>
         <input
           type="password"
           id="password"
+          name="password"
+          autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required={!initialData}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="********"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+          placeholder={initialData ? '変更しない場合は空欄' : '8文字以上で入力してください'}
         />
-        <p className="mt-2 text-sm text-gray-500">
-          8文字以上で入力してください
-        </p>
+        {!initialData && (
+          <p className="mt-2 text-sm text-gray-500">
+            8文字以上で入力してください
+          </p>
+        )}
       </div>
 
       <div className="mb-6">
-        <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="role" className="block text-sm font-medium text-gray-900 mb-2">
           ロール *
         </label>
         <select
           id="role"
+          name="role"
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          required
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
         >
           <option value="user">ユーザー</option>
           <option value="admin">管理者</option>
