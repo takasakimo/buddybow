@@ -77,12 +77,12 @@ export default function TrainingsPage() {
               placeholder="研修を検索..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             />
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             >
               <option value="">すべてのカテゴリ</option>
               {categories.map((category) => (
@@ -100,7 +100,7 @@ export default function TrainingsPage() {
           </div>
         ) : filteredTrainings.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-gray-600">
+            <p className="text-gray-900">
               {searchQuery || selectedCategory
                 ? '条件に一致する研修が見つかりませんでした。'
                 : '現在、利用可能な研修はありません。'}
@@ -134,14 +134,14 @@ export default function TrainingsPage() {
                       {training.category.name}
                     </span>
                   )}
-                  <h2 className="text-xl font-semibold mb-2">
+                  <h2 className="text-xl font-semibold mb-2 text-gray-900">
                     {training.title}
                   </h2>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  <p className="text-gray-900 text-sm mb-4 line-clamp-2">
                     {training.description || '説明なし'}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-900">
                       チャプター数: {training.modules.length}
                     </span>
                     <span className="text-blue-600 font-medium">
