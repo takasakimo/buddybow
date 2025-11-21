@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DeleteButton from './components/DeleteButton';
 
 // 日本時間に変換するヘルパー関数
 function toJSTString(date: Date, format: 'date' | 'time' = 'time') {
@@ -115,6 +116,7 @@ export default async function StudySessionsPage() {
                       >
                         編集
                       </Link>
+                      <DeleteButton id={session.id} title={session.title} />
                     </div>
                   </div>
                 </div>
