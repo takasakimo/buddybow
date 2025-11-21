@@ -1,0 +1,165 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+interface UserFormProps {
+  initialData?: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+  };
+}
+
+export default function UserForm({ initialData }: UserFormProps) {
+  const router = useRouter();
+  const [name, setName] = useState(initialData?.name || '');
+  const [email, setEmail] = useState(initialData?.email || '');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState(initialData?.role || 'user');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const url = initialData
+        ? `/api/admin/users/${initialData.id}`
+        : '/api/admin/users';
+      
+      const method = initialData ? 'PUT' : 'POST';
+
+      const body: Record<string, string> = {
+        name,
+        email,
+        role,
+      };
+
+      // 新規作成時またはパスワード変更時のみパスワードを送信
+      if (!initialData || password) {
+        if (!password) {
+          setError('パスワードを入力してください');
+          setIsSubmitting(false);
+          return;
+        }
+        body.password = password;
+      }
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || '保存に失敗しました');
+      }
+
+      router.push('/admin/users');
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '保存に失敗しました');
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      <div className="mb-6">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+          名前 *
+        </label>
+        <input
+          type="text"
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="山田太郎"
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          メールアドレス *
+        </label>
+        <input
+          type="email"
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="user@example.com"
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+          パスワード {initialData ? '(変更する場合のみ入力)' : '*'}
+        </label>
+        <input
+          type="password"
+          id="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required={!initialData}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="********"
+        />
+        <p className="mt-2 text-sm text-gray-500">
+          8文字以上で入力してください
+        </p>
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+          ロール *
+        </label>
+        <select
+          id="role"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="user">ユーザー</option>
+          <option value="admin">管理者</option>
+        </select>
+        <p className="mt-2 text-sm text-gray-500">
+          管理者は全ての機能にアクセスできます
+        </p>
+      </div>
+
+      <div className="flex gap-4">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+        >
+          {isSubmitting ? '保存中...' : initialData ? '更新' : '作成'}
+        </button>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+        >
+          キャンセル
+        </button>
+      </div>
+    </form>
+  );
+}

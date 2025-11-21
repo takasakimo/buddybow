@@ -25,6 +25,12 @@ const menuItems = [
     allowedRoles: ['admin', 'user'],
   },
   {
+    label: 'ユーザー管理',
+    href: '/admin/users',
+    icon: '👥',
+    allowedRoles: ['admin'],
+  },
+  {
     label: '研修管理',
     href: '/admin/trainings',
     icon: '⚙️',
