@@ -72,6 +72,8 @@ export default function UsersPage() {
     );
   }
 
+  const currentUserId = session?.user?.id ? parseInt(session.user.id as string) : null;
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
@@ -140,7 +142,7 @@ export default function UsersPage() {
                     >
                       編集
                     </Link>
-                    {user.id !== session?.user?.id && (
+                    {user.id !== currentUserId && (
                       <button
                         onClick={() => handleDelete(user.id)}
                         className="text-red-600 hover:text-red-900"
