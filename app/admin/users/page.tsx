@@ -36,8 +36,8 @@ export default function UsersPage() {
         const data = await response.json();
         setUsers(data);
       }
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
+    } catch {
+      console.error('Failed to fetch users');
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +57,7 @@ export default function UsersPage() {
         const data = await response.json();
         alert(data.error || '削除に失敗しました');
       }
-    } catch (error) {
+    } catch {
       alert('削除に失敗しました');
     }
   };
