@@ -24,6 +24,12 @@ const menuItems = [
     icon: '⚙️',
     allowedRoles: ['admin'],
   },
+  {
+    label: 'カテゴリ管理',
+    href: '/admin/categories',
+    icon: '🏷️',
+    allowedRoles: ['admin'],
+  },
 ];
 
 export default function Sidebar() {
