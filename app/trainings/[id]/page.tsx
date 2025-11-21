@@ -96,43 +96,38 @@ export default async function TrainingDetailPage({ params }: PageProps) {
               チャプターがまだありません
             </p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {training.modules.map((module, index) => (
                 <div
                   key={module.id}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg font-bold">
-                        {index + 1}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          {index + 1}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">
                         序章: {module.title}
                       </h3>
-                      {module.description && (
-                        <p className="text-gray-900 mb-4 whitespace-pre-wrap leading-relaxed">
-                          {module.description}
-                        </p>
-                      )}
-                      <div className="flex gap-3">
-                        {session.user.role === 'admin' && (
-                          <Link
-                            href={`/admin/trainings/${training.id}/edit`}
-                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                          >
-                            編集
-                          </Link>
-                        )}
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      {session.user.role === 'admin' && (
                         <Link
-                          href={`/trainings/${training.id}/chapters/${module.id}`}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          href={`/admin/trainings/${training.id}/edit`}
+                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
                         >
-                          開始
+                          編集
                         </Link>
-                      </div>
+                      )}
+                      <Link
+                        href={`/trainings/${training.id}/chapters/${module.id}`}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                      >
+                        開始
+                      </Link>
                     </div>
                   </div>
                 </div>
