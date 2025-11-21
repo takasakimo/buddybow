@@ -220,3 +220,17 @@ model Module {
 
   @@map("modules")
 }
+
+// チャプター進捗
+model ModuleProgress {
+  id          String   @id @default(cuid())
+  userId      Int      @map("user_id")
+  moduleId    String   @map("module_id")
+  completed   Boolean  @default(false)
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, moduleId])
+  @@map("module_progress")
+}
