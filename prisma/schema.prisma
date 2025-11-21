@@ -29,13 +29,43 @@ model User {
   @@map("users")
 }
 
+// お知らせ
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  category    String   // news, event, update
+  isPublished Boolean  @default(true) @map("is_published")
+  publishedAt DateTime @default(now()) @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("announcements")
+}
+
+// 勉強会
+model StudySession {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime @map("start_time")
+  endTime     DateTime @map("end_time")
+  location    String?  // オンライン/場所
+  maxCapacity Int?     @map("max_capacity")
+  status      String   @default("upcoming") // upcoming, ongoing, completed, cancelled
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("study_sessions")
+}
+
 // プログレス管理
 model UserProgress {
   id              String   @id @default(cuid())
   userId          Int      @unique @map("user_id")
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  currentPhase    String   @map("current_phase") // 診断/ロードマップ作成/実践/成長
-  overallProgress Int      @default(0) @map("overall_progress") // 0-100%
+  currentPhase    String   @map("current_phase")
+  overallProgress Int      @default(0) @map("overall_progress")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -65,7 +95,7 @@ model Roadmap {
   user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   title           String
   description     String?
-  targetMonths    Int         @map("target_months") // 3 or 6
+  targetMonths    Int         @map("target_months")
   startDate       DateTime    @map("start_date")
   endDate         DateTime    @map("end_date")
   milestones      Milestone[]
@@ -98,7 +128,7 @@ model DailyReport {
   userId      Int      @map("user_id")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   date        DateTime
-  type        String   // daily or weekly
+  type        String
   workHours   Float?   @map("work_hours")
   revenue     Float?
   content     String
@@ -117,7 +147,7 @@ model Consultation {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title       String
   content     String
-  status      String   @default("pending") // pending/answered/closed
+  status      String   @default("pending")
   answer      String?
   answeredAt  DateTime? @map("answered_at")
   createdAt   DateTime @default(now()) @map("created_at")

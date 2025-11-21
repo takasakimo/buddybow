@@ -40,7 +40,8 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <div>
           <h2 className="text-center text-3xl font-bold text-gray-900">
-            副業リブートプログラム〜buddybow〜
+            副業リブートプログラム
+            〜buddybow〜
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             ログイン
