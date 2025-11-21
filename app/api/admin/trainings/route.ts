@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, description, imageUrl, modules } = body;
+    const { title, description, imageUrl, categoryId, modules } = body;
 
     if (!title) {
       return NextResponse.json(
@@ -29,16 +29,26 @@ export async function POST(request: Request) {
         title,
         description: description || null,
         imageUrl: imageUrl || null,
+        categoryId: categoryId || null,
         modules: modules && modules.length > 0 ? {
-          create: modules.map((mod: { title: string; description: string; order: number }) => ({
+          create: modules.map((mod: { 
+            title: string; 
+            description: string | null;
+            imageUrl: string | null;
+            videoUrl: string | null;
+            order: number;
+          }) => ({
             title: mod.title,
             description: mod.description || null,
+            imageUrl: mod.imageUrl || null,
+            videoUrl: mod.videoUrl || null,
             order: mod.order,
           })),
         } : undefined,
       },
       include: {
         modules: true,
+        category: true,
       },
     });
 
@@ -66,6 +76,7 @@ export async function GET() {
     const trainings = await prisma.training.findMany({
       include: {
         modules: true,
+        category: true,
       },
       orderBy: {
         createdAt: 'desc',

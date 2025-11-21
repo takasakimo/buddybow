@@ -18,7 +18,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { title, description, imageUrl, modules } = body;
+    const { title, description, imageUrl, categoryId, modules } = body;
 
     if (!title) {
       return NextResponse.json(
@@ -41,6 +41,7 @@ export async function PUT(
         title,
         description: description || null,
         imageUrl: imageUrl || null,
+        categoryId: categoryId || null,
         modules: modules && modules.length > 0 ? {
           create: modules.map((mod: { 
             title: string; 
@@ -59,6 +60,7 @@ export async function PUT(
       },
       include: {
         modules: true,
+        category: true,
       },
     });
 
