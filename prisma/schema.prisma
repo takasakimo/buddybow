@@ -50,6 +50,7 @@ model StudySession {
   description String?
   startTime   DateTime @map("start_time")
   endTime     DateTime @map("end_time")
+  zoomId      String?  @map("zoom_id")
   location    String?  // オンライン/場所
   maxCapacity Int?     @map("max_capacity")
   status      String   @default("upcoming") // upcoming, ongoing, completed, cancelled
