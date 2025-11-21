@@ -29,12 +29,7 @@ export default async function MyPage() {
   }
 
   // 各種データ取得
-  const [diagnoses, roadmaps, recentReports, consultations, achievements, motivationMessages] = await Promise.all([
-    prisma.diagnosis.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: 'desc' },
-      take: 1,
-    }),
+  const [roadmaps, recentReports, consultations, achievements, motivationMessages] = await Promise.all([
     prisma.roadmap.findMany({
       where: { userId: session.user.id },
       include: { milestones: true },
@@ -62,7 +57,6 @@ export default async function MyPage() {
     }),
   ]);
 
-  const latestDiagnosis = diagnoses[0];
   const activeRoadmap = roadmaps[0];
   const completedMilestones = activeRoadmap?.milestones.filter(m => m.completed).length || 0;
   const totalMilestones = activeRoadmap?.milestones.length || 0;
