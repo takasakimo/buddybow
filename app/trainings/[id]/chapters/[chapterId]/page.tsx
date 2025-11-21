@@ -7,6 +7,8 @@ import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ChapterSidebar from './components/ChapterSidebar';
 import CompleteButton from './components/CompleteButton';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface PageProps {
   params: {
@@ -133,12 +135,55 @@ export default async function ChapterDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* 説明 */}
+              {/* 説明(Markdown対応) */}
               {currentModule.description && (
-                <div className="prose max-w-none mb-8">
-                  <div className="text-gray-900 whitespace-pre-wrap leading-relaxed">
+                <div className="prose prose-lg max-w-none mb-8">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      img: ({ src, alt }) => (
+                        <div className="relative w-full my-8">
+                          <img
+                            src={src || ''}
+                            alt={alt || ''}
+                            className="w-full h-auto rounded-lg shadow-md"
+                          />
+                        </div>
+                      ),
+                      p: ({ children }) => (
+                        <p className="text-gray-900 leading-relaxed mb-4">{children}</p>
+                      ),
+                      h1: ({ children }) => (
+                        <h1 className="text-3xl font-bold text-gray-900 mt-8 mb-4">{children}</h1>
+                      ),
+                      h2: ({ children }) => (
+                        <h2 className="text-2xl font-bold text-gray-900 mt-6 mb-3">{children}</h2>
+                      ),
+                      h3: ({ children }) => (
+                        <h3 className="text-xl font-bold text-gray-900 mt-4 mb-2">{children}</h3>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="list-disc list-inside text-gray-900 mb-4 space-y-2">{children}</ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="list-decimal list-inside text-gray-900 mb-4 space-y-2">{children}</ol>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className="font-bold text-gray-900">{children}</strong>
+                      ),
+                      em: ({ children }) => (
+                        <em className="italic text-gray-900">{children}</em>
+                      ),
+                      code: ({ children }) => (
+                        <code className="bg-gray-100 text-red-600 px-2 py-1 rounded text-sm">{children}</code>
+                      ),
+                      pre: ({ children }) => (
+                        <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto mb-4">{children}</pre>
+                      ),
+                    }}
+                  >
                     {currentModule.description}
-                  </div>
+                  </ReactMarkdown>
                 </div>
               )}
             </div>
