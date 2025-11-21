@@ -1,8 +1,9 @@
 import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
+import { redirect, notFound } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 interface PageProps {
@@ -28,56 +29,61 @@ export default async function TrainingDetailPage({ params }: PageProps) {
           order: 'asc',
         },
       },
+      category: true,
     },
   });
 
   if (!training) {
-    return (
-      <DashboardLayout>
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h1 className="text-2xl font-bold mb-4">研修が見つかりません</h1>
-            <p className="text-gray-600 mb-4">
-              指定された研修は存在しません。
-            </p>
-            <Link
-              href="/dashboard"
-              className="text-blue-600 hover:text-blue-800"
-            >
-              ダッシュボードに戻る
-            </Link>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
+    notFound();
   }
-
-  const isAdmin = session.user.role === 'admin';
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-6">
           <Link
-            href={isAdmin ? '/admin/trainings' : '/dashboard'}
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            href="/trainings"
+            className="text-blue-600 hover:text-blue-800"
           >
-            ← {isAdmin ? '研修管理' : 'ダッシュボード'}に戻る
+            ← 研修一覧に戻る
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {training.title}
-          </h1>
-          {training.description && (
-            <p className="text-gray-600">{training.description}</p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+          {training.imageUrl && (
+            <div className="relative w-full h-64 bg-gray-100">
+              <Image
+                src={training.imageUrl}
+                alt={training.title}
+                fill
+                className="object-cover"
+              />
+            </div>
           )}
-        </header>
+
+          <div className="p-8">
+            {training.category && (
+              <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full mb-4">
+                {training.category.name}
+              </span>
+            )}
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              {training.title}
+            </h1>
+            {training.description && (
+              <p className="text-gray-900 text-lg leading-relaxed whitespace-pre-wrap">
+                {training.description}
+              </p>
+            )}
+          </div>
+        </div>
 
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">チャプター一覧</h2>
-            {isAdmin && (
+            <h2 className="text-2xl font-semibold text-gray-900">チャプター一覧</h2>
+            {session.user.role === 'admin' && (
               <Link
-                href={`/admin/trainings/${training.id}/modules/new`}
+                href={`/admin/trainings/${training.id}/edit`}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 チャプター追加
@@ -86,47 +92,47 @@ export default async function TrainingDetailPage({ params }: PageProps) {
           </div>
 
           {training.modules.length === 0 ? (
-            <p className="text-gray-600">
-              この研修にはまだチャプターが登録されていません。
+            <p className="text-gray-900 text-center py-8">
+              チャプターがまだありません
             </p>
           ) : (
             <div className="space-y-4">
-              {training.modules.map((moduleData, index) => (
+              {training.modules.map((module, index) => (
                 <div
-                  key={moduleData.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  key={module.id}
+                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-sm font-medium text-gray-500">
-                          チャプター {index + 1}
-                        </span>
-                        <h3 className="font-semibold text-lg">
-                          {moduleData.title}
-                        </h3>
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg font-bold">
+                        {index + 1}
                       </div>
-                      {moduleData.description && (
-                        <p className="text-gray-600 text-sm">
-                          {moduleData.description}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                        序章: {module.title}
+                      </h3>
+                      {module.description && (
+                        <p className="text-gray-900 mb-4 whitespace-pre-wrap leading-relaxed">
+                          {module.description}
                         </p>
                       )}
-                    </div>
-                    <div className="flex gap-2">
-                      {isAdmin && (
+                      <div className="flex gap-3">
+                        {session.user.role === 'admin' && (
+                          <Link
+                            href={`/admin/trainings/${training.id}/edit`}
+                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                          >
+                            編集
+                          </Link>
+                        )}
                         <Link
-                          href={`/admin/trainings/${training.id}/modules/${moduleData.id}/edit`}
-                          className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                          href={`/trainings/${training.id}/chapters/${module.id}`}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
-                          編集
+                          開始
                         </Link>
-                      )}
-                      <Link
-                        href={`/trainings/${training.id}/modules/${moduleData.id}`}
-                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                      >
-                        開始
-                      </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
