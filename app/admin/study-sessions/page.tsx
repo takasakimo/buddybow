@@ -28,17 +28,25 @@ export default async function StudySessionsPage() {
   }
 
   const studySessions = await prisma.studySession.findMany({
-    include: {
-      _count: {
-        select: {
-          participants: true,
-        },
-      },
-    },
     orderBy: {
       startTime: 'desc',
     },
   });
+
+  // 各勉強会の参加者数を取得
+  const sessionsWithCounts = await Promise.all(
+    studySessions.map(async (session) => {
+      const participantCount = await prisma.studySessionParticipant.count({
+        where: {
+          studySessionId: session.id,
+        },
+      });
+      return {
+        ...session,
+        participantCount,
+      };
+    })
+  );
 
   return (
     <DashboardLayout>
@@ -56,13 +64,13 @@ export default async function StudySessionsPage() {
         </header>
 
         <div className="bg-white rounded-lg shadow">
-          {studySessions.length === 0 ? (
+          {sessionsWithCounts.length === 0 ? (
             <div className="p-6 text-center text-gray-600">
               勉強会がありません
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {studySessions.map((session) => (
+              {sessionsWithCounts.map((session) => (
                 <div key={session.id} className="p-6 hover:bg-gray-50">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -84,7 +92,7 @@ export default async function StudySessionsPage() {
                           {session.status === 'cancelled' && 'キャンセル'}
                         </span>
                         <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
-                          👥 {session._count.participants}名
+                          👥 {session.participantCount}名
                         </span>
                       </div>
                       <h3 className="text-lg font-semibold mb-2 text-gray-900">
