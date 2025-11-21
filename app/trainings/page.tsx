@@ -62,6 +62,16 @@ export default function TrainingsPage() {
     return matchesSearch && matchesCategory;
   });
 
+  // カテゴリ別にグループ化
+  const trainingsByCategory = filteredTrainings.reduce((acc, training) => {
+    const categoryName = training.category?.name || 'その他';
+    if (!acc[categoryName]) {
+      acc[categoryName] = [];
+    }
+    acc[categoryName].push(training);
+    return acc;
+  }, {} as Record<string, Training[]>);
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
@@ -107,49 +117,58 @@ export default function TrainingsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTrainings.map((training) => (
-              <Link
-                key={training.id}
-                href={`/trainings/${training.id}`}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
-              >
-                {training.imageUrl ? (
-                  <div className="relative w-full h-48 bg-gray-100 rounded-t-lg overflow-hidden">
-                    <Image
-                      src={training.imageUrl}
-                      alt={training.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
-                    <span className="text-4xl text-gray-400">📚</span>
-                  </div>
-                )}
-                <div className="p-6">
-                  {training.category && (
-                    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full mb-2">
-                      {training.category.name}
-                    </span>
-                  )}
-                  <h2 className="text-xl font-semibold mb-2 text-gray-900">
-                    {training.title}
-                  </h2>
-                  <p className="text-gray-900 text-sm mb-4 line-clamp-2">
-                    {training.description || '説明なし'}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-900">
-                      チャプター数: {training.modules.length}
-                    </span>
-                    <span className="text-blue-600 font-medium">
-                      開始 →
-                    </span>
-                  </div>
+          <div className="space-y-12">
+            {Object.entries(trainingsByCategory).map(([categoryName, categoryTrainings]) => (
+              <div key={categoryName}>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+                    {categoryName}
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    {categoryTrainings.length}件
+                  </span>
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {categoryTrainings.map((training) => (
+                    <Link
+                      key={training.id}
+                      href={`/trainings/${training.id}`}
+                      className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
+                    >
+                      {training.imageUrl ? (
+                        <div className="relative w-full h-48 bg-gray-100 rounded-t-lg overflow-hidden">
+                          <Image
+                            src={training.imageUrl}
+                            alt={training.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
+                          <span className="text-4xl text-gray-400">📚</span>
+                        </div>
+                      )}
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                          {training.title}
+                        </h3>
+                        <p className="text-gray-900 text-sm mb-4 line-clamp-2">
+                          {training.description || '説明なし'}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-900">
+                            チャプター数: {training.modules.length}
+                          </span>
+                          <span className="text-blue-600 font-medium">
+                            開始 →
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
