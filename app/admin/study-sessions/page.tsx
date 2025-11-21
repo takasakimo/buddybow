@@ -5,6 +5,23 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
+// 日本時間に変換するヘルパー関数
+function toJSTString(date: Date, format: 'date' | 'time' | 'datetime' = 'datetime') {
+  const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  
+  if (format === 'date') {
+    return jstDate.toLocaleDateString('ja-JP', { timeZone: 'UTC' });
+  }
+  if (format === 'time') {
+    return jstDate.toLocaleTimeString('ja-JP', { 
+      timeZone: 'UTC',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+  return jstDate.toLocaleString('ja-JP', { timeZone: 'UTC' });
+}
+
 export default async function StudySessionsPage() {
   const session = await getServerSession(authOptions);
 
@@ -62,7 +79,7 @@ export default async function StudySessionsPage() {
                           {session.status === 'cancelled' && 'キャンセル'}
                         </span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2">
+                      <h3 className="text-lg font-semibold mb-2 text-gray-900">
                         {session.title}
                       </h3>
                       {session.description && (
@@ -71,21 +88,11 @@ export default async function StudySessionsPage() {
                         </p>
                       )}
                       <div className="text-sm text-gray-600 space-y-1">
-                        <p>📅 {new Date(session.startTime).toLocaleDateString('ja-JP')}</p>
+                        <p>📅 {toJSTString(session.startTime, 'date')}</p>
                         <p>
-                          🕐{' '}
-                          {new Date(session.startTime).toLocaleTimeString('ja-JP', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}{' '}
-                          -{' '}
-                          {new Date(session.endTime).toLocaleTimeString('ja-JP', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          🕐 {toJSTString(session.startTime, 'time')} - {toJSTString(session.endTime, 'time')}
                         </p>
-                        {session.location && <p>📍 {session.location}</p>}
-                        {session.maxCapacity && <p>👥 定員: {session.maxCapacity}名</p>}
+                        {session.zoomId && <p>💻 Zoom ID: {session.zoomId}</p>}
                       </div>
                     </div>
                     <div className="flex gap-2 ml-4">

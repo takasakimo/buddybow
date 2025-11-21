@@ -18,14 +18,27 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
   const router = useRouter();
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
+  
+  // 日本時間で初期値を設定
+  const getJSTDate = (isoString: string) => {
+    const date = new Date(isoString);
+    return new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  };
+  
   const [date, setDate] = useState(
-    initialData ? new Date(initialData.startTime).toISOString().split('T')[0] : ''
+    initialData 
+      ? getJSTDate(initialData.startTime).toISOString().split('T')[0]
+      : ''
   );
   const [startTime, setStartTime] = useState(
-    initialData ? new Date(initialData.startTime).toTimeString().slice(0, 5) : ''
+    initialData 
+      ? getJSTDate(initialData.startTime).toISOString().split('T')[1].slice(0, 5)
+      : ''
   );
   const [endTime, setEndTime] = useState(
-    initialData ? new Date(initialData.endTime).toTimeString().slice(0, 5) : ''
+    initialData 
+      ? getJSTDate(initialData.endTime).toISOString().split('T')[1].slice(0, 5)
+      : ''
   );
   const [zoomId, setZoomId] = useState(initialData?.zoomId || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,9 +50,9 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
     setError('');
 
     try {
-      // 日時を結合
-      const startDateTime = new Date(`${date}T${startTime}`);
-      const endDateTime = new Date(`${date}T${endTime}`);
+      // 日本時間として解釈し、UTCに変換
+      const startDateTime = new Date(`${date}T${startTime}:00+09:00`);
+      const endDateTime = new Date(`${date}T${endTime}:00+09:00`);
 
       if (endDateTime <= startDateTime) {
         setError('終了時刻は開始時刻より後にしてください');
@@ -120,7 +133,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
       <div className="mb-6 grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="startTime" className="block text-sm font-medium text-gray-900 mb-2">
-            開始時刻 *
+            開始時刻 * (日本時間)
           </label>
           <input
             type="time"
@@ -133,7 +146,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
         </div>
         <div>
           <label htmlFor="endTime" className="block text-sm font-medium text-gray-900 mb-2">
-            終了時刻 *
+            終了時刻 * (日本時間)
           </label>
           <input
             type="time"
