@@ -50,6 +50,20 @@ export default async function DashboardPage() {
     }),
   ]);
 
+  // 日本時間に変換
+  function toJSTString(date: Date, format: 'date' | 'time' = 'time') {
+    const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+    
+    if (format === 'date') {
+      return jstDate.toLocaleDateString('ja-JP', { timeZone: 'UTC' });
+    }
+    return jstDate.toLocaleTimeString('ja-JP', { 
+      timeZone: 'UTC',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
@@ -167,7 +181,7 @@ export default async function DashboardPage() {
             {/* お知らせ */}
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
+                <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900">
                   📢 お知らせ
                 </h2>
                 {isAdmin && (
@@ -197,7 +211,7 @@ export default async function DashboardPage() {
                           {announcement.category === 'update' && 'アップデート'}
                         </span>
                         <div className="flex-1">
-                          <h3 className="font-medium mb-1">{announcement.title}</h3>
+                          <h3 className="font-medium mb-1 text-gray-900">{announcement.title}</h3>
                           <p className="text-sm text-gray-600 line-clamp-2">
                             {announcement.content}
                           </p>
@@ -215,7 +229,7 @@ export default async function DashboardPage() {
             {/* 最近の研修 */}
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">📚 最近の研修</h2>
+                <h2 className="text-xl font-semibold text-gray-900">📚 最近の研修</h2>
                 <Link href="/trainings" className="text-blue-600 text-sm">
                   すべて見る
                 </Link>
@@ -223,7 +237,7 @@ export default async function DashboardPage() {
               {trainings.length === 0 ? (
                 <p className="text-gray-600 text-sm">研修がありません</p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {trainings.map((training) => (
                     <Link
                       key={training.id}
@@ -236,7 +250,7 @@ export default async function DashboardPage() {
                             src={training.imageUrl}
                             alt={training.title}
                             fill
-                            className="object-cover"
+                            className="object-contain"
                           />
                         </div>
                       ) : (
@@ -250,7 +264,7 @@ export default async function DashboardPage() {
                             {training.category.name}
                           </span>
                         )}
-                        <h3 className="font-semibold line-clamp-1 mb-1">
+                        <h3 className="font-semibold line-clamp-1 mb-1 text-gray-900">
                           {training.title}
                         </h3>
                         <p className="text-xs text-gray-500">
@@ -269,7 +283,7 @@ export default async function DashboardPage() {
             {/* 勉強会 */}
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">🎓 勉強会</h2>
+                <h2 className="text-lg font-semibold text-gray-900">🎓 勉強会</h2>
                 {isAdmin && (
                   <Link href="/admin/study-sessions" className="text-blue-600 text-sm">
                     管理
@@ -285,22 +299,13 @@ export default async function DashboardPage() {
                       key={session.id}
                       className="p-4 border border-gray-200 rounded-lg"
                     >
-                      <h3 className="font-medium mb-2">{session.title}</h3>
+                      <h3 className="font-medium mb-2 text-gray-900">{session.title}</h3>
                       <div className="text-sm text-gray-600 space-y-1 mb-3">
-                        <p>📅 {new Date(session.startTime).toLocaleDateString('ja-JP')}</p>
+                        <p>📅 {toJSTString(session.startTime, 'date')}</p>
                         <p>
-                          🕐{' '}
-                          {new Date(session.startTime).toLocaleTimeString('ja-JP', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}{' '}
-                          -{' '}
-                          {new Date(session.endTime).toLocaleTimeString('ja-JP', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          🕐 {toJSTString(session.startTime)} - {toJSTString(session.endTime)}
                         </p>
-                        {session.location && <p>📍 {session.location}</p>}
+                        {session.zoomId && <p>💻 Zoom ID: {session.zoomId}</p>}
                       </div>
                       <button className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
                         参加する
