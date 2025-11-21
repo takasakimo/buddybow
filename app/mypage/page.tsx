@@ -12,16 +12,18 @@ export default async function MyPage() {
     redirect('/login');
   }
 
+  const userId = parseInt(session.user.id as string);
+
   // プログレス情報取得
   let userProgress = await prisma.userProgress.findUnique({
-    where: { userId: session.user.id },
+    where: { userId },
   });
 
   // 初回アクセス時はプログレスを作成
   if (!userProgress) {
     userProgress = await prisma.userProgress.create({
       data: {
-        userId: session.user.id,
+        userId,
         currentPhase: '診断',
         overallProgress: 0,
       },
@@ -31,27 +33,27 @@ export default async function MyPage() {
   // 各種データ取得
   const [roadmaps, recentReports, consultations, achievements, motivationMessages] = await Promise.all([
     prisma.roadmap.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       include: { milestones: true },
       orderBy: { createdAt: 'desc' },
       take: 1,
     }),
     prisma.dailyReport.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: { date: 'desc' },
       take: 5,
     }),
     prisma.consultation.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: { createdAt: 'desc' },
       take: 3,
     }),
     prisma.achievement.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: { earnedAt: 'desc' },
     }),
     prisma.motivationMessage.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: { createdAt: 'desc' },
       take: 1,
     }),
