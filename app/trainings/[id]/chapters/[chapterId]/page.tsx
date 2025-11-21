@@ -160,7 +160,6 @@ export default async function ChapterDetailPage({ params }: PageProps) {
 
               <div className="flex gap-3">
                 <CompleteButton
-                  trainingId={params.id}
                   moduleId={currentModule.id}
                   isCompleted={isCompleted}
                 />

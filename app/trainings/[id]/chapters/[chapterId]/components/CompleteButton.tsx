@@ -4,12 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface CompleteButtonProps {
-  trainingId: string;
   moduleId: string;
   isCompleted: boolean;
 }
 
-export default function CompleteButton({ trainingId, moduleId, isCompleted }: CompleteButtonProps) {
+export default function CompleteButton({ moduleId, isCompleted }: CompleteButtonProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
