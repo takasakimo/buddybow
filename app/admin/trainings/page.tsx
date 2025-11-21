@@ -1,51 +1,137 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
-export default async function AdminTrainingsPage() {
-  const session = await getServerSession(authOptions);
+interface Category {
+  id: string;
+  name: string;
+}
 
-  if (!session || session.user.role !== 'admin') {
-    redirect('/dashboard');
-  }
+interface Training {
+  id: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  category: Category | null;
+  modules: { id: string }[];
+}
 
-  const trainings = await prisma.training.findMany({
-    include: {
-      modules: true,
-      category: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
+export default function AdminTrainingsPage() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [trainings, setTrainings] = useState<Training[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (session?.user?.role !== 'admin') {
+      router.push('/dashboard');
+      return;
+    }
+
+    fetchData();
+  }, [session, router]);
+
+  const fetchData = async () => {
+    try {
+      const [trainingsRes, categoriesRes] = await Promise.all([
+        fetch('/api/admin/trainings'),
+        fetch('/api/admin/categories'),
+      ]);
+
+      if (trainingsRes.ok) {
+        const trainingsData = await trainingsRes.json();
+        setTrainings(trainingsData);
+      }
+
+      if (categoriesRes.ok) {
+        const categoriesData = await categoriesRes.json();
+        setCategories(categoriesData);
+      }
+    } catch {
+      console.error('Failed to fetch data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredTrainings = trainings.filter((training) => {
+    const matchesSearch = training.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (training.description && training.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesCategory = !selectedCategory || training.category?.id === selectedCategory;
+
+    return matchesSearch && matchesCategory;
   });
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">
-            研修管理
-          </h1>
-          <Link
-            href="/admin/trainings/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            新規作成
-          </Link>
+        <header className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold text-gray-900">
+              研修管理
+            </h1>
+            <Link
+              href="/admin/trainings/new"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              新規作成
+            </Link>
+          </div>
+
+          {/* 検索とフィルター */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <input
+              type="text"
+              placeholder="研修を検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            />
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            >
+              <option value="">すべてのカテゴリ</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </header>
-        {trainings.length === 0 ? (
+
+        {filteredTrainings.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-6">
             <p className="text-gray-900">
-              研修が登録されていません。新規作成ボタンから研修を作成してください。
+              {searchQuery || selectedCategory
+                ? '条件に一致する研修が見つかりませんでした。'
+                : '研修が登録されていません。新規作成ボタンから研修を作成してください。'}
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trainings.map((training) => (
+            {filteredTrainings.map((training) => (
               <div
                 key={training.id}
                 className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
