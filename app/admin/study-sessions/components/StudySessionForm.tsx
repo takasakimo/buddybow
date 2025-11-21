@@ -108,6 +108,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
         <input
           type="text"
           id="title"
+          name="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -123,6 +124,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
         <input
           type="date"
           id="date"
+          name="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
@@ -138,6 +140,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
           <input
             type="time"
             id="startTime"
+            name="startTime"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             required
@@ -151,6 +154,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
           <input
             type="time"
             id="endTime"
+            name="endTime"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
             required
@@ -166,6 +170,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
         <input
           type="text"
           id="zoomId"
+          name="zoomId"
           value={zoomId}
           onChange={(e) => setZoomId(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
@@ -182,6 +187,7 @@ export default function StudySessionForm({ initialData }: StudySessionFormProps)
         </label>
         <textarea
           id="description"
+          name="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={6}
