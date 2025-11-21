@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -13,12 +13,18 @@ interface Module {
   order: number;
 }
 
+interface Category {
+  id: string;
+  name: string;
+}
+
 interface TrainingFormProps {
   initialData?: {
     id: string;
     title: string;
     description: string | null;
     imageUrl: string | null;
+    categoryId: string | null;
     modules?: Module[];
   };
 }
@@ -28,6 +34,8 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || '');
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId || '');
+  const [categories, setCategories] = useState<Category[]>([]);
   const [modules, setModules] = useState<Module[]>(
     initialData?.modules?.map(m => ({
       id: m.id,
@@ -42,6 +50,22 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingModuleIndex, setUploadingModuleIndex] = useState<number | null>(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/admin/categories');
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -200,6 +224,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
           title,
           description,
           imageUrl,
+          categoryId: categoryId || null,
           modules: modules.map(m => ({
             title: m.title,
             description: m.description || null,
@@ -225,7 +250,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-6">基本情報</h2>
+        <h2 className="text-xl font-semibold mb-6 text-gray-900">基本情報</h2>
         
         {error && (
           <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
@@ -234,7 +259,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
         )}
 
         <div className="mb-6">
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-900 mb-2">
             研修タイトル *
           </label>
           <input
@@ -243,13 +268,32 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             placeholder="例: スマートフォン販売基礎研修"
           />
         </div>
 
         <div className="mb-6">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="category" className="block text-sm font-medium text-gray-900 mb-2">
+            カテゴリ
+          </label>
+          <select
+            id="category"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+          >
+            <option value="">カテゴリを選択</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-6">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-900 mb-2">
             説明
           </label>
           <textarea
@@ -257,13 +301,13 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={6}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             placeholder="研修の概要を入力してください"
           />
         </div>
 
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-900 mb-2">
             サムネイル画像 (1280×720px) *
           </label>
           
@@ -289,19 +333,19 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
             </div>
 
             <div>
-              <p className="text-sm text-gray-600 mb-2">または画像URLを入力:</p>
+              <p className="text-sm text-gray-900 mb-2">または画像URLを入力:</p>
               <input
                 type="url"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                 placeholder="https://example.com/image.jpg"
               />
             </div>
 
             {imageUrl && (
               <div>
-                <p className="text-sm text-gray-600 mb-2">プレビュー:</p>
+                <p className="text-sm text-gray-900 mb-2">プレビュー:</p>
                 <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
                   <Image
                     src={imageUrl}
@@ -325,7 +369,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
 
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">チャプター</h2>
+          <h2 className="text-xl font-semibold text-gray-900">チャプター</h2>
           <button
             type="button"
             onClick={addModule}
@@ -336,7 +380,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
         </div>
 
         {modules.length === 0 ? (
-          <p className="text-gray-600 text-center py-8">
+          <p className="text-gray-900 text-center py-8">
             チャプターを追加してください
           </p>
         ) : (
@@ -358,7 +402,7 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
                       タイトル *
                     </label>
                     <input
@@ -366,26 +410,26 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
                       value={mod.title}
                       onChange={(e) => updateModule(index, 'title', e.target.value)}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                       placeholder="例: 基本操作を学ぶ"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
                       説明
                     </label>
                     <textarea
                       value={mod.description || ''}
                       onChange={(e) => updateModule(index, 'description', e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                       placeholder="チャプターの概要"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
                       サムネイル画像 (1280×720px)
                     </label>
                     <div className="space-y-4">
@@ -410,19 +454,19 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
                       </div>
 
                       <div>
-                        <p className="text-sm text-gray-600 mb-2">または画像URLを入力:</p>
+                        <p className="text-sm text-gray-900 mb-2">または画像URLを入力:</p>
                         <input
                           type="url"
                           value={mod.imageUrl || ''}
                           onChange={(e) => updateModule(index, 'imageUrl', e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                           placeholder="https://example.com/image.jpg"
                         />
                       </div>
 
                       {mod.imageUrl && (
                         <div>
-                          <p className="text-sm text-gray-600 mb-2">プレビュー:</p>
+                          <p className="text-sm text-gray-900 mb-2">プレビュー:</p>
                           <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
                             <Image
                               src={mod.imageUrl}
@@ -437,18 +481,18 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
                       動画URL
                     </label>
                     <input
                       type="url"
                       value={mod.videoUrl || ''}
                       onChange={(e) => updateModule(index, 'videoUrl', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="https://www.youtube.com/watch?v=..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="https://vimeo.com/1138786209/32ff031622"
                     />
                     <p className="mt-2 text-sm text-gray-500">
-                      YouTube、Vimeoなどの動画URLを入力してください
+                      Vimeo、YouTubeなどの動画URLを入力してください
                     </p>
                   </div>
                 </div>
