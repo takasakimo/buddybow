@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
 
@@ -11,7 +10,6 @@ interface Category {
 }
 
 export default function CategoriesPage() {
-  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -29,8 +27,8 @@ export default function CategoriesPage() {
         const data = await response.json();
         setCategories(data);
       }
-    } catch (error) {
-      console.error('Failed to fetch categories:', error);
+    } catch {
+      console.error('Failed to fetch categories');
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +54,7 @@ export default function CategoriesPage() {
 
       setNewCategoryName('');
       fetchCategories();
-    } catch (err) {
+    } catch {
       setError('カテゴリの作成に失敗しました');
     } finally {
       setIsSubmitting(false);
@@ -74,7 +72,7 @@ export default function CategoriesPage() {
       if (response.ok) {
         fetchCategories();
       }
-    } catch (error) {
+    } catch {
       alert('削除に失敗しました');
     }
   };
