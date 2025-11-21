@@ -9,22 +9,23 @@ datasource db {
 }
 
 model User {
-  id                Int                @id @default(autoincrement())
-  email             String             @unique
-  password          String
-  name              String
-  role              String             @default("user")
-  createdAt         DateTime           @default(now()) @map("created_at")
-  updatedAt         DateTime           @updatedAt @map("updated_at")
+  id                      Int                        @id @default(autoincrement())
+  email                   String                     @unique
+  password                String
+  name                    String
+  role                    String                     @default("user")
+  createdAt               DateTime                   @default(now()) @map("created_at")
+  updatedAt               DateTime                   @updatedAt @map("updated_at")
   
   // マイページ関連
-  userProgress      UserProgress?
-  diagnoses         Diagnosis[]
-  roadmaps          Roadmap[]
-  dailyReports      DailyReport[]
-  consultations     Consultation[]
-  achievements      Achievement[]
-  motivationMessages MotivationMessage[]
+  userProgress            UserProgress?
+  diagnoses               Diagnosis[]
+  roadmaps                Roadmap[]
+  dailyReports            DailyReport[]
+  consultations           Consultation[]
+  achievements            Achievement[]
+  motivationMessages      MotivationMessage[]
+  studySessionParticipants StudySessionParticipant[]
 
   @@map("users")
 }
@@ -45,19 +46,36 @@ model Announcement {
 
 // 勉強会
 model StudySession {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  startTime   DateTime @map("start_time")
-  endTime     DateTime @map("end_time")
-  zoomId      String?  @map("zoom_id")
-  location    String?  // オンライン/場所
-  maxCapacity Int?     @map("max_capacity")
-  status      String   @default("upcoming") // upcoming, ongoing, completed, cancelled
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String                     @id @default(cuid())
+  title        String
+  description  String?
+  startTime    DateTime                   @map("start_time")
+  endTime      DateTime                   @map("end_time")
+  zoomId       String?                    @map("zoom_id")
+  location     String?
+  maxCapacity  Int?                       @map("max_capacity")
+  status       String                     @default("upcoming")
+  createdAt    DateTime                   @default(now()) @map("created_at")
+  updatedAt    DateTime                   @updatedAt @map("updated_at")
+  participants StudySessionParticipant[]
 
   @@map("study_sessions")
+}
+
+// 勉強会参加者
+model StudySessionParticipant {
+  id              String       @id @default(cuid())
+  studySessionId  String       @map("study_session_id")
+  studySession    StudySession @relation(fields: [studySessionId], references: [id], onDelete: Cascade)
+  userId          Int          @map("user_id")
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          String       @default("pending")
+  appliedAt       DateTime     @default(now()) @map("applied_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  @@unique([studySessionId, userId])
+  @@map("study_session_participants")
 }
 
 // プログレス管理

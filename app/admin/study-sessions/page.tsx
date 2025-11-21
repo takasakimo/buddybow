@@ -6,20 +6,17 @@ import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 // 日本時間に変換するヘルパー関数
-function toJSTString(date: Date, format: 'date' | 'time' | 'datetime' = 'datetime') {
+function toJSTString(date: Date, format: 'date' | 'time' = 'time') {
   const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
   
   if (format === 'date') {
     return jstDate.toLocaleDateString('ja-JP', { timeZone: 'UTC' });
   }
-  if (format === 'time') {
-    return jstDate.toLocaleTimeString('ja-JP', { 
-      timeZone: 'UTC',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-  return jstDate.toLocaleString('ja-JP', { timeZone: 'UTC' });
+  return jstDate.toLocaleTimeString('ja-JP', { 
+    timeZone: 'UTC',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 
 export default async function StudySessionsPage() {
@@ -30,6 +27,13 @@ export default async function StudySessionsPage() {
   }
 
   const studySessions = await prisma.studySession.findMany({
+    include: {
+      _count: {
+        select: {
+          participants: true,
+        },
+      },
+    },
     orderBy: {
       startTime: 'desc',
     },
@@ -78,6 +82,9 @@ export default async function StudySessionsPage() {
                           {session.status === 'completed' && '完了'}
                           {session.status === 'cancelled' && 'キャンセル'}
                         </span>
+                        <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
+                          👥 {session._count.participants}名
+                        </span>
                       </div>
                       <h3 className="text-lg font-semibold mb-2 text-gray-900">
                         {session.title}
@@ -90,12 +97,18 @@ export default async function StudySessionsPage() {
                       <div className="text-sm text-gray-600 space-y-1">
                         <p>📅 {toJSTString(session.startTime, 'date')}</p>
                         <p>
-                          🕐 {toJSTString(session.startTime, 'time')} - {toJSTString(session.endTime, 'time')}
+                          🕐 {toJSTString(session.startTime)} - {toJSTString(session.endTime)}
                         </p>
                         {session.zoomId && <p>💻 Zoom ID: {session.zoomId}</p>}
                       </div>
                     </div>
                     <div className="flex gap-2 ml-4">
+                      <Link
+                        href={`/admin/study-sessions/${session.id}/participants`}
+                        className="px-3 py-1 text-sm text-purple-600 hover:bg-purple-50 rounded"
+                      >
+                        参加者
+                      </Link>
                       <Link
                         href={`/admin/study-sessions/${session.id}/edit`}
                         className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"

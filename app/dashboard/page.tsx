@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import StudySessionCard from './components/StudySessionCard';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -14,9 +15,12 @@ export default async function DashboardPage() {
   }
 
   const isAdmin = session.user.role === 'admin';
+  const userId = typeof session.user.id === 'string' 
+    ? parseInt(session.user.id) 
+    : session.user.id;
 
   // データ取得
-  const [trainings, announcements, upcomingStudySessions] = await Promise.all([
+  const [trainings, announcements, upcomingStudySessions, myParticipations] = await Promise.all([
     prisma.training.findMany({
       include: {
         modules: true,
@@ -48,21 +52,17 @@ export default async function DashboardPage() {
       },
       take: 3,
     }),
+    prisma.studySessionParticipant.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        studySessionId: true,
+      },
+    }),
   ]);
 
-  // 日本時間に変換
-  function toJSTString(date: Date, format: 'date' | 'time' = 'time') {
-    const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-    
-    if (format === 'date') {
-      return jstDate.toLocaleDateString('ja-JP', { timeZone: 'UTC' });
-    }
-    return jstDate.toLocaleTimeString('ja-JP', { 
-      timeZone: 'UTC',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
+  const participatingSessionIds = new Set(myParticipations.map(p => p.studySessionId));
 
   return (
     <DashboardLayout>
@@ -295,22 +295,11 @@ export default async function DashboardPage() {
               ) : (
                 <div className="space-y-3">
                   {upcomingStudySessions.map((session) => (
-                    <div
+                    <StudySessionCard
                       key={session.id}
-                      className="p-4 border border-gray-200 rounded-lg"
-                    >
-                      <h3 className="font-medium mb-2 text-gray-900">{session.title}</h3>
-                      <div className="text-sm text-gray-600 space-y-1 mb-3">
-                        <p>📅 {toJSTString(session.startTime, 'date')}</p>
-                        <p>
-                          🕐 {toJSTString(session.startTime)} - {toJSTString(session.endTime)}
-                        </p>
-                        {session.zoomId && <p>💻 Zoom ID: {session.zoomId}</p>}
-                      </div>
-                      <button className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
-                        参加する
-                      </button>
-                    </div>
+                      session={session}
+                      isParticipating={participatingSessionIds.has(session.id)}
+                    />
                   ))}
                 </div>
               )}
