@@ -51,12 +51,12 @@ export default async function TrainingDetailPage({ params }: PageProps) {
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
           {training.imageUrl && (
-            <div className="relative w-full h-64 bg-gray-100">
+            <div className="relative w-full h-96 bg-gray-100">
               <Image
                 src={training.imageUrl}
                 alt={training.title}
                 fill
-                className="object-cover"
+                className="object-contain"
               />
             </div>
           )}
