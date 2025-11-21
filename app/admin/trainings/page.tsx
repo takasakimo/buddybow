@@ -16,6 +16,7 @@ export default async function AdminTrainingsPage() {
   const trainings = await prisma.training.findMany({
     include: {
       modules: true,
+      category: true,
     },
     orderBy: {
       createdAt: 'desc',
@@ -38,7 +39,7 @@ export default async function AdminTrainingsPage() {
         </header>
         {trainings.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-gray-600">
+            <p className="text-gray-900">
               研修が登録されていません。新規作成ボタンから研修を作成してください。
             </p>
           </div>
@@ -64,13 +65,18 @@ export default async function AdminTrainingsPage() {
                   </div>
                 )}
                 <div className="p-6">
-                  <h2 className="text-xl font-semibold mb-2">
+                  {training.category && (
+                    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full mb-2">
+                      {training.category.name}
+                    </span>
+                  )}
+                  <h2 className="text-xl font-semibold mb-2 text-gray-900">
                     {training.title}
                   </h2>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  <p className="text-gray-900 text-sm mb-4 line-clamp-2">
                     {training.description || '説明なし'}
                   </p>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-sm text-gray-900 mb-4">
                     チャプター数: {training.modules.length}
                   </p>
                   <div className="flex gap-2">
