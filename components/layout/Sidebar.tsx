@@ -13,6 +13,12 @@ const menuItems = [
     allowedRoles: ['admin', 'user'],
   },
   {
+    label: 'マイページ',
+    href: '/mypage',
+    icon: '👤',
+    allowedRoles: ['user'],
+  },
+  {
     label: '研修一覧',
     href: '/trainings',
     icon: '📚',
@@ -96,7 +102,7 @@ export default function Sidebar() {
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  pathname === item.href
+                  pathname === item.href || pathname.startsWith(item.href + '/')
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}

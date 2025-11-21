@@ -9,15 +9,147 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String
-  role      String   @default("user")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  password          String
+  name              String
+  role              String             @default("user")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  
+  // マイページ関連
+  userProgress      UserProgress?
+  diagnoses         Diagnosis[]
+  roadmaps          Roadmap[]
+  dailyReports      DailyReport[]
+  consultations     Consultation[]
+  achievements      Achievement[]
+  motivationMessages MotivationMessage[]
 
   @@map("users")
+}
+
+// プログレス管理
+model UserProgress {
+  id              String   @id @default(cuid())
+  userId          Int      @unique @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentPhase    String   @map("current_phase") // 診断/ロードマップ作成/実践/成長
+  overallProgress Int      @default(0) @map("overall_progress") // 0-100%
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("user_progress")
+}
+
+// 診断結果
+model Diagnosis {
+  id              String   @id @default(cuid())
+  userId          Int      @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  personalityType String?  @map("personality_type")
+  skillMap        Json?    @map("skill_map")
+  strengths       Json?    @map("strengths")
+  weaknesses      Json?    @map("weaknesses")
+  recommendations Json?    @map("recommendations")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("diagnoses")
+}
+
+// ロードマップ
+model Roadmap {
+  id              String      @id @default(cuid())
+  userId          Int         @map("user_id")
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  targetMonths    Int         @map("target_months") // 3 or 6
+  startDate       DateTime    @map("start_date")
+  endDate         DateTime    @map("end_date")
+  milestones      Milestone[]
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("roadmaps")
+}
+
+// マイルストーン
+model Milestone {
+  id          String   @id @default(cuid())
+  roadmapId   String   @map("roadmap_id")
+  roadmap     Roadmap  @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  targetDate  DateTime @map("target_date")
+  completed   Boolean  @default(false)
+  completedAt DateTime? @map("completed_at")
+  order       Int
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("milestones")
+}
+
+// 日報・週報
+model DailyReport {
+  id          String   @id @default(cuid())
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime
+  type        String   // daily or weekly
+  workHours   Float?   @map("work_hours")
+  revenue     Float?
+  content     String
+  challenges  String?
+  learnings   String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("daily_reports")
+}
+
+// 相談・コミュニケーション
+model Consultation {
+  id          String   @id @default(cuid())
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  content     String
+  status      String   @default("pending") // pending/answered/closed
+  answer      String?
+  answeredAt  DateTime? @map("answered_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("consultations")
+}
+
+// 達成・バッジ
+model Achievement {
+  id          String   @id @default(cuid())
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  badgeType   String   @map("badge_type")
+  earnedAt    DateTime @default(now()) @map("earned_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("achievements")
+}
+
+// 応援メッセージ
+model MotivationMessage {
+  id        String   @id @default(cuid())
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  fromAdmin Boolean  @default(true) @map("from_admin")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("motivation_messages")
 }
 
 model Category {
