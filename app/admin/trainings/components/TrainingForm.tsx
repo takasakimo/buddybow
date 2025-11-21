@@ -3,6 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+
+const RichTextEditor = dynamic(() => import('./RichTextEditor'), {
+  ssr: false,
+  loading: () => <div className="border border-gray-300 rounded-lg p-4 text-gray-500">読み込み中...</div>,
+});
 
 interface Module {
   id?: string;
@@ -417,28 +423,12 @@ export default function TrainingForm({ initialData }: TrainingFormProps) {
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      説明 (Markdown記法対応)
+                      説明 (リッチエディタ - 画像をアップロードできます)
                     </label>
-                    <textarea
-                      value={mod.description || ''}
-                      onChange={(e) => updateModule(index, 'description', e.target.value)}
-                      rows={8}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 font-mono text-sm"
-                      placeholder={`テキストの途中に画像を挿入できます。
-
-使い方:
-![画像の説明](画像のURL)
-
-例:
-AIについて説明します。
-
-![AIの概念図](https://example.com/ai-image.jpg)
-
-このように画像を挿入できます。`}
+                    <RichTextEditor
+                      content={mod.description || ''}
+                      onChange={(content) => updateModule(index, 'description', content)}
                     />
-                    <p className="mt-2 text-sm text-gray-500">
-                      💡 画像を挿入: <code className="bg-gray-100 px-2 py-1 rounded">![説明](画像URL)</code>
-                    </p>
                   </div>
 
                   <div>
