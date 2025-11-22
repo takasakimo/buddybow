@@ -45,7 +45,6 @@ export default async function ChapterDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // ユーザーの進捗を取得
   const userId = typeof session.user.id === 'string' ? parseInt(session.user.id) : session.user.id;
   
   const moduleProgress = await prisma.moduleProgress.findMany({
@@ -65,17 +64,36 @@ export default async function ChapterDetailPage({ params }: PageProps) {
 
   const isCompleted = progressMap.get(currentModule.id) || false;
 
+  // VimeoのURLを埋め込み形式に変換
+  const getEmbedUrl = (url: string) => {
+    if (!url) return null;
+    
+    // Vimeo URL: https://vimeo.com/1138786209/32ff031622
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)\/([a-zA-Z0-9]+)/);
+    if (vimeoMatch) {
+      return `https://player.vimeo.com/video/${vimeoMatch[1]}?h=${vimeoMatch[2]}&badge=0&autopause=0&player_id=0&app_id=58479`;
+    }
+    
+    // YouTube URL
+    const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+    }
+    
+    return url;
+  };
+
+  const embedUrl = currentModule.videoUrl ? getEmbedUrl(currentModule.videoUrl) : null;
+
   return (
     <DashboardLayout>
       <div className="flex gap-6 max-w-7xl mx-auto">
-        {/* 左サイドバー - チャプター一覧 */}
         <ChapterSidebar
           training={training}
           currentModuleId={currentModule.id}
           progressMap={progressMap}
         />
 
-        {/* メインコンテンツ */}
         <div className="flex-1 min-w-0">
           <div className="mb-6">
             <Link
@@ -87,7 +105,6 @@ export default async function ChapterDetailPage({ params }: PageProps) {
           </div>
 
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            {/* ヘッダー */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8">
               <p className="text-sm opacity-90 mb-2">
                 チャプター {currentIndex + 1} / {training.modules.length}
@@ -103,23 +120,22 @@ export default async function ChapterDetailPage({ params }: PageProps) {
               )}
             </div>
 
-            {/* コンテンツ */}
             <div className="p-8">
-              {/* 動画 */}
-              {currentModule.videoUrl && (
+              {embedUrl && (
                 <div className="mb-8">
                   <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden">
                     <iframe
-                      src={currentModule.videoUrl}
+                      src={embedUrl}
                       className="absolute inset-0 w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture"
+                      frameBorder="0"
+                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
                       allowFullScreen
+                      title={currentModule.title}
                     />
                   </div>
                 </div>
               )}
 
-              {/* 画像 */}
               {currentModule.imageUrl && (
                 <div className="mb-8">
                   <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
@@ -133,7 +149,6 @@ export default async function ChapterDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* 説明(HTML表示) */}
               {currentModule.description && (
                 <div 
                   className="prose prose-lg max-w-none mb-8"
@@ -142,7 +157,6 @@ export default async function ChapterDetailPage({ params }: PageProps) {
               )}
             </div>
 
-            {/* ナビゲーション */}
             <div className="border-t border-gray-200 p-6 flex justify-between items-center">
               <div>
                 {previousModule ? (
