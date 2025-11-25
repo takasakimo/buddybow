@@ -11,8 +11,18 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions);
 
+    // ロールの後方互換性を確保
+    const getUserRole = () => {
+      const userRole = session?.user?.role || 'user';
+      if (userRole === 'admin') return 'FULL_ADMIN';
+      if (userRole === 'user') return 'USER';
+      return userRole;
+    };
+
+    const userRole = getUserRole();
+
     // 全権管理者のみユーザー更新可能
-    if (!session || session.user.role !== 'FULL_ADMIN') {
+    if (!session || userRole !== 'FULL_ADMIN') {
       return NextResponse.json(
         { error: '権限がありません' },
         { status: 403 }
@@ -102,8 +112,18 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions);
 
-    // 全権管理者のみユーザー更新可能
-    if (!session || session.user.role !== 'FULL_ADMIN') {
+    // ロールの後方互換性を確保
+    const getUserRole = () => {
+      const userRole = session?.user?.role || 'user';
+      if (userRole === 'admin') return 'FULL_ADMIN';
+      if (userRole === 'user') return 'USER';
+      return userRole;
+    };
+
+    const userRole = getUserRole();
+
+    // 全権管理者のみユーザー削除可能
+    if (!session || userRole !== 'FULL_ADMIN') {
       return NextResponse.json(
         { error: '権限がありません' },
         { status: 403 }
