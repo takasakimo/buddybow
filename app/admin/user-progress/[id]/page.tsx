@@ -93,7 +93,8 @@ export default function UserProgressDetailPage() {
   const [isUploadingPdf, setIsUploadingPdf] = useState(false);
 
   useEffect(() => {
-    if (session?.user?.role !== 'admin') {
+    // 全権管理者または担当者のみアクセス可能
+    if (session?.user?.role !== 'FULL_ADMIN' && session?.user?.role !== 'MANAGER') {
       router.push('/dashboard');
       return;
     }

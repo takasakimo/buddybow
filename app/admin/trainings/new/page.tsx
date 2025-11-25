@@ -6,7 +6,8 @@ import TrainingForm from '../components/TrainingForm';
 export default async function NewTrainingPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== 'admin') {
+  // 全権管理者のみアクセス可能
+  if (!session || session.user.role !== 'FULL_ADMIN') {
     redirect('/dashboard');
   }
 

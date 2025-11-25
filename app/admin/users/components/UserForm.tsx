@@ -18,18 +18,20 @@ export default function UserForm({ initialData }: UserFormProps) {
   const [name, setName] = useState(initialData?.name || '');
   const [email, setEmail] = useState(initialData?.email || '');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState(initialData?.role || 'user');
+  const [role, setRole] = useState(initialData?.role || 'USER');
   const [assignedAdminId, setAssignedAdminId] = useState(initialData?.assignedAdminId || '');
-  const [admins, setAdmins] = useState<{ id: number; name: string }[]>([]);
+  const [admins, setAdmins] = useState<{ id: number; name: string; role: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // 管理者一覧を取得
+  // 管理者一覧を取得（全権管理者と担当者）
   useEffect(() => {
     fetch('/api/admin/users-list')
       .then((res) => res.json())
       .then((users) => {
-        const adminUsers = users.filter((u: { role: string }) => u.role === 'admin');
+        const adminUsers = users.filter((u: { role: string }) => 
+          u.role === 'FULL_ADMIN' || u.role === 'MANAGER'
+        );
         setAdmins(adminUsers);
       })
       .catch((err) => console.error('Failed to fetch admins:', err));
@@ -165,15 +167,16 @@ export default function UserForm({ initialData }: UserFormProps) {
           required
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
         >
-          <option value="user">ユーザー</option>
-          <option value="admin">管理者</option>
+          <option value="USER">一般ユーザー</option>
+          <option value="MANAGER">担当者</option>
+          <option value="FULL_ADMIN">全権管理者</option>
         </select>
         <p className="mt-2 text-sm text-gray-500">
-          管理者は全ての機能にアクセスできます
+          全権管理者: 全ユーザーを管理可能 | 担当者: 担当ユーザーのみ管理可能 | 一般ユーザー: 自分のみ
         </p>
       </div>
 
-      {role === 'user' && (
+      {role === 'USER' && (
         <div className="mb-6">
           <label htmlFor="assignedAdminId" className="block text-sm font-medium text-gray-900 mb-2">
             担当者

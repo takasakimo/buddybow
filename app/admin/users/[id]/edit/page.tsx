@@ -15,7 +15,8 @@ interface PageProps {
 export default async function EditUserPage({ params }: PageProps) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== 'admin') {
+  // 全権管理者のみユーザー編集可能
+  if (!session || session.user.role !== 'FULL_ADMIN') {
     redirect('/dashboard');
   }
 

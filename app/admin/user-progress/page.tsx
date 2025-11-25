@@ -31,7 +31,8 @@ export default function UserProgressPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    if (session?.user?.role !== 'admin') {
+    // 全権管理者または担当者のみアクセス可能
+    if (session?.user?.role !== 'FULL_ADMIN' && session?.user?.role !== 'MANAGER') {
       router.push('/dashboard');
       return;
     }
@@ -131,12 +132,18 @@ export default function UserProgressPage() {
                         <div className="text-sm text-gray-500">{user.email}</div>
                         <span
                           className={`mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            user.role === 'admin'
+                            user.role === 'FULL_ADMIN'
                               ? 'bg-purple-100 text-purple-800'
+                              : user.role === 'MANAGER'
+                              ? 'bg-blue-100 text-blue-800'
                               : 'bg-green-100 text-green-800'
                           }`}
                         >
-                          {user.role === 'admin' ? '管理者' : 'ユーザー'}
+                          {user.role === 'FULL_ADMIN' 
+                            ? '全権管理者' 
+                            : user.role === 'MANAGER'
+                            ? '担当者'
+                            : '一般ユーザー'}
                         </span>
                       </div>
                     </td>

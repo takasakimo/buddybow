@@ -7,7 +7,8 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    // 全権管理者または担当者のみアクセス可能
+    if (!session || (session.user.role !== 'FULL_ADMIN' && session.user.role !== 'MANAGER')) {
       return NextResponse.json(
         { error: '認証が必要です' },
         { status: 401 }
@@ -69,20 +70,28 @@ export async function GET(request: Request) {
 
     const userIdNum = parseInt(userId);
 
-    // 管理者の場合は全ユーザー、一般ユーザーの場合は自分のみ
-    const canViewAll = session.user.role === 'admin';
-    const targetUserId = canViewAll ? userIdNum : (typeof session.user.id === 'string' ? parseInt(session.user.id) : session.user.id);
-
-    if (!canViewAll && targetUserId !== userIdNum) {
-      return NextResponse.json(
-        { error: '権限がありません' },
-        { status: 403 }
-      );
+    // 全権管理者の場合は全ユーザー、担当者の場合は担当ユーザーのみ
+    const canViewAll = session.user.role === 'FULL_ADMIN';
+    const currentAdminId = typeof session.user.id === 'string' ? parseInt(session.user.id) : session.user.id;
+    
+    if (!canViewAll) {
+      // 担当者の場合、担当ユーザーか確認
+      const user = await prisma.user.findUnique({
+        where: { id: userIdNum },
+        select: { assignedAdminId: true },
+      });
+      
+      if (!user || user.assignedAdminId !== currentAdminId) {
+        return NextResponse.json(
+          { error: '権限がありません' },
+          { status: 403 }
+        );
+      }
     }
 
     const interviews = await prisma.interview.findMany({
       where: {
-        userId: targetUserId,
+        userId: userIdNum,
       },
       orderBy: {
         interviewDate: 'desc',

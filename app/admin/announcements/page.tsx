@@ -22,7 +22,8 @@ export default function AnnouncementsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.role !== 'admin') {
+    // 全権管理者のみアクセス可能
+    if (session?.user?.role !== 'FULL_ADMIN') {
       router.push('/dashboard');
       return;
     }

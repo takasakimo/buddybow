@@ -8,7 +8,8 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    // 全権管理者のみユーザー作成可能
+    if (!session || session.user.role !== 'FULL_ADMIN') {
       return NextResponse.json(
         { error: '権限がありません' },
         { status: 403 }
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
         name,
         email,
         password: hashedPassword,
-        role: role || 'user',
+        role: role || 'USER',
         assignedAdminId: assignedAdminId ? parseInt(assignedAdminId) : null,
       },
     });

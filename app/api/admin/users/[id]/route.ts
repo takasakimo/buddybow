@@ -11,7 +11,8 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    // 全権管理者のみユーザー更新可能
+    if (!session || session.user.role !== 'FULL_ADMIN') {
       return NextResponse.json(
         { error: '権限がありません' },
         { status: 403 }
@@ -101,7 +102,8 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    // 全権管理者のみユーザー更新可能
+    if (!session || session.user.role !== 'FULL_ADMIN') {
       return NextResponse.json(
         { error: '権限がありません' },
         { status: 403 }

@@ -138,7 +138,7 @@ export default function TrainingPage() {
           </div>
           
           {/* 管理者のみ表示 */}
-          {session?.user?.role === 'admin' && (
+          {(session?.user?.role === 'FULL_ADMIN' || session?.user?.role === 'MANAGER') && (
             <button
               onClick={() => router.push('/admin/trainings')}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"

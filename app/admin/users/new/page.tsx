@@ -8,7 +8,8 @@ import UserForm from '../components/UserForm';
 export default async function NewUserPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== 'admin') {
+  // 全権管理者のみユーザー作成可能
+  if (!session || session.user.role !== 'FULL_ADMIN') {
     redirect('/dashboard');
   }
 

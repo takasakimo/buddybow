@@ -7,7 +7,8 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    // 全権管理者のみアクセス可能
+    if (!session || session.user.role !== 'FULL_ADMIN') {
       return NextResponse.json(
         { error: '権限がありません' },
         { status: 403 }
@@ -66,7 +67,8 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    // 全権管理者のみアクセス可能
+    if (!session || session.user.role !== 'FULL_ADMIN') {
       return NextResponse.json(
         { error: '権限がありません' },
         { status: 403 }

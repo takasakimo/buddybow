@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const isAdmin = session.user.role === 'admin';
+  const isAdmin = session.user.role === 'FULL_ADMIN' || session.user.role === 'MANAGER';
   const userId = typeof session.user.id === 'string' 
     ? parseInt(session.user.id) 
     : session.user.id;

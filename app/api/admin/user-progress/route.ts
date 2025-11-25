@@ -7,7 +7,8 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    // 全権管理者または担当者のみアクセス可能
+    if (!session || (session.user.role !== 'FULL_ADMIN' && session.user.role !== 'MANAGER')) {
       return NextResponse.json(
         { error: '認証が必要です' },
         { status: 401 }
@@ -18,11 +19,16 @@ export async function GET() {
       ? parseInt(session.user.id) 
       : session.user.id;
 
+    // 全権管理者は全ユーザーを取得、担当者は担当ユーザーのみ
+    const whereClause = session.user.role === 'FULL_ADMIN'
+      ? { role: 'USER' } // 一般ユーザーのみ
+      : {
+          role: 'USER',
+          assignedAdminId: currentAdminId, // ログイン中の担当者の担当ユーザーのみ
+        };
+
     const users = await prisma.user.findMany({
-      where: {
-        role: 'user', // ユーザーのみ
-        assignedAdminId: currentAdminId, // ログイン中の管理者の担当ユーザーのみ
-      },
+      where: whereClause,
       include: {
         userProgress: true,
         _count: {

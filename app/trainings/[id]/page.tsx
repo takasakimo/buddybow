@@ -81,7 +81,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">チャプター一覧</h2>
-            {session.user.role === 'admin' && (
+            {(session.user.role === 'FULL_ADMIN' || session.user.role === 'MANAGER') && (
               <Link
                 href={`/admin/trainings/${training.id}/edit`}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -114,7 +114,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
                       </h3>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
-                      {session.user.role === 'admin' && (
+                      {(session.user.role === 'FULL_ADMIN' || session.user.role === 'MANAGER') && (
                         <Link
                           href={`/admin/trainings/${training.id}/edit`}
                           className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"

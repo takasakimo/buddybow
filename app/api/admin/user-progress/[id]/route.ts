@@ -10,7 +10,8 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    // 全権管理者または担当者のみアクセス可能
+    if (!session || (session.user.role !== 'FULL_ADMIN' && session.user.role !== 'MANAGER')) {
       return NextResponse.json(
         { error: '認証が必要です' },
         { status: 401 }
@@ -18,6 +19,9 @@ export async function GET(
     }
 
     const userId = parseInt(params.id);
+    const currentAdminId = typeof session.user.id === 'string' 
+      ? parseInt(session.user.id) 
+      : session.user.id;
 
     // ユーザー情報と進捗情報を取得
     const user = await prisma.user.findUnique({
@@ -31,6 +35,14 @@ export async function GET(
       return NextResponse.json(
         { error: 'ユーザーが見つかりません' },
         { status: 404 }
+      );
+    }
+
+    // 担当者の場合、担当ユーザーでない場合はアクセス拒否
+    if (session.user.role === 'MANAGER' && user.assignedAdminId !== currentAdminId) {
+      return NextResponse.json(
+        { error: 'このユーザーへのアクセス権限がありません' },
+        { status: 403 }
       );
     }
 

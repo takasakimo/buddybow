@@ -46,60 +46,60 @@ export default function Sidebar() {
       name: 'ダッシュボード',
       href: '/dashboard',
       icon: '🏠',
-      allowedRoles: ['admin', 'user'],
+      allowedRoles: ['FULL_ADMIN', 'MANAGER', 'USER'],
     },
     {
       name: 'マイページ',
       href: '/mypage',
       icon: '👤',
-      allowedRoles: ['user'],
+      allowedRoles: ['USER'],
     },
     {
       name: '研修一覧',
       href: '/trainings',
       icon: '📚',
-      allowedRoles: ['admin', 'user'],
+      allowedRoles: ['FULL_ADMIN', 'MANAGER', 'USER'],
     },
     {
       name: 'ユーザー管理',
       href: '/admin/users',
       icon: '👥',
-      allowedRoles: ['admin'],
+      allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: '研修管理',
       href: '/admin/trainings',
       icon: '⚙️',
-      allowedRoles: ['admin'],
+      allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: 'カテゴリ管理',
       href: '/admin/categories',
       icon: '🏷️',
-      allowedRoles: ['admin'],
+      allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: 'お知らせ管理',
       href: '/admin/announcements',
       icon: '📢',
-      allowedRoles: ['admin'],
+      allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: '勉強会管理',
       href: '/admin/study-sessions',
       icon: '🎓',
-      allowedRoles: ['admin'],
+      allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: '受講者マイページ管理',
       href: '/admin/user-progress',
       icon: '📊',
-      allowedRoles: ['admin'],
+      allowedRoles: ['FULL_ADMIN', 'MANAGER'],
     },
   ];
 
   const filteredMenuItems = menuItems.filter((item) =>
-    item.allowedRoles.includes(session?.user?.role || 'user')
+    item.allowedRoles.includes(session?.user?.role || 'USER')
   );
 
   return (

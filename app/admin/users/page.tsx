@@ -26,7 +26,8 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.role !== 'admin') {
+    // 全権管理者または担当者のみアクセス可能
+    if (session?.user?.role !== 'FULL_ADMIN' && session?.user?.role !== 'MANAGER') {
       router.push('/dashboard');
       return;
     }
@@ -132,12 +133,18 @@ export default function UsersPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.role === 'admin'
+                        user.role === 'FULL_ADMIN'
                           ? 'bg-purple-100 text-purple-800'
+                          : user.role === 'MANAGER'
+                          ? 'bg-blue-100 text-blue-800'
                           : 'bg-green-100 text-green-800'
                       }`}
                     >
-                      {user.role === 'admin' ? '管理者' : 'ユーザー'}
+                      {user.role === 'FULL_ADMIN' 
+                        ? '全権管理者' 
+                        : user.role === 'MANAGER'
+                        ? '担当者'
+                        : '一般ユーザー'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
