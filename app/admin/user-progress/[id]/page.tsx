@@ -46,6 +46,14 @@ interface Roadmap {
   createdAt: Date;
 }
 
+interface Interview {
+  id: string;
+  interviewDate: Date;
+  content: string | null;
+  pdfUrl: string | null;
+  createdAt: Date;
+}
+
 interface UserDetail {
   id: number;
   name: string;
@@ -54,6 +62,7 @@ interface UserDetail {
   trainings: Training[];
   moduleProgresses: ModuleProgress[];
   roadmaps: Roadmap[];
+  interviews: Interview[];
   dailyReports: { id: string; date: Date; type: string }[];
   consultations: { id: string; title: string; status: string }[];
   achievements: { id: string; title: string; badgeType: string }[];
@@ -75,6 +84,13 @@ export default function UserProgressDetailPage() {
     startDate: '',
     endDate: '',
   });
+  const [isAddingInterview, setIsAddingInterview] = useState(false);
+  const [interviewForm, setInterviewForm] = useState({
+    interviewDate: '',
+    content: '',
+    pdfFile: null as File | null,
+  });
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
 
   useEffect(() => {
     if (session?.user?.role !== 'admin') {
@@ -232,6 +248,101 @@ export default function UserProgressDetailPage() {
       alert('ロードマップの追加に失敗しました。コンソールを確認してください。');
     } finally {
       setIsAddingRoadmap(false);
+    }
+  };
+
+  const handlePdfUpload = async (file: File): Promise<string | null> => {
+    if (!file.type.includes('pdf')) {
+      alert('PDFファイルを選択してください');
+      return null;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('ファイルサイズは10MB以下にしてください');
+      return null;
+    }
+
+    setIsUploadingPdf(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('アップロードに失敗しました');
+      }
+
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error('PDF upload error:', error);
+      alert('PDFのアップロードに失敗しました');
+      return null;
+    } finally {
+      setIsUploadingPdf(false);
+    }
+  };
+
+  const handleAddInterview = async () => {
+    if (!interviewForm.interviewDate) {
+      alert('面談日を選択してください');
+      return;
+    }
+
+    if (!interviewForm.content && !interviewForm.pdfFile) {
+      alert('面談内容（テキスト）またはPDFファイルのいずれかは必須です');
+      return;
+    }
+
+    setIsAddingInterview(true);
+    try {
+      let pdfUrl: string | null = null;
+
+      // PDFファイルをアップロード
+      if (interviewForm.pdfFile) {
+        pdfUrl = await handlePdfUpload(interviewForm.pdfFile);
+        if (!pdfUrl) {
+          setIsAddingInterview(false);
+          return;
+        }
+      }
+
+      const response = await fetch('/api/admin/user-progress/interview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: params.id,
+          interviewDate: interviewForm.interviewDate,
+          content: interviewForm.content.trim() || null,
+          pdfUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('面談を追加しました');
+        fetchUserDetail();
+        setInterviewForm({
+          interviewDate: '',
+          content: '',
+          pdfFile: null,
+        });
+      } else {
+        console.error('Interview creation error:', data);
+        alert(data.error || '面談の追加に失敗しました');
+      }
+    } catch (error) {
+      console.error('Failed to add interview:', error);
+      alert('面談の追加に失敗しました。コンソールを確認してください。');
+    } finally {
+      setIsAddingInterview(false);
     }
   };
 
@@ -566,6 +677,136 @@ export default function UserProgressDetailPage() {
                             </div>
                           </div>
                         )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 面談管理 */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">💬 面談管理</h2>
+
+              {/* 面談を追加 */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  面談を追加
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      面談日 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={interviewForm.interviewDate}
+                      onChange={(e) =>
+                        setInterviewForm({ ...interviewForm, interviewDate: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      面談内容（テキスト）
+                    </label>
+                    <textarea
+                      value={interviewForm.content}
+                      onChange={(e) =>
+                        setInterviewForm({ ...interviewForm, content: e.target.value })
+                      }
+                      rows={5}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="面談内容を入力..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      PDFファイル
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setInterviewForm({ ...interviewForm, pdfFile: file });
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    />
+                    {interviewForm.pdfFile && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        選択中: {interviewForm.pdfFile.name} ({(interviewForm.pdfFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                    テキストまたはPDFファイルのいずれかは必須です。両方入力することも可能です。
+                  </div>
+                  <button
+                    onClick={handleAddInterview}
+                    disabled={
+                      !interviewForm.interviewDate ||
+                      (!interviewForm.content && !interviewForm.pdfFile) ||
+                      isAddingInterview ||
+                      isUploadingPdf
+                    }
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {isAddingInterview || isUploadingPdf
+                      ? isUploadingPdf
+                        ? 'PDFアップロード中...'
+                        : '追加中...'
+                      : '面談を追加'}
+                  </button>
+                </div>
+              </div>
+
+              {/* 既存の面談一覧 */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  面談一覧
+                </h3>
+                {userDetail.interviews.length === 0 ? (
+                  <p className="text-gray-500 text-sm">面談がありません</p>
+                ) : (
+                  <div className="space-y-3">
+                    {userDetail.interviews.map((interview) => (
+                      <div
+                        key={interview.id}
+                        className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <div className="text-sm font-semibold text-gray-900 mb-1">
+                              {new Date(interview.interviewDate).toLocaleDateString('ja-JP', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </div>
+                            {interview.content && (
+                              <p className="text-sm text-gray-600 whitespace-pre-wrap mb-2">
+                                {interview.content}
+                              </p>
+                            )}
+                            {interview.pdfUrl && (
+                              <a
+                                href={interview.pdfUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                              >
+                                📄 PDFを表示
+                              </a>
+                            )}
+                            <div className="text-xs text-gray-500 mt-2">
+                              作成日: {new Date(interview.createdAt).toLocaleDateString('ja-JP')}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>

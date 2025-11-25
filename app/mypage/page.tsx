@@ -31,12 +31,17 @@ export default async function MyPage() {
   }
 
   // 各種データ取得
-  const [roadmaps, recentReports, consultations, achievements, motivationMessages] = await Promise.all([
+  const [roadmaps, interviews, recentReports, consultations, achievements, motivationMessages] = await Promise.all([
     prisma.roadmap.findMany({
       where: { userId },
       include: { milestones: true },
       orderBy: { createdAt: 'desc' },
       take: 1,
+    }),
+    prisma.interview.findMany({
+      where: { userId },
+      orderBy: { interviewDate: 'desc' },
+      take: 10,
     }),
     prisma.dailyReport.findMany({
       where: { userId },
@@ -60,7 +65,7 @@ export default async function MyPage() {
   ]);
 
   const activeRoadmap = roadmaps[0];
-  const completedMilestones = activeRoadmap?.milestones.filter(m => m.completed).length || 0;
+  const completedMilestones = activeRoadmap?.milestones.filter((m) => m.completed).length || 0;
   const totalMilestones = activeRoadmap?.milestones.length || 0;
 
   return (
@@ -285,6 +290,49 @@ export default async function MyPage() {
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(consultation.createdAt).toLocaleDateString('ja-JP')}
                       </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 面談履歴 */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">💬 面談履歴</h2>
+              </div>
+              {interviews.length === 0 ? (
+                <p className="text-gray-600 text-sm">まだ面談がありません</p>
+              ) : (
+                <div className="space-y-3">
+                  {interviews.map((interview) => (
+                    <div key={interview.id} className="pb-3 border-b last:border-b-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-900 mb-1">
+                            {new Date(interview.interviewDate).toLocaleDateString('ja-JP', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </p>
+                          {interview.content && (
+                            <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                              {interview.content}
+                            </p>
+                          )}
+                          {interview.pdfUrl && (
+                            <a
+                              href={interview.pdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700"
+                            >
+                              📄 PDFを表示
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

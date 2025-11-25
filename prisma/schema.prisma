@@ -26,6 +26,7 @@ model User {
   achievements            Achievement[]
   motivationMessages      MotivationMessage[]
   studySessionParticipants StudySessionParticipant[]
+  interviews              Interview[]
 
   @@map("users")
 }
@@ -252,4 +253,18 @@ model ModuleProgress {
 
   @@unique([userId, moduleId])
   @@map("module_progress")
+}
+
+// 面談
+model Interview {
+  id          String   @id @default(cuid())
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interviewDate DateTime @map("interview_date")
+  content     String?  // テキスト内容
+  pdfUrl      String?  @map("pdf_url") // PDFファイルURL
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("interviews")
 }
