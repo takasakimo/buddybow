@@ -95,7 +95,13 @@ export async function GET(
     const [roadmaps, dailyReports, consultations, achievements] = await Promise.all([
       prisma.roadmap.findMany({
         where: { userId },
-        select: { id: true, title: true },
+        include: {
+          milestones: {
+            orderBy: {
+              order: 'asc',
+            },
+          },
+        },
         orderBy: { createdAt: 'desc' },
         take: 10,
       }),
@@ -133,7 +139,16 @@ export async function GET(
         })),
       })),
       moduleProgresses: moduleProgressesFormatted,
-      roadmaps,
+      roadmaps: roadmaps.map((r) => ({
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        targetMonths: r.targetMonths,
+        startDate: r.startDate,
+        endDate: r.endDate,
+        milestones: r.milestones,
+        createdAt: r.createdAt,
+      })),
       dailyReports,
       consultations,
       achievements,

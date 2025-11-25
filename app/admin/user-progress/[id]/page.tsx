@@ -25,6 +25,27 @@ interface ModuleProgress {
   completedAt: Date | null;
 }
 
+interface Milestone {
+  id: string;
+  title: string;
+  description: string | null;
+  targetDate: Date;
+  completed: boolean;
+  completedAt: Date | null;
+  order: number;
+}
+
+interface Roadmap {
+  id: string;
+  title: string;
+  description: string | null;
+  targetMonths: number;
+  startDate: Date;
+  endDate: Date;
+  milestones: Milestone[];
+  createdAt: Date;
+}
+
 interface UserDetail {
   id: number;
   name: string;
@@ -32,7 +53,7 @@ interface UserDetail {
   userProgress: UserProgress | null;
   trainings: Training[];
   moduleProgresses: ModuleProgress[];
-  roadmaps: { id: string; title: string }[];
+  roadmaps: Roadmap[];
   dailyReports: { id: string; date: Date; type: string }[];
   consultations: { id: string; title: string; status: string }[];
   achievements: { id: string; title: string; badgeType: string }[];
@@ -45,8 +66,15 @@ export default function UserProgressDetailPage() {
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTraining, setSelectedTraining] = useState<string>('');
-  const [selectedModule, setSelectedModule] = useState<string>('');
   const [isAddingProgress, setIsAddingProgress] = useState(false);
+  const [isAddingRoadmap, setIsAddingRoadmap] = useState(false);
+  const [roadmapForm, setRoadmapForm] = useState({
+    title: '',
+    description: '',
+    targetMonths: '6',
+    startDate: '',
+    endDate: '',
+  });
 
   useEffect(() => {
     if (session?.user?.role !== 'admin') {
@@ -75,33 +103,43 @@ export default function UserProgressDetailPage() {
   };
 
   const handleAddProgress = async () => {
-    if (!selectedModule) {
-      alert('モジュールを選択してください');
+    if (!selectedTraining) {
+      alert('研修を選択してください');
+      return;
+    }
+
+    const training = userDetail?.trainings.find((t) => t.id === selectedTraining);
+    if (!training || training.modules.length === 0) {
+      alert('この研修にはモジュールがありません');
       return;
     }
 
     setIsAddingProgress(true);
     try {
-      const response = await fetch('/api/admin/user-progress/module', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: params.id,
-          moduleId: selectedModule,
-          completed: true,
-        }),
-      });
+      // 選択された研修の全モジュールを完了として追加
+      const promises = training.modules.map((module) =>
+        fetch('/api/admin/user-progress/module', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: params.id,
+            moduleId: module.id,
+            completed: true,
+          }),
+        })
+      );
 
-      if (response.ok) {
-        alert('研修進捗を追加しました');
+      const results = await Promise.all(promises);
+      const allSuccess = results.every((r) => r.ok);
+
+      if (allSuccess) {
+        alert(`${training.title}の全モジュール（${training.modules.length}件）の進捗を追加しました`);
         fetchUserDetail();
         setSelectedTraining('');
-        setSelectedModule('');
       } else {
-        const data = await response.json();
-        alert(data.error || '進捗の追加に失敗しました');
+        alert('一部の進捗の追加に失敗しました');
       }
     } catch (error) {
       console.error('Failed to add progress:', error);
@@ -137,6 +175,66 @@ export default function UserProgressDetailPage() {
     }
   };
 
+  const handleAddRoadmap = async () => {
+    if (!roadmapForm.title || !roadmapForm.startDate || !roadmapForm.endDate) {
+      alert('タイトル、開始日、終了日は必須です');
+      return;
+    }
+
+    if (!roadmapForm.targetMonths || parseInt(roadmapForm.targetMonths) < 1) {
+      alert('目標期間は1ヶ月以上を指定してください');
+      return;
+    }
+
+    const startDate = new Date(roadmapForm.startDate);
+    const endDate = new Date(roadmapForm.endDate);
+    
+    if (endDate <= startDate) {
+      alert('終了日は開始日より後である必要があります');
+      return;
+    }
+
+    setIsAddingRoadmap(true);
+    try {
+      const response = await fetch('/api/admin/user-progress/roadmap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: params.id,
+          title: roadmapForm.title.trim(),
+          description: roadmapForm.description.trim() || null,
+          targetMonths: parseInt(roadmapForm.targetMonths),
+          startDate: roadmapForm.startDate,
+          endDate: roadmapForm.endDate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('ロードマップを追加しました');
+        fetchUserDetail();
+        setRoadmapForm({
+          title: '',
+          description: '',
+          targetMonths: '6',
+          startDate: '',
+          endDate: '',
+        });
+      } else {
+        console.error('Roadmap creation error:', data);
+        alert(data.error || 'ロードマップの追加に失敗しました');
+      }
+    } catch (error) {
+      console.error('Failed to add roadmap:', error);
+      alert('ロードマップの追加に失敗しました。コンソールを確認してください。');
+    } finally {
+      setIsAddingRoadmap(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -157,13 +255,6 @@ export default function UserProgressDetailPage() {
     );
   }
 
-  const availableModules = selectedTraining
-    ? userDetail.trainings
-        .find((t) => t.id === selectedTraining)
-        ?.modules.filter(
-          (m) => !userDetail.moduleProgresses.some((mp) => mp.moduleId === m.id)
-        ) || []
-    : [];
 
   return (
     <DashboardLayout>
@@ -227,42 +318,37 @@ export default function UserProgressDetailPage() {
                     </label>
                     <select
                       value={selectedTraining}
-                      onChange={(e) => {
-                        setSelectedTraining(e.target.value);
-                        setSelectedModule('');
-                      }}
+                      onChange={(e) => setSelectedTraining(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                     >
                       <option value="">選択してください</option>
-                      {userDetail.trainings.map((training) => (
-                        <option key={training.id} value={training.id}>
-                          {training.title}
-                        </option>
-                      ))}
+                      {userDetail.trainings.map((training) => {
+                        const completedModulesCount = training.modules.filter((m) =>
+                          userDetail.moduleProgresses.some((mp) => mp.moduleId === m.id && mp.completed)
+                        ).length;
+                        const totalModules = training.modules.length;
+                        const isCompleted = totalModules > 0 && completedModulesCount === totalModules;
+                        return (
+                          <option key={training.id} value={training.id}>
+                            {training.title} {isCompleted ? '(完了済み)' : `(${completedModulesCount}/${totalModules})`}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   {selectedTraining && (
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-1">
-                        モジュールを選択
-                      </label>
-                      <select
-                        value={selectedModule}
-                        onChange={(e) => setSelectedModule(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                      >
-                        <option value="">選択してください</option>
-                        {availableModules.map((module) => (
-                          <option key={module.id} value={module.id}>
-                            {module.title}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="text-xs text-gray-600 bg-blue-50 p-2 rounded">
+                      {(() => {
+                        const training = userDetail.trainings.find((t) => t.id === selectedTraining);
+                        if (!training) return null;
+                        const totalModules = training.modules.length;
+                        return `この研修には${totalModules}個のモジュールがあります。全モジュールを完了として追加します。`;
+                      })()}
                     </div>
                   )}
                   <button
                     onClick={handleAddProgress}
-                    disabled={!selectedModule || isAddingProgress}
+                    disabled={!selectedTraining || isAddingProgress}
                     className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     {isAddingProgress ? '追加中...' : '進捗を追加'}
@@ -309,6 +395,177 @@ export default function UserProgressDetailPage() {
                             </span>
                           </label>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ロードマップ管理 */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">🗺️ ロードマップ管理</h2>
+
+              {/* ロードマップを追加 */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  ロードマップを追加
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      タイトル <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={roadmapForm.title}
+                      onChange={(e) =>
+                        setRoadmapForm({ ...roadmapForm, title: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="例: 3ヶ月で副業を始める"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      説明
+                    </label>
+                    <textarea
+                      value={roadmapForm.description}
+                      onChange={(e) =>
+                        setRoadmapForm({ ...roadmapForm, description: e.target.value })
+                      }
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="ロードマップの説明を入力..."
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">
+                        目標期間（ヶ月） <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        value={roadmapForm.targetMonths}
+                        onChange={(e) =>
+                          setRoadmapForm({ ...roadmapForm, targetMonths: e.target.value })
+                        }
+                        min="1"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">
+                        開始日 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={roadmapForm.startDate}
+                        onChange={(e) =>
+                          setRoadmapForm({ ...roadmapForm, startDate: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      終了日 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={roadmapForm.endDate}
+                      onChange={(e) =>
+                        setRoadmapForm({ ...roadmapForm, endDate: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddRoadmap}
+                    disabled={
+                      !roadmapForm.title ||
+                      !roadmapForm.startDate ||
+                      !roadmapForm.endDate ||
+                      isAddingRoadmap
+                    }
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {isAddingRoadmap ? '追加中...' : 'ロードマップを追加'}
+                  </button>
+                </div>
+              </div>
+
+              {/* 既存のロードマップ一覧 */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  ロードマップ一覧
+                </h3>
+                {userDetail.roadmaps.length === 0 ? (
+                  <p className="text-gray-500 text-sm">ロードマップがありません</p>
+                ) : (
+                  <div className="space-y-4">
+                    {userDetail.roadmaps.map((roadmap) => (
+                      <div
+                        key={roadmap.id}
+                        className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                              {roadmap.title}
+                            </h4>
+                            {roadmap.description && (
+                              <p className="text-xs text-gray-600 mb-2">
+                                {roadmap.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span>
+                                期間: {new Date(roadmap.startDate).toLocaleDateString('ja-JP')} 〜{' '}
+                                {new Date(roadmap.endDate).toLocaleDateString('ja-JP')}
+                              </span>
+                              <span>目標: {roadmap.targetMonths}ヶ月</span>
+                              <span>
+                                マイルストーン: {roadmap.milestones.length}件
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        {roadmap.milestones.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <div className="text-xs font-medium text-gray-700 mb-2">
+                              マイルストーン:
+                            </div>
+                            <div className="space-y-1">
+                              {roadmap.milestones.map((milestone) => (
+                                <div
+                                  key={milestone.id}
+                                  className="flex items-center gap-2 text-xs"
+                                >
+                                  <span
+                                    className={`w-2 h-2 rounded-full ${
+                                      milestone.completed
+                                        ? 'bg-green-500'
+                                        : 'bg-gray-300'
+                                    }`}
+                                  />
+                                  <span
+                                    className={
+                                      milestone.completed
+                                        ? 'text-gray-500 line-through'
+                                        : 'text-gray-700'
+                                    }
+                                  >
+                                    {milestone.title} (
+                                    {new Date(milestone.targetDate).toLocaleDateString('ja-JP')})
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
