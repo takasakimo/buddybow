@@ -162,12 +162,17 @@ export default function Sidebar() {
 
       {/* サイドバー */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out flex flex-col ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
+        style={{ pointerEvents: 'auto' }}
       >
         <div className="p-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link 
+            href="/dashboard" 
+            className="flex items-center gap-2"
+            style={{ pointerEvents: 'auto' }}
+          >
             <span className="text-2xl">🎯</span>
             <span className="text-xl font-bold text-gray-900">buddybow</span>
           </Link>
@@ -181,12 +186,18 @@ export default function Sidebar() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                      // モバイルの場合のみサイドバーを閉じる
+                      if (isMounted && typeof window !== 'undefined' && window.innerWidth < 1024) {
+                        setIsOpen(false);
+                      }
+                    }}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive
                         ? 'bg-blue-50 text-blue-600 font-medium'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
+                    style={{ pointerEvents: 'auto' }}
                   >
                     <span className="text-xl">{item.icon}</span>
                     <span>{item.name}</span>
