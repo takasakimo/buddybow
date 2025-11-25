@@ -129,13 +129,12 @@ export default function Sidebar() {
         </svg>
       </button>
 
-      {/* オーバーレイ - モバイルのみ表示（1024px未満のみ） */}
-      {isMounted && isOpen && typeof window !== 'undefined' && window.innerWidth < 1024 && (
+      {/* オーバーレイ - モバイルのみ表示（CSSで制御） */}
+      {isMounted && isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:!hidden"
           onClick={() => setIsOpen(false)}
           onTouchStart={() => setIsOpen(false)}
-          style={{ display: 'block' }}
         />
       )}
 
