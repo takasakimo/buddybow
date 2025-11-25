@@ -10,8 +10,18 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
 
+    // ロールの後方互換性を確保
+    const getUserRole = () => {
+      const role = session?.user?.role || 'user';
+      if (role === 'admin') return 'FULL_ADMIN';
+      if (role === 'user') return 'USER';
+      return role;
+    };
+
+    const userRole = getUserRole();
+
     // 全権管理者または担当者のみアクセス可能
-    if (!session || (session.user.role !== 'FULL_ADMIN' && session.user.role !== 'MANAGER')) {
+    if (!session || (userRole !== 'FULL_ADMIN' && userRole !== 'MANAGER')) {
       return NextResponse.json(
         { error: '認証が必要です' },
         { status: 401 }
@@ -39,7 +49,7 @@ export async function GET(
     }
 
     // 担当者の場合、担当ユーザーでない場合はアクセス拒否
-    if (session.user.role === 'MANAGER' && user.assignedAdminId !== currentAdminId) {
+    if (userRole === 'MANAGER' && user.assignedAdminId !== currentAdminId) {
       return NextResponse.json(
         { error: 'このユーザーへのアクセス権限がありません' },
         { status: 403 }
