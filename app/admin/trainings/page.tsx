@@ -30,9 +30,18 @@ export default function AdminTrainingsPage() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
+  // ロールの後方互換性を確保
+  const getUserRole = () => {
+    const role = session?.user?.role || 'user';
+    if (role === 'admin') return 'FULL_ADMIN';
+    if (role === 'user') return 'USER';
+    return role;
+  };
+
   useEffect(() => {
     // 全権管理者のみアクセス可能
-    if (session?.user?.role !== 'FULL_ADMIN') {
+    const role = getUserRole();
+    if (role !== 'FULL_ADMIN') {
       router.push('/dashboard');
       return;
     }

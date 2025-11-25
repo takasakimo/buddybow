@@ -25,9 +25,18 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // ロールの後方互換性を確保
+  const getUserRole = () => {
+    const role = session?.user?.role || 'user';
+    if (role === 'admin') return 'FULL_ADMIN';
+    if (role === 'user') return 'USER';
+    return role;
+  };
+
   useEffect(() => {
     // 全権管理者または担当者のみアクセス可能
-    if (session?.user?.role !== 'FULL_ADMIN' && session?.user?.role !== 'MANAGER') {
+    const role = getUserRole();
+    if (role !== 'FULL_ADMIN' && role !== 'MANAGER') {
       router.push('/dashboard');
       return;
     }

@@ -14,7 +14,16 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const isAdmin = session.user.role === 'FULL_ADMIN' || session.user.role === 'MANAGER';
+  // ロールの後方互換性を確保
+  const getUserRole = () => {
+    const role = session.user.role || 'user';
+    if (role === 'admin') return 'FULL_ADMIN';
+    if (role === 'user') return 'USER';
+    return role;
+  };
+
+  const role = getUserRole();
+  const isAdmin = role === 'FULL_ADMIN' || role === 'MANAGER';
   const userId = typeof session.user.id === 'string' 
     ? parseInt(session.user.id) 
     : session.user.id;

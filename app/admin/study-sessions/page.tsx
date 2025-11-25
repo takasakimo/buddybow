@@ -23,8 +23,17 @@ function toJSTString(date: Date, format: 'date' | 'time' = 'time') {
 export default async function StudySessionsPage() {
   const session = await getServerSession(authOptions);
 
+  // ロールの後方互換性を確保
+  const getUserRole = () => {
+    const role = session?.user?.role || 'user';
+    if (role === 'admin') return 'FULL_ADMIN';
+    if (role === 'user') return 'USER';
+    return role;
+  };
+
   // 全権管理者のみアクセス可能
-  if (!session || session.user.role !== 'FULL_ADMIN') {
+  const role = getUserRole();
+  if (!session || role !== 'FULL_ADMIN') {
     redirect('/dashboard');
   }
 
