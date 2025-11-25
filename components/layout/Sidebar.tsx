@@ -22,15 +22,23 @@ export default function Sidebar() {
     setIsMounted(true);
     // デスクトップではサイドバーを常に閉じる
     const checkDesktop = () => {
-      if (window.innerWidth >= 1024) {
+      const isDesktop = window.innerWidth >= 1024;
+      if (isDesktop) {
         setIsOpen(false);
       }
     };
     
-    checkDesktop();
-    window.addEventListener('resize', checkDesktop);
+    // 初回チェック
+    if (typeof window !== 'undefined') {
+      checkDesktop();
+      window.addEventListener('resize', checkDesktop);
+    }
     
-    return () => window.removeEventListener('resize', checkDesktop);
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', checkDesktop);
+      }
+    };
   }, []);
 
   const menuItems: MenuItem[] = [
@@ -130,13 +138,18 @@ export default function Sidebar() {
       </button>
 
       {/* オーバーレイ - モバイルのみ表示（デスクトップでは絶対に表示しない） */}
-      {isMounted && isOpen && typeof window !== 'undefined' && window.innerWidth < 1024 && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsOpen(false)}
-          onTouchStart={() => setIsOpen(false)}
-        />
-      )}
+      {(() => {
+        if (!isMounted || !isOpen) return null;
+        if (typeof window === 'undefined') return null;
+        if (window.innerWidth >= 1024) return null;
+        return (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setIsOpen(false)}
+            onTouchStart={() => setIsOpen(false)}
+          />
+        );
+      })()}
 
       {/* サイドバー */}
       <aside
