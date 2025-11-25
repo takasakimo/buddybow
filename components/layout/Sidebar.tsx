@@ -98,8 +98,17 @@ export default function Sidebar() {
     },
   ];
 
+  // ロールの後方互換性を確保（既存のadmin/userも動作するように）
+  const getUserRole = () => {
+    const role = session?.user?.role || 'user';
+    // 既存のロールを新しいロールにマッピング
+    if (role === 'admin') return 'FULL_ADMIN';
+    if (role === 'user') return 'USER';
+    return role;
+  };
+
   const filteredMenuItems = menuItems.filter((item) =>
-    item.allowedRoles.includes(session?.user?.role || 'USER')
+    item.allowedRoles.includes(getUserRole())
   );
 
   return (
