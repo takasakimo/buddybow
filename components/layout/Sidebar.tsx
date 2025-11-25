@@ -16,11 +16,15 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+    // デスクトップではサイドバーを常に閉じる
     const checkDesktop = () => {
-      setIsDesktop(window.innerWidth >= 1024);
+      if (window.innerWidth >= 1024) {
+        setIsOpen(false);
+      }
     };
     
     checkDesktop();
@@ -28,13 +32,6 @@ export default function Sidebar() {
     
     return () => window.removeEventListener('resize', checkDesktop);
   }, []);
-
-  // デスクトップではサイドバーを常に開く
-  useEffect(() => {
-    if (isDesktop) {
-      setIsOpen(false);
-    }
-  }, [isDesktop]);
 
   const menuItems: MenuItem[] = [
     {
@@ -101,7 +98,11 @@ export default function Sidebar() {
     <>
       {/* ハンバーガーメニューボタン */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (isMounted && typeof window !== 'undefined' && window.innerWidth < 1024) {
+            setIsOpen(!isOpen);
+          }
+        }}
         className="fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg lg:hidden"
       >
         <svg
@@ -128,11 +129,13 @@ export default function Sidebar() {
         </svg>
       </button>
 
-      {/* オーバーレイ - モバイルのみ表示 */}
-      {isOpen && !isDesktop && (
+      {/* オーバーレイ - モバイルのみ表示（1024px未満のみ） */}
+      {isMounted && isOpen && typeof window !== 'undefined' && window.innerWidth < 1024 && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={() => setIsOpen(false)}
+          onTouchStart={() => setIsOpen(false)}
+          style={{ display: 'block' }}
         />
       )}
 
