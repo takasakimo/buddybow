@@ -124,6 +124,21 @@ export default async function DashboardPage() {
                   </div>
                 </div>
               </Link>
+
+              <Link
+                href="/admin/user-progress"
+                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-2xl">
+                    📊
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">受講者マイページ管理</h3>
+                    <p className="text-sm text-gray-600">ユーザーの進捗を管理</p>
+                  </div>
+                </div>
+              </Link>
             </>
           ) : (
             <>

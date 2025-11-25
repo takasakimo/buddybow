@@ -66,6 +66,12 @@ export default function Sidebar() {
       icon: '🎓',
       allowedRoles: ['admin'],
     },
+    {
+      name: '受講者マイページ管理',
+      href: '/admin/user-progress',
+      icon: '📊',
+      allowedRoles: ['admin'],
+    },
   ];
 
   const filteredMenuItems = menuItems.filter((item) =>
