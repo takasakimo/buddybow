@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface UserFormProps {
@@ -9,6 +9,7 @@ interface UserFormProps {
     name: string;
     email: string;
     role: string;
+    assignedAdminId?: string;
   };
 }
 
@@ -18,8 +19,21 @@ export default function UserForm({ initialData }: UserFormProps) {
   const [email, setEmail] = useState(initialData?.email || '');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState(initialData?.role || 'user');
+  const [assignedAdminId, setAssignedAdminId] = useState(initialData?.assignedAdminId || '');
+  const [admins, setAdmins] = useState<{ id: number; name: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // 管理者一覧を取得
+  useEffect(() => {
+    fetch('/api/admin/users-list')
+      .then((res) => res.json())
+      .then((users) => {
+        const adminUsers = users.filter((u: { role: string }) => u.role === 'admin');
+        setAdmins(adminUsers);
+      })
+      .catch((err) => console.error('Failed to fetch admins:', err));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,10 +52,12 @@ export default function UserForm({ initialData }: UserFormProps) {
         email: string;
         role: string;
         password?: string;
+        assignedAdminId?: string;
       } = {
         name,
         email,
         role,
+        assignedAdminId: assignedAdminId || undefined,
       };
 
       // 新規作成時またはパスワード変更時のみパスワードを送信
@@ -156,6 +172,31 @@ export default function UserForm({ initialData }: UserFormProps) {
           管理者は全ての機能にアクセスできます
         </p>
       </div>
+
+      {role === 'user' && (
+        <div className="mb-6">
+          <label htmlFor="assignedAdminId" className="block text-sm font-medium text-gray-900 mb-2">
+            担当者
+          </label>
+          <select
+            id="assignedAdminId"
+            name="assignedAdminId"
+            value={assignedAdminId}
+            onChange={(e) => setAssignedAdminId(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+          >
+            <option value="">担当者なし</option>
+            {admins.map((admin) => (
+              <option key={admin.id} value={admin.id.toString()}>
+                {admin.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-2 text-sm text-gray-500">
+            このユーザーの担当管理者を選択します。担当者が設定されると、その管理者のみがこのユーザーを管理できます。
+          </p>
+        </div>
+      )}
 
       <div className="flex gap-4">
         <button

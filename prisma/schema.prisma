@@ -14,6 +14,9 @@ model User {
   password                String
   name                    String
   role                    String                     @default("user")
+  assignedAdminId         Int?                       @map("assigned_admin_id")
+  assignedAdmin           User?                      @relation("UserAssignedAdmin", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  assignedUsers           User[]                     @relation("UserAssignedAdmin")
   createdAt               DateTime                   @default(now()) @map("created_at")
   updatedAt               DateTime                   @updatedAt @map("updated_at")
   

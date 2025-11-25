@@ -11,6 +11,11 @@ interface User {
   name: string;
   email: string;
   role: string;
+  assignedAdminId: number | null;
+  assignedAdmin: {
+    id: number;
+    name: string;
+  } | null;
   createdAt: string;
 }
 
@@ -103,6 +108,9 @@ export default function UsersPage() {
                   ロール
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  担当者
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   作成日
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -131,6 +139,15 @@ export default function UsersPage() {
                     >
                       {user.role === 'admin' ? '管理者' : 'ユーザー'}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {user.assignedAdmin ? (
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                        {user.assignedAdmin.name}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">未設定</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(user.createdAt).toLocaleDateString('ja-JP')}

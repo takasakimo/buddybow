@@ -19,7 +19,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, email, password, role } = body;
+    const { name, email, password, role, assignedAdminId } = body;
 
     if (!name || !email || !role) {
       return NextResponse.json(
@@ -51,10 +51,12 @@ export async function PUT(
       email: string;
       role: string;
       password?: string;
+      assignedAdminId?: number | null;
     } = {
       name,
       email,
       role,
+      assignedAdminId: assignedAdminId ? parseInt(assignedAdminId) : null,
     };
 
     if (password) {

@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, email, password, role } = body;
+    const { name, email, password, role, assignedAdminId } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -52,6 +52,7 @@ export async function POST(request: Request) {
         email,
         password: hashedPassword,
         role: role || 'user',
+        assignedAdminId: assignedAdminId ? parseInt(assignedAdminId) : null,
       },
     });
 

@@ -23,6 +23,14 @@ export default async function EditUserPage({ params }: PageProps) {
     where: {
       id: parseInt(params.id),
     },
+    include: {
+      assignedAdmin: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
   });
 
   if (!user) {
@@ -49,6 +57,7 @@ export default async function EditUserPage({ params }: PageProps) {
             name: user.name,
             email: user.email,
             role: user.role,
+            assignedAdminId: user.assignedAdminId?.toString() || '',
           }}
         />
       </div>

@@ -14,9 +14,14 @@ export async function GET() {
       );
     }
 
+    const currentAdminId = typeof session.user.id === 'string' 
+      ? parseInt(session.user.id) 
+      : session.user.id;
+
     const users = await prisma.user.findMany({
       where: {
         role: 'user', // ユーザーのみ
+        assignedAdminId: currentAdminId, // ログイン中の管理者の担当ユーザーのみ
       },
       include: {
         userProgress: true,

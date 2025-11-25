@@ -23,6 +23,13 @@ export async function GET() {
         name: true,
         email: true,
         role: true,
+        assignedAdminId: true,
+        assignedAdmin: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         createdAt: true,
       },
     });
