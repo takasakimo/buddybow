@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 import { 
 
@@ -142,11 +143,11 @@ const BuddyBowLP = () => {
 
             <button onClick={() => scrollToSection('method')} className="hover:text-[#B08968] transition-colors">独自メソッド</button>
 
-            <button onClick={() => scrollToSection('contact')} className="px-5 py-2.5 bg-[#B08968] text-white rounded-full hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-md">
+            <Link href="/consultation" className="px-5 py-2.5 bg-[#B08968] text-white rounded-full hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-md inline-block">
 
               無料相談はこちら
 
-            </button>
+            </Link>
 
           </div>
 
@@ -182,11 +183,11 @@ const BuddyBowLP = () => {
 
             <button onClick={() => scrollToSection('method')} className="text-left py-2 border-b border-stone-100">独自メソッド</button>
 
-            <button onClick={() => scrollToSection('contact')} className="mt-4 w-full py-3 bg-[#B08968] text-white rounded-lg text-center font-bold">
+            <Link href="/consultation" className="mt-4 w-full py-3 bg-[#B08968] text-white rounded-lg text-center font-bold block">
 
               無料相談はこちら
 
-            </button>
+            </Link>
 
           </div>
 
@@ -242,13 +243,13 @@ const BuddyBowLP = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
 
-              <button onClick={() => scrollToSection('contact')} className="px-8 py-4 bg-[#B08968] text-white rounded-full font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group">
+              <Link href="/consultation" className="px-8 py-4 bg-[#B08968] text-white rounded-full font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group inline-block">
 
                 まずは無料相談へ
 
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
 
-              </button>
+              </Link>
 
             </div>
 
@@ -1148,13 +1149,13 @@ const BuddyBowLP = () => {
 
             
 
-            <button className="px-10 py-5 bg-[#B08968] text-white rounded-full font-bold text-xl hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 mx-auto w-full md:w-auto animate-pulse">
+            <Link href="/consultation" className="px-10 py-5 bg-[#B08968] text-white rounded-full font-bold text-xl hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 mx-auto w-full md:w-auto animate-pulse inline-block">
 
               <Calendar />
 
               無料で相談枠を予約する
 
-            </button>
+            </Link>
 
             <p className="text-xs text-stone-500 mt-6">
 
