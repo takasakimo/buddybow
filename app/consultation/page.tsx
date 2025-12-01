@@ -26,6 +26,8 @@ export default function ConsultationPage() {
     phone: '',
     message: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // 1週間分の日付を生成
   const generateWeekSchedule = (): DaySchedule[] => {
@@ -70,15 +72,39 @@ export default function ConsultationPage() {
     setStep('form');
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep('confirm');
-    // ここで実際の予約処理を行う
-    console.log('予約情報:', {
-      date: selectedDate,
-      time: selectedTime,
-      ...formData,
-    });
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/consultation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: selectedDate?.toISOString(),
+          time: selectedTime,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || '予約の送信に失敗しました');
+      }
+
+      setStep('confirm');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '予約の送信に失敗しました';
+      setError(errorMessage || '予約の送信に失敗しました。しばらくしてから再度お試しください。');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBack = () => {
@@ -197,6 +223,12 @@ export default function ConsultationPage() {
                 </div>
               </div>
 
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              )}
+
               <form onSubmit={handleFormSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-stone-700 mb-2 flex items-center gap-2">
@@ -257,9 +289,10 @@ export default function ConsultationPage() {
 
                 <button
                   type="submit"
-                  className="w-full py-4 bg-[#B08968] text-white rounded-xl font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:scale-[1.02] shadow-lg"
+                  disabled={isSubmitting}
+                  className="w-full py-4 bg-[#B08968] text-white rounded-xl font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:scale-[1.02] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  予約を確定する
+                  {isSubmitting ? '送信中...' : '予約を確定する'}
                 </button>
               </form>
             </div>
