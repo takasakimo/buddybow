@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Calendar, Clock, User, Mail, Phone, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Calendar, Clock, User, Mail, Phone, ArrowLeft, CheckCircle2, MessageCircle, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 
 type TimeSlot = {
@@ -330,6 +330,42 @@ export default function ConsultationPage() {
                     <span className="font-medium">{formData.email}</span>
                   </div>
                 </div>
+              </div>
+
+              {/* LINE登録への誘導 */}
+              <div className="bg-gradient-to-br from-[#06C755] to-[#00B900] rounded-2xl p-6 mb-6 text-white">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <MessageCircle size={24} />
+                  <h3 className="text-xl font-bold">公式LINEに登録して最新情報を受け取る</h3>
+                </div>
+                <p className="text-white/90 text-sm mb-4">
+                  相談の詳細や当日のリマインダー、最新の情報をお届けします
+                </p>
+                
+                {/* LINE QRコード表示エリア（オプション） */}
+                {process.env.NEXT_PUBLIC_LINE_QR_CODE_URL && (
+                  <div className="mb-4 flex justify-center">
+                    <img
+                      src={process.env.NEXT_PUBLIC_LINE_QR_CODE_URL}
+                      alt="LINE QRコード"
+                      className="w-48 h-48 bg-white p-2 rounded-lg"
+                    />
+                  </div>
+                )}
+                
+                <a
+                  href={process.env.NEXT_PUBLIC_LINE_URL || "https://lin.ee/YOUR_LINE_ID"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full py-3 bg-white text-[#06C755] rounded-xl font-bold text-lg hover:bg-white/90 transition-all flex items-center justify-center gap-2"
+                >
+                  <MessageCircle size={20} />
+                  LINEで友だち追加
+                  <ExternalLink size={18} />
+                </a>
+                <p className="text-xs text-white/80 mt-3">
+                  ※ LINE登録は任意です。登録しなくても予約は有効です。
+                </p>
               </div>
 
               <div className="space-y-3">
