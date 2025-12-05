@@ -145,7 +145,7 @@ const BuddyBowLP = () => {
 
             <Link href="/consultation" className="px-5 py-2.5 bg-[#B08968] text-white rounded-full hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-md inline-block">
 
-              無料診断はこちら
+              LINEで友だち追加して診断を受ける
 
             </Link>
 
@@ -185,7 +185,7 @@ const BuddyBowLP = () => {
 
             <Link href="/consultation" className="mt-4 w-full py-3 bg-[#B08968] text-white rounded-lg text-center font-bold block">
 
-              無料診断はこちら
+              LINEで友だち追加して診断を受ける
 
             </Link>
 
@@ -245,9 +245,8 @@ const BuddyBowLP = () => {
 
               <Link href="/consultation" className="px-8 py-4 bg-[#B08968] text-white rounded-full font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group inline-block">
 
-                まずは無料診断へ
-
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                <MessageCircle size={20} />
+                LINEで友だち追加して診断を受ける
 
               </Link>
 
@@ -1103,17 +1102,6 @@ const BuddyBowLP = () => {
 
             </h2>
             
-            <div className="mb-6">
-              <a 
-                href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-8 py-4 bg-[#B08968] text-white rounded-full font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group mx-auto"
-              >
-                無料リブート診断を受ける
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </a>
-            </div>
 
             <p className="text-lg text-stone-600 mb-8 max-w-2xl mx-auto leading-relaxed">
 
@@ -1161,27 +1149,13 @@ const BuddyBowLP = () => {
 
             
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-
-              <a 
-                href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-10 py-5 bg-white text-[#B08968] border-2 border-[#B08968] rounded-full font-bold text-xl hover:bg-[#B08968] hover:text-white transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 w-full md:w-auto"
-              >
-                無料リブート診断を受ける
-                <ArrowRight size={20} />
-              </a>
-
-              <Link href="/consultation" className="px-10 py-5 bg-[#B08968] text-white rounded-full font-bold text-xl hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 w-full md:w-auto animate-pulse inline-block">
+            <Link href="/consultation" className="px-10 py-5 bg-[#B08968] text-white rounded-full font-bold text-xl hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 mx-auto w-full md:w-auto animate-pulse inline-block">
 
               <MessageCircle size={24} />
 
-              無料診断を受ける
+              LINEで友だち追加して診断を受ける
 
             </Link>
-
-            </div>
 
             <p className="text-xs text-stone-500 mt-6">
 
