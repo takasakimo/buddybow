@@ -1,10 +1,90 @@
 "use client";
 
-import React from 'react';
-import { MessageCircle, ExternalLink, ArrowLeft, CheckCircle2, Compass, Target } from 'lucide-react';
+import React, { useState } from 'react';
+import { MessageCircle, ExternalLink, ArrowLeft, CheckCircle2, Compass, Target, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ConsultationPage() {
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleStartDiagnosis = () => {
+    setShowConfirm(true);
+  };
+
+  const handleGoToLine = () => {
+    const lineUrl = process.env.NEXT_PUBLIC_LINE_URL || "https://lin.ee/YOUR_LINE_ID";
+    window.open(lineUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  if (showConfirm) {
+    return (
+      <div className="min-h-screen bg-[#FAF9F6]">
+        {/* Header */}
+        <header className="bg-white border-b border-stone-200 sticky top-0 z-50">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex items-center gap-2 text-[#B08968] hover:opacity-80 transition"
+              >
+                <ArrowLeft size={20} />
+                <span className="text-lg font-bold">buddybow</span>
+              </button>
+              <h1 className="text-xl font-bold text-stone-800">無料診断</h1>
+              <div className="w-24"></div>
+            </div>
+          </div>
+        </header>
+
+        <div className="container mx-auto px-6 py-12 max-w-2xl">
+          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-stone-100 text-center">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 size={48} className="text-green-600" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-4">
+              診断を開始します
+            </h2>
+            <p className="text-stone-600 mb-8 text-lg">
+              公式LINEに友だち追加していただくと、<br />
+              無料診断フォームが表示されます。
+            </p>
+
+            <div className="bg-[#FAF9F6] rounded-2xl p-6 mb-8 text-left">
+              <h3 className="font-bold text-stone-800 mb-4 text-center">診断で分かること</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2 text-sm text-stone-600">
+                  <CheckCircle2 size={18} className="text-[#B08968] shrink-0 mt-0.5" />
+                  <span>現状の「行動ブレーキ」の特定</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm text-stone-600">
+                  <CheckCircle2 size={18} className="text-[#B08968] shrink-0 mt-0.5" />
+                  <span>あなたに合った副業ジャンルの提案</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm text-stone-600">
+                  <CheckCircle2 size={18} className="text-[#B08968] shrink-0 mt-0.5" />
+                  <span>90日間のリブートロードマップ案</span>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              onClick={handleGoToLine}
+              className="w-full py-5 bg-gradient-to-r from-[#06C755] to-[#00B900] text-white rounded-xl font-bold text-xl hover:opacity-90 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3 mb-4"
+            >
+              <MessageCircle size={24} />
+              LINEで友だち追加する
+              <ExternalLink size={20} />
+            </button>
+
+            <p className="text-xs text-stone-500">
+              ※ 診断は完全無料です。強引な勧誘は一切行いません。
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
       {/* Header */}
@@ -77,32 +157,17 @@ export default function ConsultationPage() {
               </p>
             </div>
             
-            {/* LINE QRコード表示エリア（オプション） */}
-            {process.env.NEXT_PUBLIC_LINE_QR_CODE_URL && (
-              <div className="mb-6 flex justify-center">
-                <div className="bg-white p-4 rounded-2xl">
-                  <img
-                    src={process.env.NEXT_PUBLIC_LINE_QR_CODE_URL}
-                    alt="LINE QRコード"
-                    className="w-48 h-48"
-                  />
-                </div>
-              </div>
-            )}
-            
-            <a
-              href={process.env.NEXT_PUBLIC_LINE_URL || "https://lin.ee/YOUR_LINE_ID"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full py-5 bg-white text-[#06C755] rounded-xl font-bold text-xl hover:bg-white/90 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3"
+            <button
+              onClick={handleStartDiagnosis}
+              className="w-full py-5 bg-white text-[#06C755] rounded-xl font-bold text-xl hover:bg-white/90 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3"
             >
               <MessageCircle size={24} />
-              LINEで友だち追加して診断を受ける
-              <ExternalLink size={20} />
-            </a>
+              診断を開始する
+              <ArrowRight size={20} />
+            </button>
             
             <p className="text-xs text-white/80 mt-6 text-center">
-              ※ LINE登録後、診断フォームが表示されます。診断は無料です。
+              ※ 診断は完全無料です。強引な勧誘は一切行いません。
             </p>
           </div>
 
