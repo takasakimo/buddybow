@@ -37,15 +37,15 @@ import {
 
   HelpCircle,
 
-  Calendar,
-
   Flag,
 
   Video,
 
   Layers,
 
-  PlayCircle
+  PlayCircle,
+
+  MessageCircle
 
 } from 'lucide-react';
 
@@ -145,7 +145,7 @@ const BuddyBowLP = () => {
 
             <Link href="/consultation" className="px-5 py-2.5 bg-[#B08968] text-white rounded-full hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-md inline-block">
 
-              無料相談はこちら
+              無料診断はこちら
 
             </Link>
 
@@ -185,7 +185,7 @@ const BuddyBowLP = () => {
 
             <Link href="/consultation" className="mt-4 w-full py-3 bg-[#B08968] text-white rounded-lg text-center font-bold block">
 
-              無料相談はこちら
+              無料診断はこちら
 
             </Link>
 
@@ -245,7 +245,7 @@ const BuddyBowLP = () => {
 
               <Link href="/consultation" className="px-8 py-4 bg-[#B08968] text-white rounded-full font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group inline-block">
 
-                まずは無料相談へ
+                まずは無料診断へ
 
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
 
@@ -711,11 +711,11 @@ const BuddyBowLP = () => {
 
                   <div className="mt-4 flex flex-wrap gap-2">
 
-                    <span className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600">行動タイプ診断</span>
+                    <a href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" target="_blank" rel="noopener noreferrer" className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600 hover:bg-[#B08968] hover:text-white hover:border-[#B08968] transition-all cursor-pointer">行動タイプ診断</a>
 
-                    <span className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600">認知パターン診断</span>
+                    <a href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" target="_blank" rel="noopener noreferrer" className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600 hover:bg-[#B08968] hover:text-white hover:border-[#B08968] transition-all cursor-pointer">認知パターン診断</a>
 
-                    <span className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600">生活リズム診断</span>
+                    <a href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" target="_blank" rel="noopener noreferrer" className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600 hover:bg-[#B08968] hover:text-white hover:border-[#B08968] transition-all cursor-pointer">生活リズム診断</a>
 
                   </div>
 
@@ -1035,7 +1035,7 @@ const BuddyBowLP = () => {
 
               { q: "本業が忙しく、時間が取れるか不安です。", a: "1日30分〜1時間からでも始められるプランを設計します。「隙間時間の活用法」や「生活リズムの見直し」から一緒に考えましょう。" },
 
-              { q: "無料相談では何をしますか？売り込みはされませんか？", a: "あなたの現状のヒアリング、行動タイプ診断の簡易版、そしてロードマップの提案を行います。強引な勧誘は一切行いませんので、安心してお話しください。" },
+              { q: "無料診断では何をしますか？売り込みはされませんか？", a: "あなたの現状のヒアリング、行動タイプ診断の簡易版、そしてロードマップの提案を行います。強引な勧誘は一切行いませんので、安心してお話しください。" },
 
               { q: "パソコンスキルに自信がありません。", a: "スマホだけで完結できるジャンル（SNS運用など）もご用意しています。また、ツールの使い方も画面共有しながら丁寧にサポートします。" }
 
@@ -1085,7 +1085,7 @@ const BuddyBowLP = () => {
 
 
 
-      {/* CTA Section: 無料相談の詳細 */}
+      {/* CTA Section: 無料診断の詳細 */}
 
       <section id="contact" className="py-24 bg-white">
 
@@ -1099,9 +1099,21 @@ const BuddyBowLP = () => {
 
             <h2 className="text-3xl md:text-5xl font-bold text-stone-800 mb-6">
 
-              まずは「無料リブート診断」へ
+              まずは「無料診断」へ
 
             </h2>
+            
+            <div className="mb-6">
+              <a 
+                href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-8 py-4 bg-[#B08968] text-white rounded-full font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group mx-auto"
+              >
+                無料リブート診断を受ける
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
 
             <p className="text-lg text-stone-600 mb-8 max-w-2xl mx-auto leading-relaxed">
 
@@ -1115,7 +1127,7 @@ const BuddyBowLP = () => {
 
             <div className="bg-white rounded-2xl p-6 mb-8 max-w-lg mx-auto shadow-sm text-left">
 
-              <h3 className="font-bold text-stone-800 mb-4 text-center border-b border-stone-100 pb-2">無料相談で得られるもの</h3>
+              <h3 className="font-bold text-stone-800 mb-4 text-center border-b border-stone-100 pb-2">無料診断で得られるもの</h3>
 
               <ul className="space-y-3">
 
@@ -1149,13 +1161,27 @@ const BuddyBowLP = () => {
 
             
 
-            <Link href="/consultation" className="px-10 py-5 bg-[#B08968] text-white rounded-full font-bold text-xl hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 mx-auto w-full md:w-auto animate-pulse inline-block">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
 
-              <Calendar />
+              <a 
+                href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-10 py-5 bg-white text-[#B08968] border-2 border-[#B08968] rounded-full font-bold text-xl hover:bg-[#B08968] hover:text-white transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 w-full md:w-auto"
+              >
+                無料リブート診断を受ける
+                <ArrowRight size={20} />
+              </a>
 
-              無料で相談枠を予約する
+              <Link href="/consultation" className="px-10 py-5 bg-[#B08968] text-white rounded-full font-bold text-xl hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 w-full md:w-auto animate-pulse inline-block">
+
+              <MessageCircle size={24} />
+
+              無料診断を受ける
 
             </Link>
+
+            </div>
 
             <p className="text-xs text-stone-500 mt-6">
 
