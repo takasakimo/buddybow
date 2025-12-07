@@ -74,23 +74,32 @@ export default function StudySessionCard({ session, isParticipating: initialPart
   }
 
   return (
-    <div className="p-4 border border-gray-200 rounded-lg">
-      <h3 className="font-medium mb-2 text-gray-900">{session.title}</h3>
-      <div className="text-sm text-gray-600 space-y-1 mb-3">
-        <p>📅 {toJSTString(session.startTime, 'date')}</p>
-        <p>
-          🕐 {toJSTString(session.startTime)} - {toJSTString(session.endTime)}
+    <div className="p-4 border border-slate-200 rounded-xl bg-white">
+      <h3 className="font-semibold mb-3 text-slate-900 text-sm">{session.title}</h3>
+      <div className="text-sm text-slate-600 space-y-2 mb-4">
+        <p className="flex items-center gap-1.5">
+          <span className="text-slate-400">日時:</span>
+          <span>{toJSTString(session.startTime, 'date')}</span>
         </p>
-        {session.zoomId && <p>💻 Zoom ID: {session.zoomId}</p>}
+        <p className="flex items-center gap-1.5">
+          <span className="text-slate-400">時間:</span>
+          <span>{toJSTString(session.startTime)} - {toJSTString(session.endTime)}</span>
+        </p>
+        {session.zoomId && (
+          <p className="flex items-center gap-1.5">
+            <span className="text-slate-400">Zoom ID:</span>
+            <span className="font-mono text-xs">{session.zoomId}</span>
+          </p>
+        )}
       </div>
       <button
         onClick={handleParticipate}
         disabled={isLoading}
-        className={`w-full py-2 rounded-lg text-sm transition-colors ${
+        className={`w-full py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
           isParticipating
-            ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            : 'bg-blue-600 text-white hover:bg-blue-700'
-        } disabled:opacity-50`}
+            ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+            : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm hover:shadow'
+        } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         {isLoading ? '処理中...' : isParticipating ? '参加をキャンセル' : '参加する'}
       </button>

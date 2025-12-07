@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import StudySessionCard from './components/StudySessionCard';
+import { Users, Settings, Tag, BarChart3, User, BookOpen, FileText, Bell, GraduationCap } from 'lucide-react';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -76,12 +77,12 @@ export default async function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <header className="mb-10">
+          <h1 className="text-3xl font-semibold text-slate-900 mb-2 tracking-tight">
             ダッシュボード
           </h1>
-          <p className="text-gray-600">
-            こんにちは、{session.user.name}さん
+          <p className="text-slate-600 text-sm">
+            {session.user.name}さん、おかえりなさい
           </p>
         </header>
 
@@ -91,60 +92,60 @@ export default async function DashboardPage() {
             <>
               <Link
                 href="/admin/users"
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+                className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-2xl">
-                    👥
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-900 transition-colors">
+                    <Users className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">ユーザー管理</h3>
-                    <p className="text-sm text-gray-600">ユーザーの管理</p>
+                    <h3 className="font-semibold text-slate-900 mb-0.5">ユーザー管理</h3>
+                    <p className="text-sm text-slate-600">ユーザーの管理</p>
                   </div>
                 </div>
               </Link>
 
               <Link
                 href="/admin/trainings"
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+                className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
-                    ⚙️
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-900 transition-colors">
+                    <Settings className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">研修管理</h3>
-                    <p className="text-sm text-gray-600">研修の作成・編集</p>
+                    <h3 className="font-semibold text-slate-900 mb-0.5">研修管理</h3>
+                    <p className="text-sm text-slate-600">研修の作成・編集</p>
                   </div>
                 </div>
               </Link>
 
               <Link
                 href="/admin/categories"
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+                className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-2xl">
-                    🏷️
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-900 transition-colors">
+                    <Tag className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">カテゴリ管理</h3>
-                    <p className="text-sm text-gray-600">カテゴリの管理</p>
+                    <h3 className="font-semibold text-slate-900 mb-0.5">カテゴリ管理</h3>
+                    <p className="text-sm text-slate-600">カテゴリの管理</p>
                   </div>
                 </div>
               </Link>
 
               <Link
                 href="/admin/user-progress"
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+                className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-2xl">
-                    📊
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-900 transition-colors">
+                    <BarChart3 className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">受講者マイページ管理</h3>
-                    <p className="text-sm text-gray-600">ユーザーの進捗を管理</p>
+                    <h3 className="font-semibold text-slate-900 mb-0.5">受講者マイページ管理</h3>
+                    <p className="text-sm text-slate-600">ユーザーの進捗を管理</p>
                   </div>
                 </div>
               </Link>
@@ -153,45 +154,45 @@ export default async function DashboardPage() {
             <>
               <Link
                 href="/mypage"
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+                className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
-                    👤
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-900 transition-colors">
+                    <User className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">マイページ</h3>
-                    <p className="text-sm text-gray-600">進捗を確認</p>
+                    <h3 className="font-semibold text-slate-900 mb-0.5">マイページ</h3>
+                    <p className="text-sm text-slate-600">進捗を確認</p>
                   </div>
                 </div>
               </Link>
 
               <Link
                 href="/trainings"
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+                className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-2xl">
-                    📚
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-900 transition-colors">
+                    <BookOpen className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">研修一覧</h3>
-                    <p className="text-sm text-gray-600">研修を受講</p>
+                    <h3 className="font-semibold text-slate-900 mb-0.5">研修一覧</h3>
+                    <p className="text-sm text-slate-600">研修を受講</p>
                   </div>
                 </div>
               </Link>
 
               <Link
                 href="/mypage/reports/new"
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+                className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-2xl">
-                    📝
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-900 transition-colors">
+                    <FileText className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">日報作成</h3>
-                    <p className="text-sm text-gray-600">今日の記録</p>
+                    <h3 className="font-semibold text-slate-900 mb-0.5">日報作成</h3>
+                    <p className="text-sm text-slate-600">今日の記録</p>
                   </div>
                 </div>
               </Link>
@@ -203,43 +204,44 @@ export default async function DashboardPage() {
           {/* 左カラム */}
           <div className="lg:col-span-2 space-y-6">
             {/* お知らせ */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900">
-                  📢 お知らせ
-                </h2>
+            <div className="card p-6">
+              <div className="flex justify-between items-center mb-5">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-slate-700" />
+                  <h2 className="text-lg font-semibold text-slate-900">お知らせ</h2>
+                </div>
                 {isAdmin && (
-                  <Link href="/admin/announcements" className="text-blue-600 text-sm">
-                    管理
+                  <Link href="/admin/announcements" className="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">
+                    管理 →
                   </Link>
                 )}
               </div>
               {announcements.length === 0 ? (
-                <p className="text-gray-600 text-sm">お知らせはありません</p>
+                <p className="text-slate-500 text-sm py-4">お知らせはありません</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {announcements.map((announcement) => (
-                    <div key={announcement.id} className="pb-3 border-b last:border-b-0">
+                    <div key={announcement.id} className="pb-4 border-b border-slate-200 last:border-b-0 last:pb-0">
                       <div className="flex items-start gap-3">
                         <span
-                          className={`mt-1 px-2 py-1 text-xs rounded ${
+                          className={`px-2.5 py-1 text-xs rounded-full font-medium ${
                             announcement.category === 'news'
-                              ? 'bg-blue-100 text-blue-800'
+                              ? 'bg-blue-100 text-blue-700'
                               : announcement.category === 'event'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-purple-100 text-purple-800'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-purple-100 text-purple-700'
                           }`}
                         >
                           {announcement.category === 'news' && 'ニュース'}
                           {announcement.category === 'event' && 'イベント'}
                           {announcement.category === 'update' && 'アップデート'}
                         </span>
-                        <div className="flex-1">
-                          <h3 className="font-medium mb-1 text-gray-900">{announcement.title}</h3>
-                          <p className="text-sm text-gray-600 line-clamp-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium mb-1.5 text-slate-900">{announcement.title}</h3>
+                          <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-2">
                             {announcement.content}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-slate-500">
                             {new Date(announcement.publishedAt).toLocaleDateString('ja-JP')}
                           </p>
                         </div>
@@ -251,25 +253,28 @@ export default async function DashboardPage() {
             </div>
 
             {/* 最近の研修 */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">📚 最近の研修</h2>
-                <Link href="/trainings" className="text-blue-600 text-sm">
-                  すべて見る
+            <div className="card p-6">
+              <div className="flex justify-between items-center mb-5">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-slate-700" />
+                  <h2 className="text-lg font-semibold text-slate-900">最近の研修</h2>
+                </div>
+                <Link href="/trainings" className="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">
+                  すべて見る →
                 </Link>
               </div>
               {trainings.length === 0 ? (
-                <p className="text-gray-600 text-sm">研修がありません</p>
+                <p className="text-slate-500 text-sm py-4">研修がありません</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {trainings.map((training) => (
                     <Link
                       key={training.id}
                       href={`/trainings/${training.id}`}
-                      className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                      className="card card-hover overflow-hidden group"
                     >
                       {training.imageUrl ? (
-                        <div className="relative w-full h-32 bg-gray-100">
+                        <div className="relative w-full h-32 bg-slate-100">
                           <Image
                             src={training.imageUrl}
                             alt={training.title}
@@ -278,20 +283,20 @@ export default async function DashboardPage() {
                           />
                         </div>
                       ) : (
-                        <div className="w-full h-32 bg-gray-200 flex items-center justify-center">
-                          <span className="text-4xl">📚</span>
+                        <div className="w-full h-32 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                          <BookOpen className="w-8 h-8 text-slate-400" />
                         </div>
                       )}
                       <div className="p-4">
                         {training.category && (
-                          <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded mb-2">
+                          <span className="inline-block px-2.5 py-1 bg-slate-100 text-slate-700 text-xs rounded-full font-medium mb-2.5">
                             {training.category.name}
                           </span>
                         )}
-                        <h3 className="font-semibold line-clamp-1 mb-1 text-gray-900">
+                        <h3 className="font-semibold line-clamp-1 mb-1 text-slate-900 group-hover:text-slate-700 transition-colors">
                           {training.title}
                         </h3>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-slate-500">
                           チャプター数: {training.modules.length}
                         </p>
                       </div>
@@ -305,17 +310,20 @@ export default async function DashboardPage() {
           {/* 右カラム */}
           <div className="space-y-6">
             {/* 勉強会 */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">🎓 勉強会</h2>
+            <div className="card p-6">
+              <div className="flex justify-between items-center mb-5">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-5 h-5 text-slate-700" />
+                  <h2 className="text-base font-semibold text-slate-900">勉強会</h2>
+                </div>
                 {isAdmin && (
-                  <Link href="/admin/study-sessions" className="text-blue-600 text-sm">
-                    管理
+                  <Link href="/admin/study-sessions" className="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">
+                    管理 →
                   </Link>
                 )}
               </div>
               {upcomingStudySessions.length === 0 ? (
-                <p className="text-gray-600 text-sm">予定されている勉強会はありません</p>
+                <p className="text-slate-500 text-sm py-4">予定されている勉強会はありません</p>
               ) : (
                 <div className="space-y-3">
                   {upcomingStudySessions.map((session) => (

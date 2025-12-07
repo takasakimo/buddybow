@@ -4,16 +4,63 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-slate-50 text-slate-900 antialiased;
   }
   
   /* デフォルトのテキストカラーを黒に */
   * {
-    @apply text-gray-900;
+    @apply text-slate-900;
   }
   
   /* 特定の要素は継承 */
   button, a, input, select, textarea {
     color: inherit;
+  }
+
+  /* より洗練されたスクロールバー */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
+
+@layer components {
+  /* 洗練されたカードスタイル */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200/60 transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-md hover:border-slate-300/80;
+  }
+
+  /* 洗練されたボタンスタイル */
+  .btn-primary {
+    @apply px-5 py-2.5 bg-slate-900 text-white rounded-lg font-medium 
+           hover:bg-slate-800 active:bg-slate-950 transition-all duration-200 
+           shadow-sm hover:shadow-md;
+  }
+
+  .btn-secondary {
+    @apply px-5 py-2.5 bg-white text-slate-700 rounded-lg font-medium 
+           border border-slate-200 hover:bg-slate-50 active:bg-slate-100 
+           transition-all duration-200 shadow-sm hover:shadow;
+  }
+
+  /* 洗練されたバッジスタイル */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 }

@@ -4,11 +4,24 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import { 
+  Home, 
+  User, 
+  BookOpen, 
+  Users, 
+  Settings, 
+  Tag, 
+  Bell, 
+  GraduationCap, 
+  BarChart3,
+  LogOut,
+  Target
+} from 'lucide-react';
 
 interface MenuItem {
   name: string;
   href: string;
-  icon: string;
+  icon: React.ReactNode;
   allowedRoles: string[];
 }
 
@@ -45,55 +58,55 @@ export default function Sidebar() {
     {
       name: 'ダッシュボード',
       href: '/dashboard',
-      icon: '🏠',
+      icon: <Home className="w-5 h-5" />,
       allowedRoles: ['FULL_ADMIN', 'MANAGER', 'USER'],
     },
     {
       name: 'マイページ',
       href: '/mypage',
-      icon: '👤',
+      icon: <User className="w-5 h-5" />,
       allowedRoles: ['USER'],
     },
     {
       name: '研修一覧',
       href: '/trainings',
-      icon: '📚',
+      icon: <BookOpen className="w-5 h-5" />,
       allowedRoles: ['FULL_ADMIN', 'MANAGER', 'USER'],
     },
     {
       name: 'ユーザー管理',
       href: '/admin/users',
-      icon: '👥',
+      icon: <Users className="w-5 h-5" />,
       allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: '研修管理',
       href: '/admin/trainings',
-      icon: '⚙️',
+      icon: <Settings className="w-5 h-5" />,
       allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: 'カテゴリ管理',
       href: '/admin/categories',
-      icon: '🏷️',
+      icon: <Tag className="w-5 h-5" />,
       allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: 'お知らせ管理',
       href: '/admin/announcements',
-      icon: '📢',
+      icon: <Bell className="w-5 h-5" />,
       allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: '勉強会管理',
       href: '/admin/study-sessions',
-      icon: '🎓',
+      icon: <GraduationCap className="w-5 h-5" />,
       allowedRoles: ['FULL_ADMIN'],
     },
     {
       name: '受講者マイページ管理',
       href: '/admin/user-progress',
-      icon: '📊',
+      icon: <BarChart3 className="w-5 h-5" />,
       allowedRoles: ['FULL_ADMIN', 'MANAGER'],
     },
   ];
@@ -162,24 +175,26 @@ export default function Sidebar() {
 
       {/* サイドバー */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200/60 transform transition-transform duration-300 ease-in-out flex flex-col shadow-soft ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         style={{ pointerEvents: 'auto' }}
       >
-        <div className="p-6">
+        <div className="p-6 border-b border-slate-200">
           <Link 
             href="/dashboard" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2.5 group"
             style={{ pointerEvents: 'auto' }}
           >
-            <span className="text-2xl">🎯</span>
-            <span className="text-xl font-bold text-gray-900">buddybow</span>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center group-hover:from-slate-800 group-hover:to-slate-600 transition-all">
+              <Target className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-lg font-semibold text-slate-900 tracking-tight">buddybow</span>
           </Link>
         </div>
 
-        <nav className="flex-1 px-4 overflow-y-auto">
-          <ul className="space-y-2">
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+          <ul className="space-y-1">
             {filteredMenuItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
               return (
@@ -192,15 +207,15 @@ export default function Sidebar() {
                         setIsOpen(false);
                       }
                     }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? 'bg-blue-50 text-blue-600 font-medium'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-slate-900 text-white font-medium shadow-sm'
+                        : 'text-slate-700 hover:bg-slate-100 active:bg-slate-200'
                     }`}
                     style={{ pointerEvents: 'auto' }}
                   >
-                    <span className="text-xl">{item.icon}</span>
-                    <span>{item.name}</span>
+                    <span className={isActive ? 'text-white' : 'text-slate-500'}>{item.icon}</span>
+                    <span className="text-sm">{item.name}</span>
                   </Link>
                 </li>
               );
@@ -208,15 +223,16 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-gray-200">
-          <div className="px-4 py-3 bg-gray-50 rounded-lg mb-2">
-            <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
-            <p className="text-xs text-gray-500">{session?.user?.email}</p>
+        <div className="p-4 border-t border-slate-200 bg-slate-50/50">
+          <div className="px-3 py-2.5 bg-white rounded-lg mb-2 border border-slate-200">
+            <p className="text-sm font-medium text-slate-900">{session?.user?.name}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{session?.user?.email}</p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
-            className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="w-full px-3 py-2 text-sm text-slate-700 hover:bg-white rounded-lg transition-all duration-200 border border-slate-200 hover:border-slate-300 flex items-center justify-center gap-2 font-medium"
           >
+            <LogOut className="w-4 h-4" />
             ログアウト
           </button>
         </div>
