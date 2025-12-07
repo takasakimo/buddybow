@@ -186,8 +186,8 @@ export default function Sidebar() {
             className="flex items-center gap-2.5 group"
             style={{ pointerEvents: 'auto' }}
           >
-            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-all">
-              <Target className="w-4 h-4 text-blue-600" />
+            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-all">
+              <Target className="w-4 h-4 text-slate-700" />
             </div>
             <span className="text-lg font-semibold text-slate-900 tracking-tight">buddybow</span>
           </Link>
