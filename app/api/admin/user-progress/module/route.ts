@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { userId, moduleId, completed } = body;
+    const { userId, moduleId, completed, deadline } = body;
 
     if (!userId || !moduleId) {
       return NextResponse.json(
@@ -60,12 +60,14 @@ export async function POST(request: Request) {
       update: {
         completed: completed ?? true,
         completedAt: completed ? new Date() : null,
+        deadline: deadline ? new Date(deadline) : null,
       },
       create: {
         userId: userIdNum,
         moduleId,
         completed: completed ?? true,
         completedAt: completed ? new Date() : null,
+        deadline: deadline ? new Date(deadline) : null,
       },
     });
 
@@ -102,7 +104,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { userId, moduleId, completed } = body;
+    const { userId, moduleId, completed, deadline } = body;
 
     if (!userId || !moduleId || completed === undefined) {
       return NextResponse.json(
@@ -124,12 +126,14 @@ export async function PUT(request: Request) {
       update: {
         completed,
         completedAt: completed ? new Date() : null,
+        deadline: deadline ? new Date(deadline) : null,
       },
       create: {
         userId: userIdNum,
         moduleId,
         completed,
         completedAt: completed ? new Date() : null,
+        deadline: deadline ? new Date(deadline) : null,
       },
     });
 

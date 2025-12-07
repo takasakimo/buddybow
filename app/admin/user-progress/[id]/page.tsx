@@ -76,6 +76,7 @@ export default function UserProgressDetailPage() {
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTraining, setSelectedTraining] = useState<string>('');
+  const [trainingDeadline, setTrainingDeadline] = useState<string>('');
   const [isAddingProgress, setIsAddingProgress] = useState(false);
   const [isAddingRoadmap, setIsAddingRoadmap] = useState(false);
   const [roadmapForm, setRoadmapForm] = useState({
@@ -144,6 +145,7 @@ export default function UserProgressDetailPage() {
     setIsAddingProgress(true);
     try {
       // 選択された研修の全モジュールを未完了として追加（受講者が進めるように）
+      const deadline = trainingDeadline ? new Date(trainingDeadline).toISOString() : null;
       const promises = training.modules.map((module) =>
         fetch('/api/admin/user-progress/module', {
           method: 'POST',
@@ -154,6 +156,7 @@ export default function UserProgressDetailPage() {
             userId: params.id,
             moduleId: module.id,
             completed: false,
+            deadline: deadline,
           }),
         })
       );
@@ -165,6 +168,7 @@ export default function UserProgressDetailPage() {
         alert(`${training.title}を受講者のマイページに追加しました`);
         fetchUserDetail();
         setSelectedTraining('');
+        setTrainingDeadline('');
       } else {
         alert('研修の追加に失敗しました');
       }
@@ -450,6 +454,18 @@ export default function UserProgressDetailPage() {
                       })()}
                     </div>
                   )}
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      期日（任意）
+                    </label>
+                    <input
+                      type="date"
+                      value={trainingDeadline}
+                      onChange={(e) => setTrainingDeadline(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
                   <button
                     onClick={handleAddProgress}
                     disabled={!selectedTraining || isAddingProgress}

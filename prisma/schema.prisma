@@ -251,6 +251,7 @@ model ModuleProgress {
   moduleId    String   @map("module_id")
   completed   Boolean  @default(false)
   completedAt DateTime? @map("completed_at")
+  deadline    DateTime? @map("deadline")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 

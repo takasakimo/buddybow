@@ -15,6 +15,8 @@ interface TrainingProgress {
   totalModules: number;
   completedModules: number;
   progress: number;
+  assignedAt: Date;
+  deadline: Date | null;
 }
 
 export default async function MyPage() {
@@ -48,6 +50,8 @@ export default async function MyPage() {
     select: {
       moduleId: true,
       completed: true,
+      createdAt: true,
+      deadline: true,
     },
     orderBy: {
       createdAt: 'desc',
@@ -93,6 +97,8 @@ export default async function MyPage() {
   modules.forEach((module) => {
     const trainingId = module.training.id;
     if (!trainingMap[trainingId]) {
+      // この研修の最初のモジュールの進捗を取得（追加日と期日を取得するため）
+      const firstModuleProgress = moduleProgresses.find((mp) => mp.moduleId === module.id);
       trainingMap[trainingId] = {
         trainingId,
         trainingTitle: module.training.title,
@@ -101,6 +107,8 @@ export default async function MyPage() {
         totalModules: module.training.modules.length,
         completedModules: 0,
         progress: 0,
+        assignedAt: firstModuleProgress?.createdAt || new Date(),
+        deadline: firstModuleProgress?.deadline || null,
       };
     }
   });
@@ -321,6 +329,20 @@ export default async function MyPage() {
                               {training.trainingDescription}
                             </p>
                           )}
+                          <div className="flex items-center gap-4 mb-3 text-xs text-slate-500">
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span>追加日: {new Date(training.assignedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                            </div>
+                            {training.deadline && (
+                              <div className="flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5" />
+                                <span className={new Date(training.deadline) < new Date() ? 'text-red-600 font-medium' : ''}>
+                                  期日: {new Date(training.deadline).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                           <div className="flex items-center gap-3">
                             <div className="flex-1">
                               <div className="flex justify-between text-xs text-slate-600 mb-1">
