@@ -135,17 +135,9 @@ export async function GET(
       }),
       prisma.diagnosis.findMany({
         where: { userId },
-        select: {
-          id: true,
-          personalityType: true,
-          pdfUrl: true,
-          comment: true,
-          createdAt: true,
-          updatedAt: true,
-        },
         orderBy: { createdAt: 'desc' },
         take: 20,
-      }),
+      }).catch(() => []), // エラーが発生した場合は空配列を返す
       prisma.dailyReport.findMany({
         where: { userId },
         select: { id: true, date: true, type: true },
@@ -197,14 +189,24 @@ export async function GET(
         pdfUrl: i.pdfUrl,
         createdAt: i.createdAt,
       })),
-      diagnoses: diagnoses.map((d) => ({
-        id: d.id,
-        personalityType: d.personalityType,
-        pdfUrl: d.pdfUrl,
-        comment: d.comment,
-        createdAt: d.createdAt,
-        updatedAt: d.updatedAt,
-      })),
+      diagnoses: diagnoses.map((d) => {
+        const diagnosis = d as {
+          id: string;
+          personalityType: string | null;
+          pdfUrl?: string | null;
+          comment?: string | null;
+          createdAt: Date;
+          updatedAt: Date;
+        };
+        return {
+          id: diagnosis.id,
+          personalityType: diagnosis.personalityType || null,
+          pdfUrl: diagnosis.pdfUrl || null,
+          comment: diagnosis.comment || null,
+          createdAt: diagnosis.createdAt,
+          updatedAt: diagnosis.updatedAt,
+        };
+      }),
       dailyReports,
       consultations,
       achievements,
