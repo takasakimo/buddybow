@@ -24,6 +24,7 @@ interface ModuleProgress {
   trainingTitle: string;
   completed: boolean;
   completedAt: Date | null;
+  deadline: Date | null;
 }
 
 interface Milestone {
@@ -78,6 +79,8 @@ export default function UserProgressDetailPage() {
   const [selectedTraining, setSelectedTraining] = useState<string>('');
   const [trainingDeadline, setTrainingDeadline] = useState<string>('');
   const [isAddingProgress, setIsAddingProgress] = useState(false);
+  const [editingDeadline, setEditingDeadline] = useState<Record<string, string>>({});
+  const [isUpdatingDeadline, setIsUpdatingDeadline] = useState<Record<string, boolean>>({});
   const [isAddingRoadmap, setIsAddingRoadmap] = useState(false);
   const [roadmapForm, setRoadmapForm] = useState({
     title: '',
@@ -180,6 +183,64 @@ export default function UserProgressDetailPage() {
     }
   };
 
+  const handleUpdateDeadline = async (trainingId: string) => {
+    const training = userDetail?.trainings.find((t) => t.id === trainingId);
+    if (!training) return;
+
+    const deadline = editingDeadline[trainingId];
+    if (!deadline) {
+      alert('期日を入力してください');
+      return;
+    }
+
+    setIsUpdatingDeadline((prev) => ({ ...prev, [trainingId]: true }));
+    try {
+      // この研修の全モジュールの期日を更新
+      const promises = training.modules
+        .map((module) => {
+          const moduleProgress = userDetail?.moduleProgresses.find((mp) => mp.moduleId === module.id);
+          if (!moduleProgress) return null;
+
+          return fetch('/api/admin/user-progress/module', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: params.id,
+              moduleId: module.id,
+              completed: moduleProgress.completed,
+              deadline: new Date(deadline).toISOString(),
+            }),
+          });
+        })
+        .filter((p): p is Promise<Response> => p !== null);
+
+      const results = await Promise.all(promises);
+      const allSuccess = results.length > 0 && results.every((r) => r.ok);
+
+      if (allSuccess) {
+        alert('期日を更新しました');
+        fetchUserDetail();
+        setEditingDeadline((prev) => {
+          const newState = { ...prev };
+          delete newState[trainingId];
+          return newState;
+        });
+      } else {
+        alert('期日の更新に失敗しました');
+      }
+    } catch (error) {
+      console.error('Failed to update deadline:', error);
+      alert('期日の更新に失敗しました');
+    } finally {
+      setIsUpdatingDeadline((prev) => {
+        const newState = { ...prev };
+        delete newState[trainingId];
+        return newState;
+      });
+    }
+  };
 
   const handleAddRoadmap = async () => {
     if (!roadmapForm.title || !roadmapForm.startDate || !roadmapForm.endDate) {
@@ -502,6 +563,18 @@ export default function UserProgressDetailPage() {
                         const totalModules = training.modules.length;
                         const progress = totalModules > 0 ? (completedModulesCount / totalModules) * 100 : 0;
                         const isCompleted = totalModules > 0 && completedModulesCount === totalModules;
+                        
+                        // この研修の最初のモジュール進捗から期日を取得
+                        const firstModuleProgress = training.modules
+                          .map((m) => userDetail.moduleProgresses.find((mp) => mp.moduleId === m.id))
+                          .find((mp) => mp);
+                        const currentDeadline = firstModuleProgress?.deadline 
+                          ? new Date(firstModuleProgress.deadline).toISOString().split('T')[0]
+                          : '';
+                        const isEditing = editingDeadline[training.id] !== undefined;
+                        const deadlineValue = isEditing 
+                          ? editingDeadline[training.id] || currentDeadline
+                          : currentDeadline;
 
                         return (
                           <div
@@ -513,7 +586,7 @@ export default function UserProgressDetailPage() {
                                 <div className="text-sm font-medium text-gray-900 mb-1">
                                   {training.title}
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3 mb-2">
                                   <div className="flex-1">
                                     <div className="flex justify-between text-xs text-gray-600 mb-1">
                                       <span>進捗率</span>
@@ -531,6 +604,58 @@ export default function UserProgressDetailPage() {
                                   <div className="text-xs text-gray-600 min-w-[3rem] text-right">
                                     {completedModulesCount}/{totalModules}
                                   </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {isEditing ? (
+                                    <>
+                                      <input
+                                        type="date"
+                                        value={deadlineValue}
+                                        onChange={(e) => setEditingDeadline((prev) => ({
+                                          ...prev,
+                                          [training.id]: e.target.value,
+                                        }))}
+                                        className="text-xs px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        min={new Date().toISOString().split('T')[0]}
+                                      />
+                                      <button
+                                        onClick={() => handleUpdateDeadline(training.id)}
+                                        disabled={isUpdatingDeadline[training.id]}
+                                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+                                      >
+                                        {isUpdatingDeadline[training.id] ? '更新中...' : '保存'}
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setEditingDeadline((prev) => {
+                                            const newState = { ...prev };
+                                            delete newState[training.id];
+                                            return newState;
+                                          });
+                                        }}
+                                        className="text-xs px-2 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                      >
+                                        キャンセル
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="text-xs text-gray-600">
+                                        期日: {currentDeadline 
+                                          ? new Date(currentDeadline).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
+                                          : '未設定'}
+                                      </span>
+                                      <button
+                                        onClick={() => setEditingDeadline((prev) => ({
+                                          ...prev,
+                                          [training.id]: currentDeadline,
+                                        }))}
+                                        className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                                      >
+                                        編集
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </div>

@@ -109,6 +109,7 @@ export async function GET(
           trainingTitle: moduleData.training.title,
           completed: mp.completed,
           completedAt: mp.completedAt,
+          deadline: mp.deadline,
         };
       })
       .filter((mp): mp is NonNullable<typeof mp> => mp !== null);
