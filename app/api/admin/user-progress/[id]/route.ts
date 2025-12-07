@@ -115,7 +115,7 @@ export async function GET(
       .filter((mp): mp is NonNullable<typeof mp> => mp !== null);
 
     // その他のマイページ情報を取得
-    const [roadmaps, interviews, dailyReports, consultations, achievements] = await Promise.all([
+    const [roadmaps, interviews, diagnoses, dailyReports, consultations, achievements] = await Promise.all([
       prisma.roadmap.findMany({
         where: { userId },
         include: {
@@ -131,6 +131,19 @@ export async function GET(
       prisma.interview.findMany({
         where: { userId },
         orderBy: { interviewDate: 'desc' },
+        take: 20,
+      }),
+      prisma.diagnosis.findMany({
+        where: { userId },
+        select: {
+          id: true,
+          personalityType: true,
+          pdfUrl: true,
+          comment: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
         take: 20,
       }),
       prisma.dailyReport.findMany({
@@ -183,6 +196,14 @@ export async function GET(
         content: i.content,
         pdfUrl: i.pdfUrl,
         createdAt: i.createdAt,
+      })),
+      diagnoses: diagnoses.map((d) => ({
+        id: d.id,
+        personalityType: d.personalityType,
+        pdfUrl: d.pdfUrl,
+        comment: d.comment,
+        createdAt: d.createdAt,
+        updatedAt: d.updatedAt,
       })),
       dailyReports,
       consultations,

@@ -105,6 +105,8 @@ model Diagnosis {
   strengths       Json?    @map("strengths")
   weaknesses      Json?    @map("weaknesses")
   recommendations Json?    @map("recommendations")
+  pdfUrl          String?  @map("pdf_url")
+  comment         String?  @map("comment")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 

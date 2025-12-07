@@ -56,6 +56,15 @@ interface Interview {
   createdAt: Date;
 }
 
+interface Diagnosis {
+  id: string;
+  personalityType: string | null;
+  pdfUrl: string | null;
+  comment: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface UserDetail {
   id: number;
   name: string;
@@ -65,6 +74,7 @@ interface UserDetail {
   moduleProgresses: ModuleProgress[];
   roadmaps: Roadmap[];
   interviews: Interview[];
+  diagnoses: Diagnosis[];
   dailyReports: { id: string; date: Date; type: string }[];
   consultations: { id: string; title: string; status: string }[];
   achievements: { id: string; title: string; badgeType: string }[];
@@ -96,6 +106,11 @@ export default function UserProgressDetailPage() {
     pdfFile: null as File | null,
   });
   const [isUploadingPdf, setIsUploadingPdf] = useState(false);
+  const [isAddingDiagnosis, setIsAddingDiagnosis] = useState(false);
+  const [diagnosisForm, setDiagnosisForm] = useState({
+    pdfFile: null as File | null,
+    comment: '',
+  });
 
   // ロールの後方互換性を確保
   const getUserRole = () => {
@@ -394,6 +409,58 @@ export default function UserProgressDetailPage() {
       alert('面談の追加に失敗しました。コンソールを確認してください。');
     } finally {
       setIsAddingInterview(false);
+    }
+  };
+
+  const handleAddDiagnosis = async () => {
+    if (!diagnosisForm.pdfFile && !diagnosisForm.comment.trim()) {
+      alert('PDFファイルまたはコメントのいずれかは必須です');
+      return;
+    }
+
+    setIsAddingDiagnosis(true);
+    try {
+      let pdfUrl: string | null = null;
+
+      // PDFファイルをアップロード
+      if (diagnosisForm.pdfFile) {
+        pdfUrl = await handlePdfUpload(diagnosisForm.pdfFile);
+        if (!pdfUrl) {
+          setIsAddingDiagnosis(false);
+          return;
+        }
+      }
+
+      const response = await fetch('/api/admin/user-progress/diagnosis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: params.id,
+          pdfUrl,
+          comment: diagnosisForm.comment.trim() || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('診断結果を追加しました');
+        fetchUserDetail();
+        setDiagnosisForm({
+          pdfFile: null,
+          comment: '',
+        });
+      } else {
+        console.error('Diagnosis creation error:', data);
+        alert(data.error || '診断結果の追加に失敗しました');
+      }
+    } catch (error) {
+      console.error('Failed to add diagnosis:', error);
+      alert('診断結果の追加に失敗しました。コンソールを確認してください。');
+    } finally {
+      setIsAddingDiagnosis(false);
     }
   };
 
@@ -966,6 +1033,119 @@ export default function UserProgressDetailPage() {
                             )}
                             <div className="text-xs text-gray-500 mt-2">
                               作成日: {new Date(interview.createdAt).toLocaleDateString('ja-JP')}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 診断結果管理 */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Target className="w-5 h-5 text-slate-700" />
+                <h2 className="text-xl font-semibold text-slate-900">診断結果管理</h2>
+              </div>
+
+              {/* 診断結果を追加 */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  診断結果を追加
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      コメント
+                    </label>
+                    <textarea
+                      value={diagnosisForm.comment}
+                      onChange={(e) =>
+                        setDiagnosisForm({ ...diagnosisForm, comment: e.target.value })
+                      }
+                      rows={5}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="診断結果のコメントを入力..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      PDFファイル
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setDiagnosisForm({ ...diagnosisForm, pdfFile: file });
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    />
+                    {diagnosisForm.pdfFile && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        選択中: {diagnosisForm.pdfFile.name} ({(diagnosisForm.pdfFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                    PDFファイルまたはコメントのいずれかは必須です。両方入力することも可能です。
+                  </div>
+                  <button
+                    onClick={handleAddDiagnosis}
+                    disabled={
+                      (!diagnosisForm.comment.trim() && !diagnosisForm.pdfFile) ||
+                      isAddingDiagnosis ||
+                      isUploadingPdf
+                    }
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {isAddingDiagnosis || isUploadingPdf
+                      ? isUploadingPdf
+                        ? 'PDFアップロード中...'
+                        : '追加中...'
+                      : '診断結果を追加'}
+                  </button>
+                </div>
+              </div>
+
+              {/* 既存の診断結果一覧 */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  診断結果一覧
+                </h3>
+                {userDetail.diagnoses.length === 0 ? (
+                  <p className="text-gray-500 text-sm">診断結果がありません</p>
+                ) : (
+                  <div className="space-y-3">
+                    {userDetail.diagnoses.map((diagnosis) => (
+                      <div
+                        key={diagnosis.id}
+                        className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            {diagnosis.comment && (
+                              <div className="text-sm text-gray-900 mb-2 whitespace-pre-wrap">
+                                {diagnosis.comment}
+                              </div>
+                            )}
+                            {diagnosis.pdfUrl && (
+                              <a
+                                href={diagnosis.pdfUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                <FileText className="w-4 h-4" />
+                                PDFを表示
+                              </a>
+                            )}
+                            <div className="text-xs text-gray-500 mt-2">
+                              作成日: {new Date(diagnosis.createdAt).toLocaleDateString('ja-JP')}
                             </div>
                           </div>
                         </div>
