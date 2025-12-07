@@ -81,7 +81,7 @@ export default async function ModuleDetailPage({ params }: PageProps) {
         <header className="mb-8">
           <Link
             href={`/trainings/${params.id}`}
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            className="text-buddybow-orange hover:text-buddybow-orange-dark mb-4 inline-block"
           >
             ← {training.title}に戻る
           </Link>
@@ -149,7 +149,7 @@ export default async function ModuleDetailPage({ params }: PageProps) {
           {nextModule ? (
             <Link
               href={`/trainings/${params.id}/modules/${nextModule.id}`}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark transition-colors"
             >
               次のチャプター →
             </Link>

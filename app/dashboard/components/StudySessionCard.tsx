@@ -98,7 +98,7 @@ export default function StudySessionCard({ session, isParticipating: initialPart
         className={`w-full py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
           isParticipating
             ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-            : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
+            : 'bg-buddybow-orange text-white hover:bg-buddybow-orange-dark shadow-sm hover:shadow'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         {isLoading ? '処理中...' : isParticipating ? '参加をキャンセル' : '参加する'}

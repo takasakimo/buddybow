@@ -76,7 +76,7 @@ export default async function DiagnosisPage() {
                       href={diagnosis.pdfUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark transition-colors text-sm font-medium"
                     >
                       <FileText className="w-4 h-4" />
                       PDFを表示

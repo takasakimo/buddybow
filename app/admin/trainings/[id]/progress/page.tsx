@@ -92,7 +92,7 @@ export default function TrainingProgressPage() {
         <header className="mb-8">
           <Link
             href="/admin/trainings"
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            className="text-buddybow-orange hover:text-buddybow-orange-dark mb-4 inline-block"
           >
             ← 研修管理に戻る
           </Link>
@@ -163,7 +163,7 @@ export default function TrainingProgressPage() {
                             <div className="w-full bg-gray-200 rounded-full h-2">
                               <div
                                 className={`h-2 rounded-full transition-all ${
-                                  userProgress.progress === 100 ? 'bg-green-500' : 'bg-blue-600'
+                                  userProgress.progress === 100 ? 'bg-green-500' : 'bg-buddybow-orange'
                                 }`}
                                 style={{ width: `${userProgress.progress}%` }}
                               />
@@ -179,7 +179,7 @@ export default function TrainingProgressPage() {
                       <td className="px-6 py-4 text-right text-sm font-medium">
                         <Link
                           href={`/admin/user-progress/${userProgress.userId}`}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-buddybow-orange hover:text-buddybow-orange-dark"
                         >
                           マイページ管理 →
                         </Link>

@@ -102,7 +102,7 @@ export default function AdminTrainingsPage() {
             </h1>
             <Link
               href="/admin/trainings/new"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark"
             >
               新規作成
             </Link>
@@ -163,7 +163,7 @@ export default function AdminTrainingsPage() {
                 )}
                 <div className="p-6">
                   {training.category && (
-                    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full mb-2">
+                    <span className="inline-block px-3 py-1 bg-buddybow-beige-light text-buddybow-orange-dark text-sm rounded-full mb-2">
                       {training.category.name}
                     </span>
                   )}
@@ -193,7 +193,7 @@ export default function AdminTrainingsPage() {
                     </div>
                     <Link
                       href={`/admin/trainings/${training.id}/progress`}
-                      className="w-full px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 text-sm"
+                      className="w-full px-4 py-2 bg-buddybow-orange text-white text-center rounded-lg hover:bg-buddybow-orange-dark text-sm"
                     >
                       受講者進捗を見る
                     </Link>

@@ -145,7 +145,7 @@ export default function UserProgressPage() {
                             user.role === 'FULL_ADMIN'
                               ? 'bg-purple-100 text-purple-800'
                               : user.role === 'MANAGER'
-                              ? 'bg-blue-100 text-blue-800'
+                              ? 'bg-buddybow-beige-light text-buddybow-orange-dark'
                               : 'bg-green-100 text-green-800'
                           }`}
                         >
@@ -164,13 +164,13 @@ export default function UserProgressPage() {
                             <span className="text-sm text-gray-600">
                               {user.userProgress.currentPhase}
                             </span>
-                            <span className="text-sm font-semibold text-blue-600">
+                            <span className="text-sm font-semibold text-buddybow-orange">
                               {user.userProgress.overallProgress}%
                             </span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
-                              className="bg-blue-600 h-2 rounded-full transition-all"
+                              className="bg-buddybow-orange h-2 rounded-full transition-all"
                               style={{
                                 width: `${user.userProgress.overallProgress}%`,
                               }}
@@ -212,7 +212,7 @@ export default function UserProgressPage() {
                     <td className="px-6 py-4 text-right text-sm font-medium">
                       <Link
                         href={`/admin/user-progress/${user.id}`}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="text-buddybow-orange hover:text-buddybow-orange-dark"
                       >
                         詳細を見る
                       </Link>

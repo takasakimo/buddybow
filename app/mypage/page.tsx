@@ -202,7 +202,7 @@ export default async function MyPage() {
             {/* 現在のフェーズ */}
             <div className="card p-6">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-buddybow-orange flex items-center justify-center">
                   <Target className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="text-lg font-semibold text-slate-900">現在のフェーズ</h2>
@@ -214,7 +214,7 @@ export default async function MyPage() {
                 </div>
                 <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-blue-600 to-blue-500 h-2.5 rounded-full transition-all duration-500"
+                    className="bg-gradient-to-r from-buddybow-orange to-buddybow-beige-warm h-2.5 rounded-full transition-all duration-500"
                     style={{ width: `${userProgress.overallProgress}%` }}
                   />
                 </div>
@@ -225,8 +225,8 @@ export default async function MyPage() {
                     key={phase}
                     className={`py-2.5 px-3 rounded-lg text-center text-xs font-medium transition-all ${
                       userProgress.currentPhase === phase
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-slate-100 text-slate-600'
+                        ? 'bg-buddybow-orange text-white shadow-sm'
+                        : 'bg-buddybow-beige-light text-stone-600'
                     }`}
                   >
                     {phase}
@@ -254,7 +254,7 @@ export default async function MyPage() {
                       className="flex flex-col items-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200/60 hover:border-slate-300 transition-all cursor-pointer group"
                       title={achievement.description || ''}
                     >
-                      <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                      <div className="w-10 h-10 rounded-full bg-buddybow-orange flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <CheckCircle2 className="w-5 h-5 text-white" />
                       </div>
                       <span className="text-xs text-slate-700 text-center line-clamp-2 font-medium">
@@ -364,7 +364,7 @@ export default async function MyPage() {
                               <div className="w-full bg-slate-200 rounded-full h-2">
                                 <div
                                   className={`h-2 rounded-full transition-all ${
-                                    training.progress === 100 ? 'bg-green-500' : 'bg-blue-600'
+                                    training.progress === 100 ? 'bg-green-500' : 'bg-buddybow-orange'
                                   }`}
                                   style={{ width: `${training.progress}%` }}
                                 />
@@ -432,7 +432,7 @@ export default async function MyPage() {
           <div className="space-y-6">
             {/* 応援メッセージ */}
             {motivationMessages[0] && (
-              <div className="bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-medium p-6 text-white">
+              <div className="bg-gradient-to-br from-buddybow-orange to-buddybow-beige-warm rounded-xl shadow-medium p-6 text-white">
                 <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
                   <MessageSquare className="w-4 h-4" />
                   メッセージ
@@ -452,7 +452,7 @@ export default async function MyPage() {
               <div className="space-y-2.5">
                 <Link
                   href="/mypage/reports/new"
-                  className="block w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 text-center font-medium text-sm transition-all duration-200 shadow-sm hover:shadow"
+                  className="block w-full py-3 px-4 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark active:bg-buddybow-orange-dark text-center font-medium text-sm transition-all duration-200 shadow-sm hover:shadow"
                 >
                   今日の記録をつける
                 </Link>

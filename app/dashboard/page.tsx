@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                 className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <div className="w-12 h-12 bg-buddybow-beige-light rounded-xl flex items-center justify-center group-hover:bg-buddybow-orange transition-colors">
                     <Users className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
@@ -110,7 +110,7 @@ export default async function DashboardPage() {
                 className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <div className="w-12 h-12 bg-buddybow-beige-light rounded-xl flex items-center justify-center group-hover:bg-buddybow-orange transition-colors">
                     <Settings className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
@@ -125,7 +125,7 @@ export default async function DashboardPage() {
                 className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <div className="w-12 h-12 bg-buddybow-beige-light rounded-xl flex items-center justify-center group-hover:bg-buddybow-orange transition-colors">
                     <Tag className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
@@ -140,7 +140,7 @@ export default async function DashboardPage() {
                 className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <div className="w-12 h-12 bg-buddybow-beige-light rounded-xl flex items-center justify-center group-hover:bg-buddybow-orange transition-colors">
                     <BarChart3 className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
@@ -157,7 +157,7 @@ export default async function DashboardPage() {
                 className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <div className="w-12 h-12 bg-buddybow-beige-light rounded-xl flex items-center justify-center group-hover:bg-buddybow-orange transition-colors">
                     <User className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
@@ -172,7 +172,7 @@ export default async function DashboardPage() {
                 className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <div className="w-12 h-12 bg-buddybow-beige-light rounded-xl flex items-center justify-center group-hover:bg-buddybow-orange transition-colors">
                     <BookOpen className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
@@ -187,7 +187,7 @@ export default async function DashboardPage() {
                 className="card card-hover p-6 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <div className="w-12 h-12 bg-buddybow-beige-light rounded-xl flex items-center justify-center group-hover:bg-buddybow-orange transition-colors">
                     <FileText className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors" />
                   </div>
                   <div>
@@ -226,7 +226,7 @@ export default async function DashboardPage() {
                         <span
                           className={`px-2.5 py-1 text-xs rounded-full font-medium ${
                             announcement.category === 'news'
-                              ? 'bg-blue-100 text-blue-700'
+                              ? 'bg-buddybow-beige-light text-buddybow-orange-dark'
                               : announcement.category === 'event'
                               ? 'bg-emerald-100 text-emerald-700'
                               : 'bg-purple-100 text-purple-700'

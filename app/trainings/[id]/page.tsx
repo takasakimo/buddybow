@@ -66,7 +66,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
         <div className="mb-6">
           <Link
             href="/trainings"
-            className="text-blue-600 hover:text-blue-800"
+            className="text-buddybow-orange hover:text-buddybow-orange-dark"
           >
             ← 研修一覧に戻る
           </Link>
@@ -86,7 +86,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
 
           <div className="p-8">
             {training.category && (
-              <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full mb-4">
+              <span className="inline-block px-3 py-1 bg-buddybow-beige-light text-buddybow-orange-dark text-sm rounded-full mb-4">
                 {training.category.name}
               </span>
             )}
@@ -110,7 +110,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
               <div className="w-full bg-slate-200 rounded-full h-3 mb-3">
                 <div
                   className={`h-3 rounded-full transition-all ${
-                    progressPercentage === 100 ? 'bg-green-500' : 'bg-blue-600'
+                    progressPercentage === 100 ? 'bg-green-500' : 'bg-buddybow-orange'
                   }`}
                   style={{ width: `${progressPercentage}%` }}
                 />
@@ -136,7 +136,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
             {(session.user.role === 'FULL_ADMIN' || session.user.role === 'MANAGER') && (
               <Link
                 href={`/admin/trainings/${training.id}/edit`}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark"
               >
                 チャプター追加
               </Link>
@@ -166,7 +166,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
                               <CheckCircle2 className="w-5 h-5" />
                             </div>
                           ) : (
-                            <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                            <div className="w-10 h-10 bg-buddybow-orange text-white rounded-full flex items-center justify-center text-sm font-bold">
                               {index + 1}
                             </div>
                           )}
@@ -197,7 +197,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
                           className={`px-4 py-2 rounded-lg text-sm ${
                             isCompleted
                               ? 'bg-green-600 text-white hover:bg-green-700'
-                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                              : 'bg-buddybow-orange text-white hover:bg-buddybow-orange-dark'
                           }`}
                         >
                           {isCompleted ? '再開' : '開始'}

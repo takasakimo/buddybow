@@ -186,10 +186,10 @@ export default function Sidebar() {
             className="flex items-center gap-2.5 group"
             style={{ pointerEvents: 'auto' }}
           >
-            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-all">
-              <Target className="w-4 h-4 text-slate-700" />
+            <div className="w-8 h-8 rounded-lg bg-buddybow-beige-light flex items-center justify-center group-hover:bg-buddybow-beige-accent transition-all">
+              <Target className="w-4 h-4 text-buddybow-orange" />
             </div>
-            <span className="text-lg font-semibold text-slate-900 tracking-tight">buddybow</span>
+            <span className="text-lg font-semibold text-stone-800 tracking-tight">buddybow</span>
           </Link>
         </div>
 
@@ -209,12 +209,12 @@ export default function Sidebar() {
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? 'bg-slate-200 text-slate-900 font-medium'
-                        : 'text-slate-700 hover:bg-slate-100 active:bg-slate-200'
+                        ? 'bg-buddybow-beige-accent text-buddybow-orange-dark font-medium'
+                        : 'text-stone-700 hover:bg-buddybow-beige-light active:bg-buddybow-beige-accent'
                     }`}
                     style={{ pointerEvents: 'auto' }}
                   >
-                    <span className={isActive ? 'text-slate-700' : 'text-slate-500'}>{item.icon}</span>
+                    <span className={isActive ? 'text-buddybow-orange' : 'text-stone-600'}>{item.icon}</span>
                     <span className="text-sm">{item.name}</span>
                   </Link>
                 </li>
@@ -223,14 +223,14 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-slate-200 bg-slate-50/50">
-          <div className="px-3 py-2.5 bg-white rounded-lg mb-2 border border-slate-200">
-            <p className="text-sm font-medium text-slate-900">{session?.user?.name}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{session?.user?.email}</p>
+        <div className="p-4 border-t border-buddybow-beige-accent bg-buddybow-beige-light/50">
+          <div className="px-3 py-2.5 bg-white rounded-lg mb-2 border border-buddybow-beige-accent">
+            <p className="text-sm font-medium text-stone-800">{session?.user?.name}</p>
+            <p className="text-xs text-stone-600 mt-0.5">{session?.user?.email}</p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
-            className="w-full px-3 py-2 text-sm text-slate-700 hover:bg-white rounded-lg transition-all duration-200 border border-slate-200 hover:border-slate-300 flex items-center justify-center gap-2 font-medium"
+            className="w-full px-3 py-2 text-sm text-stone-700 hover:bg-white rounded-lg transition-all duration-200 border border-buddybow-beige-accent hover:border-buddybow-orange flex items-center justify-center gap-2 font-medium"
           >
             <LogOut className="w-4 h-4" />
             ログアウト

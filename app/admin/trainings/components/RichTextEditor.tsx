@@ -178,7 +178,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
         <button
           type="button"
           onClick={addImage}
-          className="px-3 py-1 rounded hover:bg-gray-200 bg-blue-100 text-blue-700"
+          className="px-3 py-1 rounded hover:bg-gray-200 bg-buddybow-beige-light text-buddybow-orange-dark"
           title="画像をアップロード"
         >
           📷 画像

@@ -53,7 +53,7 @@ export default async function EditUserPage({ params }: PageProps) {
         <header className="mb-8">
           <Link
             href="/admin/users"
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            className="text-buddybow-orange hover:text-buddybow-orange-dark mb-4 inline-block"
           >
             ← ユーザー管理に戻る
           </Link>

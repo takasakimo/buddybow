@@ -98,7 +98,7 @@ export default function UsersPage() {
           </h1>
           <Link
             href="/admin/users/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark"
           >
             新規作成
           </Link>
@@ -145,7 +145,7 @@ export default function UsersPage() {
                         user.role === 'FULL_ADMIN'
                           ? 'bg-purple-100 text-purple-800'
                           : user.role === 'MANAGER'
-                          ? 'bg-blue-100 text-blue-800'
+                          ? 'bg-buddybow-beige-light text-buddybow-orange-dark'
                           : 'bg-green-100 text-green-800'
                       }`}
                     >
@@ -158,7 +158,7 @@ export default function UsersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {user.assignedAdmin ? (
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                      <span className="px-2 py-1 bg-buddybow-beige-light text-buddybow-orange-dark rounded text-xs">
                         {user.assignedAdmin.name}
                       </span>
                     ) : (
@@ -171,7 +171,7 @@ export default function UsersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link
                       href={`/admin/users/${user.id}/edit`}
-                      className="text-blue-600 hover:text-blue-900 mr-4"
+                      className="text-buddybow-orange hover:text-buddybow-orange-dark mr-4"
                     >
                       編集
                     </Link>

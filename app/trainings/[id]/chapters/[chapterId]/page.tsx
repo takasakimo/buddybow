@@ -99,14 +99,14 @@ export default async function ChapterDetailPage({ params }: PageProps) {
           <div className="mb-6">
             <Link
               href={`/trainings/${params.id}`}
-              className="text-blue-600 hover:text-blue-800"
+              className="text-buddybow-orange hover:text-buddybow-orange-dark"
             >
               ← {training.title}に戻る
             </Link>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8">
+            <div className="bg-gradient-to-r from-buddybow-orange to-buddybow-orange-dark text-white p-8">
               <p className="text-sm opacity-90 mb-2">
                 チャプター {currentIndex + 1} / {training.modules.length}
               </p>
@@ -181,7 +181,7 @@ export default async function ChapterDetailPage({ params }: PageProps) {
                 {nextModule && (
                   <Link
                     href={`/trainings/${params.id}/chapters/${nextModule.id}`}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-6 py-3 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark transition-colors"
                   >
                     次のチャプター →
                   </Link>

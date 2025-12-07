@@ -141,7 +141,7 @@ export default function TrainingPage() {
           {(session?.user?.role === 'FULL_ADMIN' || session?.user?.role === 'MANAGER') && (
             <button
               onClick={() => router.push('/admin/trainings')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="px-6 py-3 bg-buddybow-orange text-white rounded-lg font-medium hover:bg-buddybow-orange-dark transition-colors flex items-center gap-2"
             >
               ⚙️ 研修を管理
             </button>
@@ -155,7 +155,7 @@ export default function TrainingPage() {
               onClick={() => setSelectedCategory('all')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 selectedCategory === 'all'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-buddybow-orange text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -167,7 +167,7 @@ export default function TrainingPage() {
                 onClick={() => setSelectedCategory(category.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   selectedCategory === category.id
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-buddybow-orange text-white'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                 }`}
               >
@@ -200,7 +200,7 @@ export default function TrainingPage() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-buddybow-orange hover:text-buddybow-orange-dark"
                 >
                   クリア
                 </button>
@@ -215,7 +215,7 @@ export default function TrainingPage() {
                   onClick={() => handleSort('title')}
                   className={`px-3 py-1 text-sm rounded ${
                     sortField === 'title'
-                      ? 'bg-blue-100 text-blue-800'
+                      ? 'bg-buddybow-beige-light text-buddybow-orange-dark'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -225,7 +225,7 @@ export default function TrainingPage() {
                   onClick={() => handleSort('modules')}
                   className={`px-3 py-1 text-sm rounded ${
                     sortField === 'modules'
-                      ? 'bg-blue-100 text-blue-800'
+                      ? 'bg-buddybow-beige-light text-buddybow-orange-dark'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -311,13 +311,13 @@ export default function TrainingPage() {
                     <div className="mt-4">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-gray-600">進捗</span>
-                        <span className="text-xs font-semibold text-blue-600">
+                        <span className="text-xs font-semibold text-buddybow-orange">
                           {training.progress.progressPercent}%
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className="bg-blue-600 h-2 rounded-full transition-all"
+                          className="bg-buddybow-orange h-2 rounded-full transition-all"
                           style={{
                             width: `${training.progress.progressPercent}%`,
                           }}
@@ -334,7 +334,7 @@ export default function TrainingPage() {
                   {/* 未受講の場合 */}
                   {!training.progress && (
                     <div className="mt-4">
-                      <button className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                      <button className="w-full bg-buddybow-orange text-white py-2 rounded-lg text-sm font-medium hover:bg-buddybow-orange-dark transition-colors">
                         受講を開始
                       </button>
                     </div>

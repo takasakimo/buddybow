@@ -120,7 +120,7 @@ export default function AnnouncementForm({ initialData }: AnnouncementFormProps)
             type="checkbox"
             checked={isPublished}
             onChange={(e) => setIsPublished(e.target.checked)}
-            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+            className="w-4 h-4 text-buddybow-orange rounded focus:ring-2 focus:ring-blue-500"
           />
           <span className="text-sm font-medium text-gray-700">公開する</span>
         </label>
@@ -133,7 +133,7 @@ export default function AnnouncementForm({ initialData }: AnnouncementFormProps)
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+          className="px-6 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark disabled:bg-gray-400"
         >
           {isSubmitting ? '保存中...' : initialData ? '更新' : '作成'}
         </button>

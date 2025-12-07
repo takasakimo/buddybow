@@ -83,7 +83,7 @@ export default function CategoriesPage() {
         <header className="mb-8">
           <Link
             href="/admin/trainings"
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            className="text-buddybow-orange hover:text-buddybow-orange-dark mb-4 inline-block"
           >
             ← 研修管理に戻る
           </Link>
@@ -106,7 +106,7 @@ export default function CategoriesPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+              className="px-6 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark disabled:bg-gray-400"
             >
               {isSubmitting ? '追加中...' : '追加'}
             </button>

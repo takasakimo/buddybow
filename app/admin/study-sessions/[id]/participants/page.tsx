@@ -62,7 +62,7 @@ export default async function ParticipantsPage({ params }: PageProps) {
         <header className="mb-8">
           <Link
             href="/admin/study-sessions"
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            className="text-buddybow-orange hover:text-buddybow-orange-dark mb-4 inline-block"
           >
             ← 勉強会管理に戻る
           </Link>
@@ -123,8 +123,8 @@ export default async function ParticipantsPage({ params }: PageProps) {
           )}
         </div>
 
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-900">
+        <div className="mt-6 bg-buddybow-beige-light border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-buddybow-orange-dark">
             💡 参加者にZoomパスワードを送信する際は、各ユーザーのメールアドレス宛に個別に送信してください。
           </p>
         </div>

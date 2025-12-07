@@ -28,7 +28,7 @@ export default async function NewAnnouncementPage() {
         <header className="mb-8">
           <Link
             href="/admin/announcements"
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            className="text-buddybow-orange hover:text-buddybow-orange-dark mb-4 inline-block"
           >
             ← お知らせ管理に戻る
           </Link>

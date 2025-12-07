@@ -491,7 +491,7 @@ export default function UserProgressDetailPage() {
         <header className="mb-8">
           <Link
             href="/admin/user-progress"
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            className="text-buddybow-orange hover:text-buddybow-orange-dark mb-4 inline-block"
           >
             ← 受講者マイページ管理に戻る
           </Link>
@@ -520,7 +520,7 @@ export default function UserProgressDetailPage() {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-3">
                         <div
-                          className="bg-blue-600 h-3 rounded-full transition-all"
+                          className="bg-buddybow-orange h-3 rounded-full transition-all"
                           style={{
                             width: `${userDetail.userProgress.overallProgress}%`,
                           }}
@@ -573,7 +573,7 @@ export default function UserProgressDetailPage() {
                     </select>
                   </div>
                   {selectedTraining && (
-                    <div className="text-xs text-gray-600 bg-blue-50 p-2 rounded">
+                    <div className="text-xs text-gray-600 bg-buddybow-beige-light p-2 rounded">
                       {(() => {
                         const training = userDetail.trainings.find((t) => t.id === selectedTraining);
                         if (!training) return null;
@@ -597,7 +597,7 @@ export default function UserProgressDetailPage() {
                   <button
                     onClick={handleAddProgress}
                     disabled={!selectedTraining || isAddingProgress}
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     {isAddingProgress ? '追加中...' : 'ショートカットを追加'}
                   </button>
@@ -662,7 +662,7 @@ export default function UserProgressDetailPage() {
                                     <div className="w-full bg-gray-200 rounded-full h-1.5">
                                       <div
                                         className={`h-1.5 rounded-full transition-all ${
-                                          isCompleted ? 'bg-green-500' : 'bg-blue-600'
+                                          isCompleted ? 'bg-green-500' : 'bg-buddybow-orange'
                                         }`}
                                         style={{ width: `${progress}%` }}
                                       />
@@ -688,7 +688,7 @@ export default function UserProgressDetailPage() {
                                       <button
                                         onClick={() => handleUpdateDeadline(training.id)}
                                         disabled={isUpdatingDeadline[training.id]}
-                                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+                                        className="text-xs px-2 py-1 bg-buddybow-orange text-white rounded hover:bg-buddybow-orange-dark disabled:bg-gray-400"
                                       >
                                         {isUpdatingDeadline[training.id] ? '更新中...' : '保存'}
                                       </button>
@@ -826,7 +826,7 @@ export default function UserProgressDetailPage() {
                       !roadmapForm.endDate ||
                       isAddingRoadmap
                     }
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     {isAddingRoadmap ? '追加中...' : 'ロードマップを追加'}
                   </button>
@@ -970,7 +970,7 @@ export default function UserProgressDetailPage() {
                       </p>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                  <div className="text-xs text-gray-500 bg-buddybow-beige-light p-2 rounded">
                     テキストまたはPDFファイルのいずれかは必須です。両方入力することも可能です。
                   </div>
                   <button
@@ -981,7 +981,7 @@ export default function UserProgressDetailPage() {
                       isAddingInterview ||
                       isUploadingPdf
                     }
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     {isAddingInterview || isUploadingPdf
                       ? isUploadingPdf
@@ -1025,7 +1025,7 @@ export default function UserProgressDetailPage() {
                                 href={interview.pdfUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700"
+                                className="inline-flex items-center gap-1.5 text-sm text-buddybow-orange hover:text-buddybow-orange-dark"
                               >
                                 <FileText className="w-4 h-4" />
                                 PDFを表示
@@ -1091,7 +1091,7 @@ export default function UserProgressDetailPage() {
                       </p>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                  <div className="text-xs text-gray-500 bg-buddybow-beige-light p-2 rounded">
                     PDFファイルまたはコメントのいずれかは必須です。両方入力することも可能です。
                   </div>
                   <button
@@ -1101,7 +1101,7 @@ export default function UserProgressDetailPage() {
                       isAddingDiagnosis ||
                       isUploadingPdf
                     }
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     {isAddingDiagnosis || isUploadingPdf
                       ? isUploadingPdf
@@ -1138,7 +1138,7 @@ export default function UserProgressDetailPage() {
                                 href={diagnosis.pdfUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                className="inline-flex items-center gap-1.5 text-sm text-buddybow-orange hover:text-buddybow-orange-dark font-medium"
                               >
                                 <FileText className="w-4 h-4" />
                                 PDFを表示

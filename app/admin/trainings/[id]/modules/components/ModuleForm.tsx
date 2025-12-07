@@ -250,7 +250,7 @@ export default function ModuleForm({ trainingId, nextOrder, initialData }: Modul
         <button
           type="submit"
           disabled={isSubmitting || isUploading}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+          className="px-6 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark disabled:bg-gray-400"
         >
           {isSubmitting ? '保存中...' : initialData ? '更新' : '作成'}
         </button>

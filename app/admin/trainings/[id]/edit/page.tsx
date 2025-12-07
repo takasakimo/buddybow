@@ -52,7 +52,7 @@ export default async function EditTrainingPage({ params }: PageProps) {
         <header className="mb-8">
           <Link
             href="/admin/trainings"
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            className="text-buddybow-orange hover:text-buddybow-orange-dark mb-4 inline-block"
           >
             ← 研修管理に戻る
           </Link>

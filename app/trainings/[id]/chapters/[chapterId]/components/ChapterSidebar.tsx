@@ -41,7 +41,7 @@ export default function ChapterSidebar({ training, currentModuleId, progressMap 
                   href={`/trainings/${training.id}/chapters/${module.id}`}
                   className={`block p-3 rounded-lg transition-colors ${
                     isCurrent
-                      ? 'bg-blue-50 border-2 border-blue-600'
+                      ? 'bg-buddybow-beige-light border-2 border-buddybow-orange'
                       : isCompleted
                       ? 'bg-green-50 hover:bg-green-100 border-2 border-green-500'
                       : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
@@ -51,7 +51,7 @@ export default function ChapterSidebar({ training, currentModuleId, progressMap 
                     <span
                       className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                         isCurrent
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-buddybow-orange text-white'
                           : isCompleted
                           ? 'bg-green-600 text-white'
                           : 'bg-gray-300 text-gray-700'
@@ -66,7 +66,7 @@ export default function ChapterSidebar({ training, currentModuleId, progressMap 
                     <span
                       className={`text-sm font-medium line-clamp-2 ${
                         isCurrent
-                          ? 'text-blue-900'
+                          ? 'text-buddybow-orange-dark'
                           : isCompleted
                           ? 'text-green-900'
                           : 'text-gray-900'

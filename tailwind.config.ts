@@ -11,6 +11,14 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        buddybow: {
+          orange: '#B08968',
+          'orange-dark': '#9c7858',
+          beige: '#FAF9F6',
+          'beige-light': '#F5EFE6',
+          'beige-accent': '#E6CCB2',
+          'beige-warm': '#DDB892',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

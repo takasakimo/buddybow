@@ -91,7 +91,7 @@ export default function AnnouncementsPage() {
           </h1>
           <Link
             href="/admin/announcements/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark"
           >
             新規作成
           </Link>
@@ -112,7 +112,7 @@ export default function AnnouncementsPage() {
                         <span
                           className={`px-2 py-1 text-xs rounded ${
                             announcement.category === 'news'
-                              ? 'bg-blue-100 text-blue-800'
+                              ? 'bg-buddybow-beige-light text-buddybow-orange-dark'
                               : announcement.category === 'event'
                               ? 'bg-green-100 text-green-800'
                               : 'bg-purple-100 text-purple-800'
@@ -145,7 +145,7 @@ export default function AnnouncementsPage() {
                     <div className="flex gap-2 ml-4">
                       <Link
                         href={`/admin/announcements/${announcement.id}/edit`}
-                        className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"
+                        className="px-3 py-1 text-sm text-buddybow-orange hover:bg-buddybow-beige-light rounded"
                       >
                         編集
                       </Link>
