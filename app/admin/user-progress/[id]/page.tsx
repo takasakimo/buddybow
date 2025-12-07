@@ -128,6 +128,14 @@ export default function UserProgressDetailPage() {
     content: '',
     answer: '',
   });
+  const [showRoadmapForm, setShowRoadmapForm] = useState(false);
+  const [showInterviewForm, setShowInterviewForm] = useState(false);
+  const [showConsultationForm, setShowConsultationForm] = useState(false);
+  const [showDiagnosisForm, setShowDiagnosisForm] = useState(false);
+  const [showRoadmapList, setShowRoadmapList] = useState(false);
+  const [showInterviewList, setShowInterviewList] = useState(false);
+  const [showConsultationList, setShowConsultationList] = useState(false);
+  const [showDiagnosisList, setShowDiagnosisList] = useState(false);
 
   // ロールの後方互換性を確保
   const getUserRole = () => {
@@ -798,17 +806,27 @@ export default function UserProgressDetailPage() {
 
             {/* ロードマップ管理 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Map className="w-5 h-5 text-slate-700" />
-                <h2 className="text-xl font-semibold text-slate-900">ロードマップ管理</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Map className="w-5 h-5 text-slate-700" />
+                  <h2 className="text-xl font-semibold text-slate-900">ロードマップ管理</h2>
+                  <span className="text-sm text-gray-500">({userDetail.roadmaps.length}件)</span>
+                </div>
+                <button
+                  onClick={() => setShowRoadmapForm(!showRoadmapForm)}
+                  className="px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark text-sm"
+                >
+                  {showRoadmapForm ? '閉じる' : '追加'}
+                </button>
               </div>
 
               {/* ロードマップを追加 */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  ロードマップを追加
-                </h3>
-                <div className="space-y-3">
+              {showRoadmapForm && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">
+                    ロードマップを追加
+                  </h3>
+                  <div className="space-y-3">
                   <div>
                     <label className="block text-sm text-gray-600 mb-1">
                       タイトル <span className="text-red-500">*</span>
@@ -892,17 +910,20 @@ export default function UserProgressDetailPage() {
                     {isAddingRoadmap ? '追加中...' : 'ロードマップを追加'}
                   </button>
                 </div>
-              </div>
+                </div>
+              )}
 
               {/* 既存のロードマップ一覧 */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  ロードマップ一覧
-                </h3>
-                {userDetail.roadmaps.length === 0 ? (
-                  <p className="text-gray-500 text-sm">ロードマップがありません</p>
-                ) : (
-                  <div className="space-y-4">
+              {userDetail.roadmaps.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setShowRoadmapList(!showRoadmapList)}
+                    className="text-sm text-gray-600 hover:text-gray-900 mb-3 flex items-center gap-1"
+                  >
+                    {showRoadmapList ? '▼' : '▶'} ロードマップ一覧 ({userDetail.roadmaps.length}件)
+                  </button>
+                  {showRoadmapList && (
+                    <div className="space-y-4">
                     {userDetail.roadmaps.map((roadmap) => (
                       <div
                         key={roadmap.id}
@@ -965,24 +986,38 @@ export default function UserProgressDetailPage() {
                         )}
                       </div>
                     ))}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {userDetail.roadmaps.length === 0 && (
+                <p className="text-gray-500 text-sm">ロードマップがありません</p>
+              )}
             </div>
 
             {/* 面談管理 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <MessageSquare className="w-5 h-5 text-slate-700" />
-                <h2 className="text-xl font-semibold text-slate-900">面談管理</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-slate-700" />
+                  <h2 className="text-xl font-semibold text-slate-900">面談管理</h2>
+                  <span className="text-sm text-gray-500">({userDetail.interviews.length}件)</span>
+                </div>
+                <button
+                  onClick={() => setShowInterviewForm(!showInterviewForm)}
+                  className="px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark text-sm"
+                >
+                  {showInterviewForm ? '閉じる' : '追加'}
+                </button>
               </div>
 
               {/* 面談を追加 */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  面談を追加
-                </h3>
-                <div className="space-y-3">
+              {showInterviewForm && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">
+                    面談を追加
+                  </h3>
+                  <div className="space-y-3">
                   <div>
                     <label className="block text-sm text-gray-600 mb-1">
                       面談日 <span className="text-red-500">*</span>
@@ -1051,17 +1086,20 @@ export default function UserProgressDetailPage() {
                       : '面談を追加'}
                   </button>
                 </div>
-              </div>
+                </div>
+              )}
 
               {/* 既存の面談一覧 */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  面談一覧
-                </h3>
-                {userDetail.interviews.length === 0 ? (
-                  <p className="text-gray-500 text-sm">面談がありません</p>
-                ) : (
-                  <div className="space-y-3">
+              {userDetail.interviews.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setShowInterviewList(!showInterviewList)}
+                    className="text-sm text-gray-600 hover:text-gray-900 mb-3 flex items-center gap-1"
+                  >
+                    {showInterviewList ? '▼' : '▶'} 面談一覧 ({userDetail.interviews.length}件)
+                  </button>
+                  {showInterviewList && (
+                    <div className="space-y-3">
                     {userDetail.interviews.map((interview) => (
                       <div
                         key={interview.id}
@@ -1099,24 +1137,38 @@ export default function UserProgressDetailPage() {
                         </div>
                       </div>
                     ))}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {userDetail.interviews.length === 0 && (
+                <p className="text-gray-500 text-sm">面談がありません</p>
+              )}
             </div>
 
             {/* 相談管理 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <MessageSquare className="w-5 h-5 text-slate-700" />
-                <h2 className="text-xl font-semibold text-slate-900">相談管理</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-slate-700" />
+                  <h2 className="text-xl font-semibold text-slate-900">相談管理</h2>
+                  <span className="text-sm text-gray-500">({userDetail.consultations.length}件)</span>
+                </div>
+                <button
+                  onClick={() => setShowConsultationForm(!showConsultationForm)}
+                  className="px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark text-sm"
+                >
+                  {showConsultationForm ? '閉じる' : '追加'}
+                </button>
               </div>
 
               {/* 相談履歴を追加 */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  相談履歴を追加
-                </h3>
-                <div className="space-y-3">
+              {showConsultationForm && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">
+                    相談履歴を追加
+                  </h3>
+                  <div className="space-y-3">
                   <div>
                     <label className="block text-sm text-gray-600 mb-1">
                       タイトル <span className="text-red-500">*</span>
@@ -1174,17 +1226,20 @@ export default function UserProgressDetailPage() {
                     {isAddingConsultation ? '追加中...' : '相談履歴を追加'}
                   </button>
                 </div>
-              </div>
+                </div>
+              )}
 
               {/* 既存の相談一覧 */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  相談一覧
-                </h3>
-                {userDetail.consultations.length === 0 ? (
-                  <p className="text-gray-500 text-sm">相談がありません</p>
-                ) : (
-                  <div className="space-y-3">
+              {userDetail.consultations.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setShowConsultationList(!showConsultationList)}
+                    className="text-sm text-gray-600 hover:text-gray-900 mb-3 flex items-center gap-1"
+                  >
+                    {showConsultationList ? '▼' : '▶'} 相談一覧 ({userDetail.consultations.length}件)
+                  </button>
+                  {showConsultationList && (
+                    <div className="space-y-3">
                     {userDetail.consultations.map((consultation) => {
                       const handleAnswer = async () => {
                         const answerText = answerTexts[consultation.id] || '';
@@ -1324,24 +1379,38 @@ export default function UserProgressDetailPage() {
                         </div>
                       );
                     })}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {userDetail.consultations.length === 0 && (
+                <p className="text-gray-500 text-sm">相談がありません</p>
+              )}
             </div>
 
             {/* 診断結果管理 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <Target className="w-5 h-5 text-slate-700" />
-                <h2 className="text-xl font-semibold text-slate-900">診断結果管理</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-slate-700" />
+                  <h2 className="text-xl font-semibold text-slate-900">診断結果管理</h2>
+                  <span className="text-sm text-gray-500">({userDetail.diagnoses.length}件)</span>
+                </div>
+                <button
+                  onClick={() => setShowDiagnosisForm(!showDiagnosisForm)}
+                  className="px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark text-sm"
+                >
+                  {showDiagnosisForm ? '閉じる' : '追加'}
+                </button>
               </div>
 
               {/* 診断結果を追加 */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  診断結果を追加
-                </h3>
-                <div className="space-y-3">
+              {showDiagnosisForm && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">
+                    診断結果を追加
+                  </h3>
+                  <div className="space-y-3">
                   <div>
                     <label className="block text-sm text-gray-600 mb-1">
                       コメント
@@ -1396,17 +1465,20 @@ export default function UserProgressDetailPage() {
                       : '診断結果を追加'}
                   </button>
                 </div>
-              </div>
+                </div>
+              )}
 
               {/* 既存の診断結果一覧 */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  診断結果一覧
-                </h3>
-                {userDetail.diagnoses.length === 0 ? (
-                  <p className="text-gray-500 text-sm">診断結果がありません</p>
-                ) : (
-                  <div className="space-y-3">
+              {userDetail.diagnoses.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setShowDiagnosisList(!showDiagnosisList)}
+                    className="text-sm text-gray-600 hover:text-gray-900 mb-3 flex items-center gap-1"
+                  >
+                    {showDiagnosisList ? '▼' : '▶'} 診断結果一覧 ({userDetail.diagnoses.length}件)
+                  </button>
+                  {showDiagnosisList && (
+                    <div className="space-y-3">
                     {userDetail.diagnoses.map((diagnosis) => (
                       <div
                         key={diagnosis.id}
@@ -1437,9 +1509,13 @@ export default function UserProgressDetailPage() {
                         </div>
                       </div>
                     ))}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {userDetail.diagnoses.length === 0 && (
+                <p className="text-gray-500 text-sm">診断結果がありません</p>
+              )}
             </div>
           </div>
 
