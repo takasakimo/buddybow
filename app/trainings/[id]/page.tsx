@@ -19,6 +19,10 @@ export default async function TrainingDetailPage({ params }: PageProps) {
     redirect('/login');
   }
 
+  const userId = typeof session.user.id === 'string' 
+    ? parseInt(session.user.id) 
+    : session.user.id;
+
   const training = await prisma.training.findUnique({
     where: {
       id: params.id,
@@ -36,6 +40,24 @@ export default async function TrainingDetailPage({ params }: PageProps) {
   if (!training) {
     notFound();
   }
+
+  // ユーザーの進捗情報を取得
+  const moduleProgresses = await prisma.moduleProgress.findMany({
+    where: {
+      userId,
+      moduleId: {
+        in: training.modules.map((m) => m.id),
+      },
+    },
+  });
+
+  // モジュールIDで進捗をマップ
+  const progressMap = new Map(moduleProgresses.map((p) => [p.moduleId, p.completed]));
+
+  // 進捗率を計算
+  const completedModules = training.modules.filter((m) => progressMap.get(m.id)).length;
+  const totalModules = training.modules.length;
+  const progressPercentage = totalModules > 0 ? (completedModules / totalModules) * 100 : 0;
 
   return (
     <DashboardLayout>
@@ -71,10 +93,36 @@ export default async function TrainingDetailPage({ params }: PageProps) {
               {training.title}
             </h1>
             {training.description && (
-              <p className="text-gray-900 text-lg leading-relaxed whitespace-pre-wrap">
+              <p className="text-gray-900 text-lg leading-relaxed whitespace-pre-wrap mb-6">
                 {training.description}
               </p>
             )}
+            
+            {/* 進捗表示 */}
+            <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold text-slate-900">進捗状況</h3>
+                <span className="text-lg font-bold text-slate-900">
+                  {Math.round(progressPercentage)}%
+                </span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-3 mb-3">
+                <div
+                  className={`h-3 rounded-full transition-all ${
+                    progressPercentage === 100 ? 'bg-green-500' : 'bg-blue-600'
+                  }`}
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-sm text-slate-600">
+                <span>
+                  完了: {completedModules}/{totalModules} チャプター
+                </span>
+                {progressPercentage === 100 && (
+                  <span className="text-green-600 font-semibold">✓ 完了</span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -97,41 +145,61 @@ export default async function TrainingDetailPage({ params }: PageProps) {
             </p>
           ) : (
             <div className="space-y-3">
-              {training.modules.map((module, index) => (
-                <div
-                  key={module.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="flex-shrink-0">
-                        <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                          {index + 1}
+              {training.modules.map((module, index) => {
+                const isCompleted = progressMap.get(module.id) || false;
+                return (
+                  <div
+                    key={module.id}
+                    className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
+                      isCompleted ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="flex-shrink-0 relative">
+                          {isCompleted ? (
+                            <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                              ✓
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                              {index + 1}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                            {module.title}
+                          </h3>
+                          {isCompleted && (
+                            <p className="text-sm text-green-600 mt-1">✓ 完了</p>
+                          )}
                         </div>
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">
-                        序章: {module.title}
-                      </h3>
-                    </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      {(session.user.role === 'FULL_ADMIN' || session.user.role === 'MANAGER') && (
+                      <div className="flex gap-2 flex-shrink-0">
+                        {(session.user.role === 'FULL_ADMIN' || session.user.role === 'MANAGER') && (
+                          <Link
+                            href={`/admin/trainings/${training.id}/edit`}
+                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
+                          >
+                            編集
+                          </Link>
+                        )}
                         <Link
-                          href={`/admin/trainings/${training.id}/edit`}
-                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
+                          href={`/trainings/${training.id}/chapters/${module.id}`}
+                          className={`px-4 py-2 rounded-lg text-sm ${
+                            isCompleted
+                              ? 'bg-green-600 text-white hover:bg-green-700'
+                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                          }`}
                         >
-                          編集
+                          {isCompleted ? '再開' : '開始'}
                         </Link>
-                      )}
-                      <Link
-                        href={`/trainings/${training.id}/chapters/${module.id}`}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-                      >
-                        開始
-                      </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
