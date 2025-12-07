@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { BookOpen } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -157,7 +158,7 @@ export default function AdminTrainingsPage() {
                   </div>
                 ) : (
                   <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
-                    <span className="text-4xl text-gray-400">📚</span>
+                    <BookOpen className="w-12 h-12 text-gray-400" />
                   </div>
                 )}
                 <div className="p-6">

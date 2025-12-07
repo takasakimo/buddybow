@@ -7,6 +7,7 @@ import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ChapterSidebar from './components/ChapterSidebar';
 import CompleteButton from './components/CompleteButton';
+import { CheckCircle2 } from 'lucide-react';
 
 interface PageProps {
   params: {
@@ -114,7 +115,7 @@ export default async function ChapterDetailPage({ params }: PageProps) {
               </h1>
               {isCompleted && (
                 <div className="mt-3 inline-flex items-center gap-2 bg-green-500 text-white px-3 py-1 rounded-full text-sm">
-                  <span>✓</span>
+                  <CheckCircle2 className="w-4 h-4" />
                   <span>完了済み</span>
                 </div>
               )}
@@ -189,9 +190,10 @@ export default async function ChapterDetailPage({ params }: PageProps) {
                 {!nextModule && (
                   <Link
                     href={`/trainings/${params.id}`}
-                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
                   >
-                    研修を完了 ✓
+                    研修を完了
+                    <CheckCircle2 className="w-4 h-4" />
                   </Link>
                 )}
               </div>

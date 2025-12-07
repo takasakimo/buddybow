@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { CheckCircle2 } from 'lucide-react';
 
 interface PageProps {
   params: {
@@ -119,7 +120,10 @@ export default async function TrainingDetailPage({ params }: PageProps) {
                   完了: {completedModules}/{totalModules} チャプター
                 </span>
                 {progressPercentage === 100 && (
-                  <span className="text-green-600 font-semibold">✓ 完了</span>
+                  <span className="text-green-600 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" />
+                    完了
+                  </span>
                 )}
               </div>
             </div>
@@ -158,8 +162,8 @@ export default async function TrainingDetailPage({ params }: PageProps) {
                       <div className="flex items-center gap-4 flex-1 min-w-0">
                         <div className="flex-shrink-0 relative">
                           {isCompleted ? (
-                            <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                              ✓
+                            <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center">
+                              <CheckCircle2 className="w-5 h-5" />
                             </div>
                           ) : (
                             <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
@@ -172,7 +176,10 @@ export default async function TrainingDetailPage({ params }: PageProps) {
                             {module.title}
                           </h3>
                           {isCompleted && (
-                            <p className="text-sm text-green-600 mt-1">✓ 完了</p>
+                            <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
+                              <CheckCircle2 className="w-4 h-4" />
+                              完了
+                            </p>
                           )}
                         </div>
                       </div>

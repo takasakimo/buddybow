@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CheckCircle2 } from 'lucide-react';
 
 interface Module {
   id: string;
@@ -56,7 +57,11 @@ export default function ChapterSidebar({ training, currentModuleId, progressMap 
                           : 'bg-gray-300 text-gray-700'
                       }`}
                     >
-                      {isCompleted ? '✓' : index + 1}
+                      {isCompleted ? (
+                        <CheckCircle2 className="w-4 h-4" />
+                      ) : (
+                        index + 1
+                      )}
                     </span>
                     <span
                       className={`text-sm font-medium line-clamp-2 ${

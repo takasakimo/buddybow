@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Map, FileText, MessageSquare, Trophy } from 'lucide-react';
 
 interface User {
   id: number;
@@ -182,26 +183,26 @@ export default function UserProgressPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="flex items-center gap-1">
-                          <span>🗺️</span>
+                        <div className="flex items-center gap-1.5">
+                          <Map className="w-4 h-4 text-slate-500" />
                           <span className="text-gray-600">
                             ロードマップ: {user._count.roadmaps}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <span>📝</span>
+                        <div className="flex items-center gap-1.5">
+                          <FileText className="w-4 h-4 text-slate-500" />
                           <span className="text-gray-600">
                             日報: {user._count.dailyReports}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <span>💬</span>
+                        <div className="flex items-center gap-1.5">
+                          <MessageSquare className="w-4 h-4 text-slate-500" />
                           <span className="text-gray-600">
                             相談: {user._count.consultations}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <span>🏆</span>
+                        <div className="flex items-center gap-1.5">
+                          <Trophy className="w-4 h-4 text-slate-500" />
                           <span className="text-gray-600">
                             バッジ: {user._count.achievements}
                           </span>

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DeleteButton from './components/DeleteButton';
+import { Users, Calendar, Clock, Video } from 'lucide-react';
 
 // 日本時間に変換するヘルパー関数
 function toJSTString(date: Date, format: 'date' | 'time' = 'time') {
@@ -101,8 +102,9 @@ export default async function StudySessionsPage() {
                           {session.status === 'completed' && '完了'}
                           {session.status === 'cancelled' && 'キャンセル'}
                         </span>
-                        <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
-                          👥 {session.participantCount}名
+                        <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {session.participantCount}名
                         </span>
                       </div>
                       <h3 className="text-lg font-semibold mb-2 text-gray-900">
@@ -114,11 +116,20 @@ export default async function StudySessionsPage() {
                         </p>
                       )}
                       <div className="text-sm text-gray-600 space-y-1">
-                        <p>📅 {toJSTString(session.startTime, 'date')}</p>
-                        <p>
-                          🕐 {toJSTString(session.startTime)} - {toJSTString(session.endTime)}
+                        <p className="flex items-center gap-1.5">
+                          <Calendar className="w-4 h-4" />
+                          {toJSTString(session.startTime, 'date')}
                         </p>
-                        {session.zoomId && <p>💻 Zoom ID: {session.zoomId}</p>}
+                        <p className="flex items-center gap-1.5">
+                          <Clock className="w-4 h-4" />
+                          {toJSTString(session.startTime)} - {toJSTString(session.endTime)}
+                        </p>
+                        {session.zoomId && (
+                          <p className="flex items-center gap-1.5">
+                            <Video className="w-4 h-4" />
+                            Zoom ID: {session.zoomId}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-2 ml-4">

@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Target, BookOpen, Map, MessageSquare, FileText, BarChart3, Trophy } from 'lucide-react';
 
 interface UserProgress {
   currentPhase: string;
@@ -373,7 +374,10 @@ export default function UserProgressDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* 進捗状況 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">🎯 進捗状況</h2>
+              <div className="flex items-center gap-2 mb-4">
+                <Target className="w-5 h-5 text-slate-700" />
+                <h2 className="text-xl font-semibold text-slate-900">進捗状況</h2>
+              </div>
               {userDetail.userProgress ? (
                 <div>
                   <div className="flex items-center gap-4 mb-4">
@@ -400,7 +404,10 @@ export default function UserProgressDetailPage() {
 
             {/* 研修ショートカット追加 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">📚 研修ショートカット追加</h2>
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-slate-700" />
+                <h2 className="text-xl font-semibold text-slate-900">研修ショートカット追加</h2>
+              </div>
 
               {/* 研修ショートカットを追加 */}
               <div className="p-4 bg-gray-50 rounded-lg">
@@ -522,7 +529,10 @@ export default function UserProgressDetailPage() {
 
             {/* ロードマップ管理 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">🗺️ ロードマップ管理</h2>
+              <div className="flex items-center gap-2 mb-4">
+                <Map className="w-5 h-5 text-slate-700" />
+                <h2 className="text-xl font-semibold text-slate-900">ロードマップ管理</h2>
+              </div>
 
               {/* ロードマップを追加 */}
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -693,7 +703,10 @@ export default function UserProgressDetailPage() {
 
             {/* 面談管理 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">💬 面談管理</h2>
+              <div className="flex items-center gap-2 mb-4">
+                <MessageSquare className="w-5 h-5 text-slate-700" />
+                <h2 className="text-xl font-semibold text-slate-900">面談管理</h2>
+              </div>
 
               {/* 面談を追加 */}
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -804,9 +817,10 @@ export default function UserProgressDetailPage() {
                                 href={interview.pdfUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                                className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700"
                               >
-                                📄 PDFを表示
+                                <FileText className="w-4 h-4" />
+                                PDFを表示
                               </a>
                             )}
                             <div className="text-xs text-gray-500 mt-2">
@@ -826,11 +840,17 @@ export default function UserProgressDetailPage() {
           <div className="space-y-6">
             {/* マイページ情報サマリー */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold mb-4">📊 マイページ情報</h2>
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3 className="w-5 h-5 text-slate-700" />
+                <h2 className="text-lg font-semibold text-slate-900">マイページ情報</h2>
+              </div>
               <div className="space-y-3">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-600">🗺️ ロードマップ</span>
+                    <div className="flex items-center gap-1.5">
+                      <Map className="w-4 h-4 text-slate-500" />
+                      <span className="text-sm text-gray-600">ロードマップ</span>
+                    </div>
                     <span className="text-sm font-medium text-gray-900">
                       {userDetail.roadmaps.length}件
                     </span>
@@ -838,7 +858,10 @@ export default function UserProgressDetailPage() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-600">📝 日報</span>
+                    <div className="flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-slate-500" />
+                      <span className="text-sm text-gray-600">日報</span>
+                    </div>
                     <span className="text-sm font-medium text-gray-900">
                       {userDetail.dailyReports.length}件
                     </span>
@@ -846,7 +869,10 @@ export default function UserProgressDetailPage() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-600">💬 相談</span>
+                    <div className="flex items-center gap-1.5">
+                      <MessageSquare className="w-4 h-4 text-slate-500" />
+                      <span className="text-sm text-gray-600">相談</span>
+                    </div>
                     <span className="text-sm font-medium text-gray-900">
                       {userDetail.consultations.length}件
                     </span>
@@ -854,7 +880,10 @@ export default function UserProgressDetailPage() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-600">🏆 達成バッジ</span>
+                    <div className="flex items-center gap-1.5">
+                      <Trophy className="w-4 h-4 text-slate-500" />
+                      <span className="text-sm text-gray-600">達成バッジ</span>
+                    </div>
                     <span className="text-sm font-medium text-gray-900">
                       {userDetail.achievements.length}件
                     </span>
@@ -865,7 +894,10 @@ export default function UserProgressDetailPage() {
 
             {/* 最近の活動 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold mb-4">📝 最近の日報</h2>
+              <div className="flex items-center gap-2 mb-4">
+                <FileText className="w-5 h-5 text-slate-700" />
+                <h2 className="text-lg font-semibold text-slate-900">最近の日報</h2>
+              </div>
               {userDetail.dailyReports.length === 0 ? (
                 <p className="text-gray-500 text-sm">日報がありません</p>
               ) : (
