@@ -122,6 +122,12 @@ export default function UserProgressDetailPage() {
   const [answeringConsultations, setAnsweringConsultations] = useState<Record<string, boolean>>({});
   const [answerTexts, setAnswerTexts] = useState<Record<string, string>>({});
   const [showAnswerForms, setShowAnswerForms] = useState<Record<string, boolean>>({});
+  const [isAddingConsultation, setIsAddingConsultation] = useState(false);
+  const [consultationForm, setConsultationForm] = useState({
+    title: '',
+    content: '',
+    answer: '',
+  });
 
   // ロールの後方互換性を確保
   const getUserRole = () => {
@@ -472,6 +478,50 @@ export default function UserProgressDetailPage() {
       alert('診断結果の追加に失敗しました。コンソールを確認してください。');
     } finally {
       setIsAddingDiagnosis(false);
+    }
+  };
+
+  const handleAddConsultation = async () => {
+    if (!consultationForm.title.trim() || !consultationForm.content.trim()) {
+      alert('タイトルと内容は必須です');
+      return;
+    }
+
+    setIsAddingConsultation(true);
+    try {
+      const response = await fetch('/api/admin/user-progress/consultation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: params.id,
+          title: consultationForm.title.trim(),
+          content: consultationForm.content.trim(),
+          answer: consultationForm.answer.trim() || null,
+          status: consultationForm.answer.trim() ? 'answered' : 'pending',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('相談履歴を追加しました');
+        fetchUserDetail();
+        setConsultationForm({
+          title: '',
+          content: '',
+          answer: '',
+        });
+      } else {
+        console.error('Consultation creation error:', data);
+        alert(data.error || '相談履歴の追加に失敗しました');
+      }
+    } catch (error) {
+      console.error('Failed to add consultation:', error);
+      alert('相談履歴の追加に失敗しました。コンソールを確認してください。');
+    } finally {
+      setIsAddingConsultation(false);
     }
   };
 
@@ -1059,6 +1109,71 @@ export default function UserProgressDetailPage() {
               <div className="flex items-center gap-2 mb-6">
                 <MessageSquare className="w-5 h-5 text-slate-700" />
                 <h2 className="text-xl font-semibold text-slate-900">相談管理</h2>
+              </div>
+
+              {/* 相談履歴を追加 */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  相談履歴を追加
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      タイトル <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={consultationForm.title}
+                      onChange={(e) =>
+                        setConsultationForm({ ...consultationForm, title: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-buddybow-orange focus:border-transparent text-gray-900"
+                      placeholder="相談のタイトル"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      相談内容 <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      value={consultationForm.content}
+                      onChange={(e) =>
+                        setConsultationForm({ ...consultationForm, content: e.target.value })
+                      }
+                      rows={5}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-buddybow-orange focus:border-transparent text-gray-900"
+                      placeholder="相談内容を入力..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      回答（任意）
+                    </label>
+                    <textarea
+                      value={consultationForm.answer}
+                      onChange={(e) =>
+                        setConsultationForm({ ...consultationForm, answer: e.target.value })
+                      }
+                      rows={5}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-buddybow-orange focus:border-transparent text-gray-900"
+                      placeholder="回答を入力（任意）..."
+                    />
+                  </div>
+                  <div className="text-xs text-gray-500 bg-buddybow-beige-light p-2 rounded">
+                    公式LINEなどで行われた相談を記録として追加できます。回答も同時に追加することができます。
+                  </div>
+                  <button
+                    onClick={handleAddConsultation}
+                    disabled={
+                      !consultationForm.title.trim() ||
+                      !consultationForm.content.trim() ||
+                      isAddingConsultation
+                    }
+                    className="w-full px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {isAddingConsultation ? '追加中...' : '相談履歴を追加'}
+                  </button>
+                </div>
               </div>
 
               {/* 既存の相談一覧 */}
