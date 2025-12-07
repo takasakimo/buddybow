@@ -142,7 +142,7 @@ export default function UserProgressDetailPage() {
 
     setIsAddingProgress(true);
     try {
-      // 選択された研修の全モジュールを完了として追加
+      // 選択された研修の全モジュールを未完了として追加（受講者が進めるように）
       const promises = training.modules.map((module) =>
         fetch('/api/admin/user-progress/module', {
           method: 'POST',
@@ -152,7 +152,7 @@ export default function UserProgressDetailPage() {
           body: JSON.stringify({
             userId: params.id,
             moduleId: module.id,
-            completed: true,
+            completed: false,
           }),
         })
       );

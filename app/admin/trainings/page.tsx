@@ -175,18 +175,26 @@ export default function AdminTrainingsPage() {
                   <p className="text-sm text-gray-900 mb-4">
                     チャプター数: {training.modules.length}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/trainings/${training.id}/edit`}
+                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 text-center rounded-lg hover:bg-gray-300 text-sm"
+                      >
+                        編集
+                      </Link>
+                      <Link
+                        href={`/trainings/${training.id}`}
+                        className="flex-1 px-4 py-2 bg-green-600 text-white text-center rounded-lg hover:bg-green-700 text-sm"
+                      >
+                        表示
+                      </Link>
+                    </div>
                     <Link
-                      href={`/admin/trainings/${training.id}/edit`}
-                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 text-center rounded-lg hover:bg-gray-300"
+                      href={`/admin/trainings/${training.id}/progress`}
+                      className="w-full px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 text-sm"
                     >
-                      編集
-                    </Link>
-                    <Link
-                      href={`/trainings/${training.id}`}
-                      className="flex-1 px-4 py-2 bg-green-600 text-white text-center rounded-lg hover:bg-green-700"
-                    >
-                      表示
+                      受講者進捗を見る
                     </Link>
                   </div>
                 </div>
