@@ -65,7 +65,7 @@ export default function Sidebar() {
       name: 'マイページ',
       href: '/mypage',
       icon: <User className="w-5 h-5" />,
-      allowedRoles: ['USER'],
+      allowedRoles: ['FULL_ADMIN', 'MANAGER', 'USER'],
     },
     {
       name: '研修一覧',
