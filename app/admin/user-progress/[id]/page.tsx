@@ -418,18 +418,19 @@ export default function UserProgressDetailPage() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                     >
                       <option value="">選択してください</option>
-                      {userDetail.trainings.map((training) => {
-                        const completedModulesCount = training.modules.filter((m) =>
-                          userDetail.moduleProgresses.some((mp) => mp.moduleId === m.id && mp.completed)
-                        ).length;
-                        const totalModules = training.modules.length;
-                        const isCompleted = totalModules > 0 && completedModulesCount === totalModules;
-                        return (
+                      {userDetail.trainings
+                        .filter((training) => {
+                          // 既に追加されている研修を除外（1つでもモジュールが進捗として追加されている場合）
+                          const hasAnyProgress = training.modules.some((m) =>
+                            userDetail.moduleProgresses.some((mp) => mp.moduleId === m.id)
+                          );
+                          return !hasAnyProgress;
+                        })
+                        .map((training) => (
                           <option key={training.id} value={training.id}>
-                            {training.title} {isCompleted ? '(完了済み)' : `(${completedModulesCount}/${totalModules})`}
+                            {training.title}
                           </option>
-                        );
-                      })}
+                        ))}
                     </select>
                   </div>
                   {selectedTraining && (
