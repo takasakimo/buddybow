@@ -15,6 +15,8 @@ interface UserProgress {
 interface Training {
   id: string;
   title: string;
+  categoryId: string | null;
+  category: { id: string; name: string } | null;
   modules: { id: string; title: string }[];
 }
 
@@ -97,6 +99,8 @@ export default function UserProgressDetailPage() {
   const [selectedTraining, setSelectedTraining] = useState<string>('');
   const [trainingDeadline, setTrainingDeadline] = useState<string>('');
   const [isAddingProgress, setIsAddingProgress] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [isAddingCategoryProgress, setIsAddingCategoryProgress] = useState(false);
   const [editingDeadline, setEditingDeadline] = useState<Record<string, string>>({});
   const [isUpdatingDeadline, setIsUpdatingDeadline] = useState<Record<string, boolean>>({});
   const [isAddingRoadmap, setIsAddingRoadmap] = useState(false);
@@ -220,6 +224,76 @@ export default function UserProgressDetailPage() {
       alert('進捗の追加に失敗しました');
     } finally {
       setIsAddingProgress(false);
+    }
+  };
+
+  const handleAddCategoryProgress = async () => {
+    if (!selectedCategory) {
+      alert('カテゴリを選択してください');
+      return;
+    }
+
+    if (!userDetail) {
+      return;
+    }
+
+    // 選択されたカテゴリに属する未追加の研修を取得
+    const categoryTrainings = userDetail.trainings.filter((training) => {
+      // カテゴリが一致する
+      const categoryMatch = training.categoryId === selectedCategory;
+      // まだ追加されていない（1つでもモジュールが進捗として追加されている場合は除外）
+      const hasAnyProgress = training.modules.some((m) =>
+        userDetail.moduleProgresses.some((mp) => mp.moduleId === m.id)
+      );
+      return categoryMatch && !hasAnyProgress;
+    });
+
+    if (categoryTrainings.length === 0) {
+      alert('このカテゴリに追加できる研修がありません');
+      return;
+    }
+
+    setIsAddingCategoryProgress(true);
+    try {
+      const deadline = trainingDeadline ? new Date(trainingDeadline).toISOString() : null;
+      
+      // 全ての研修の全モジュールを追加
+      const allPromises: Promise<Response>[] = [];
+      categoryTrainings.forEach((training) => {
+        training.modules.forEach((module) => {
+          allPromises.push(
+            fetch('/api/admin/user-progress/module', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                userId: params.id,
+                moduleId: module.id,
+                completed: false,
+                deadline: deadline,
+              }),
+            })
+          );
+        });
+      });
+
+      const results = await Promise.all(allPromises);
+      const allSuccess = results.every((r) => r.ok);
+
+      if (allSuccess) {
+        alert(`${categoryTrainings.length}件の研修を一括追加しました`);
+        fetchUserDetail();
+        setSelectedCategory('');
+        setTrainingDeadline('');
+      } else {
+        alert('一部の研修の追加に失敗しました');
+      }
+    } catch (error) {
+      console.error('Failed to add category progress:', error);
+      alert('研修の一括追加に失敗しました');
+    } finally {
+      setIsAddingCategoryProgress(false);
     }
   };
 
@@ -610,10 +684,83 @@ export default function UserProgressDetailPage() {
                 <h2 className="text-xl font-semibold text-slate-900">研修ショートカット追加</h2>
               </div>
 
-              {/* 研修ショートカットを追加 */}
+              {/* カテゴリごとの一括追加 */}
+              <div className="p-4 bg-buddybow-beige-light rounded-lg mb-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  カテゴリごとに一括追加
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      カテゴリを選択
+                    </label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    >
+                      <option value="">選択してください</option>
+                      {(() => {
+                        // カテゴリ一覧を取得（重複を除去）
+                        const seenIds = new Set<string>();
+                        const categories: { id: string; name: string }[] = [];
+                        userDetail.trainings
+                          .filter((t) => t.category)
+                          .forEach((t) => {
+                            if (t.category && !seenIds.has(t.category.id)) {
+                              seenIds.add(t.category.id);
+                              categories.push(t.category);
+                            }
+                          });
+                        return categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ));
+                      })()}
+                    </select>
+                  </div>
+                  {selectedCategory && (() => {
+                    const categoryTrainings = userDetail.trainings.filter((training) => {
+                      const categoryMatch = training.categoryId === selectedCategory;
+                      const hasAnyProgress = training.modules.some((m) =>
+                        userDetail.moduleProgresses.some((mp) => mp.moduleId === m.id)
+                      );
+                      return categoryMatch && !hasAnyProgress;
+                    });
+                    const totalModules = categoryTrainings.reduce((sum, t) => sum + t.modules.length, 0);
+                    return (
+                      <div className="text-xs text-gray-600 bg-white p-2 rounded">
+                        {categoryTrainings.length}件の研修（全{totalModules}個のモジュール）が追加されます
+                      </div>
+                    );
+                  })()}
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      期日（任意・全研修共通）
+                    </label>
+                    <input
+                      type="date"
+                      value={trainingDeadline}
+                      onChange={(e) => setTrainingDeadline(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddCategoryProgress}
+                    disabled={!selectedCategory || isAddingCategoryProgress}
+                    className="w-full px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {isAddingCategoryProgress ? '追加中...' : 'カテゴリごとに一括追加'}
+                  </button>
+                </div>
+              </div>
+
+              {/* 個別の研修ショートカットを追加 */}
               <div className="p-4 bg-gray-50 rounded-lg">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  受講者のマイページに研修を追加
+                  個別の研修を追加
                 </h3>
                 <div className="space-y-3">
                   <div>

@@ -64,6 +64,12 @@ export async function GET(
             order: 'asc',
           },
         },
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -174,6 +180,11 @@ export async function GET(
       trainings: trainings.map((t) => ({
         id: t.id,
         title: t.title,
+        categoryId: t.categoryId,
+        category: t.category ? {
+          id: t.category.id,
+          name: t.category.name,
+        } : null,
         modules: t.modules.map((m) => ({
           id: m.id,
           title: m.title,
