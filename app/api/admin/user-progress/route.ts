@@ -29,9 +29,9 @@ export async function GET() {
       ? parseInt(session.user.id) 
       : session.user.id;
 
-    // 全権管理者は全ユーザーを取得、担当者は担当ユーザーのみ
+    // 全権管理者は全ユーザーを取得（管理者含む）、担当者は担当ユーザーのみ
     const whereClause = userRole === 'FULL_ADMIN'
-      ? { role: 'USER' } // 一般ユーザーのみ
+      ? {} // 全ユーザー（管理者含む）を取得
       : {
           role: 'USER',
           assignedAdminId: currentAdminId, // ログイン中の担当者の担当ユーザーのみ
