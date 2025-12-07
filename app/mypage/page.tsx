@@ -4,7 +4,18 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Target, Trophy, Map, FileText, MessageSquare, Calendar, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Target, Trophy, Map, FileText, MessageSquare, Calendar, TrendingUp, CheckCircle2, BookOpen } from 'lucide-react';
+import Image from 'next/image';
+
+interface TrainingProgress {
+  trainingId: string;
+  trainingTitle: string;
+  trainingDescription: string | null;
+  trainingImageUrl: string | null;
+  totalModules: number;
+  completedModules: number;
+  progress: number;
+}
 
 export default async function MyPage() {
   const session = await getServerSession(authOptions);
@@ -30,6 +41,90 @@ export default async function MyPage() {
       },
     });
   }
+
+  // ユーザーのモジュール進捗を取得
+  const moduleProgresses = await prisma.moduleProgress.findMany({
+    where: { userId },
+    select: {
+      moduleId: true,
+      completed: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  // モジュールIDを取得（重複を除去）
+  const uniqueModuleIds = Array.from(new Set(moduleProgresses.map((mp) => mp.moduleId)));
+
+  // モジュール情報と研修情報を取得
+  const modules = uniqueModuleIds.length > 0
+    ? await prisma.module.findMany({
+        where: {
+          id: {
+            in: uniqueModuleIds,
+          },
+        },
+        include: {
+          training: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              imageUrl: true,
+              modules: {
+                select: {
+                  id: true,
+                },
+                orderBy: {
+                  order: 'asc',
+                },
+              },
+            },
+          },
+        },
+      })
+    : [];
+
+  // 研修単位でグループ化して進捗率を計算
+  const trainingMap: Record<string, TrainingProgress> = {};
+
+  // まず、各研修の基本情報を設定
+  modules.forEach((module) => {
+    const trainingId = module.training.id;
+    if (!trainingMap[trainingId]) {
+      trainingMap[trainingId] = {
+        trainingId,
+        trainingTitle: module.training.title,
+        trainingDescription: module.training.description,
+        trainingImageUrl: module.training.imageUrl,
+        totalModules: module.training.modules.length,
+        completedModules: 0,
+        progress: 0,
+      };
+    }
+  });
+
+  // 完了モジュール数をカウント
+  modules.forEach((module) => {
+    const trainingId = module.training.id;
+    const progress = moduleProgresses.find((mp) => mp.moduleId === module.id);
+    if (progress?.completed) {
+      const training = trainingMap[trainingId];
+      if (training) {
+        training.completedModules++;
+      }
+    }
+  });
+
+  // 進捗率を計算
+  Object.values(trainingMap).forEach((training) => {
+    training.progress = training.totalModules > 0
+      ? (training.completedModules / training.totalModules) * 100
+      : 0;
+  });
+
+  const userTrainings = Object.values(trainingMap);
 
   // 各種データ取得
   const [roadmaps, interviews, recentReports, consultations, achievements, motivationMessages] = await Promise.all([
@@ -180,6 +275,78 @@ export default async function MyPage() {
                 </div>
               </div>
             )}
+
+            {/* 受講中の研修 */}
+            <div className="card p-6">
+                <div className="flex justify-between items-center mb-5">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-slate-700" />
+                    <h2 className="text-lg font-semibold text-slate-900">受講中の研修</h2>
+                  </div>
+                  <Link href="/trainings" className="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">
+                    すべて見る →
+                  </Link>
+                </div>
+                {userTrainings.length === 0 ? (
+                  <p className="text-slate-500 text-sm py-4">受講中の研修はありません</p>
+                ) : (
+                  <div className="space-y-4">
+                    {userTrainings.map((training) => (
+                    <Link
+                      key={training.trainingId}
+                      href={`/trainings/${training.trainingId}`}
+                      className="block p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex items-start gap-4">
+                        {training.trainingImageUrl ? (
+                          <div className="relative w-20 h-20 rounded-lg bg-slate-100 flex-shrink-0 overflow-hidden">
+                            <Image
+                              src={training.trainingImageUrl}
+                              alt={training.trainingTitle}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                            <BookOpen className="w-8 h-8 text-slate-400" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-semibold text-slate-900 mb-1 line-clamp-1">
+                            {training.trainingTitle}
+                          </h3>
+                          {training.trainingDescription && (
+                            <p className="text-sm text-slate-600 mb-3 line-clamp-2">
+                              {training.trainingDescription}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <div className="flex justify-between text-xs text-slate-600 mb-1">
+                                <span>進捗率</span>
+                                <span className="font-medium">{Math.round(training.progress)}%</span>
+                              </div>
+                              <div className="w-full bg-slate-200 rounded-full h-2">
+                                <div
+                                  className={`h-2 rounded-full transition-all ${
+                                    training.progress === 100 ? 'bg-green-500' : 'bg-blue-600'
+                                  }`}
+                                  style={{ width: `${training.progress}%` }}
+                                />
+                              </div>
+                            </div>
+                            <div className="text-xs text-slate-600 min-w-[3rem] text-right">
+                              {training.completedModules}/{training.totalModules}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                  </div>
+                )}
+              </div>
 
             {/* 最近の活動 */}
             <div className="card p-6">
