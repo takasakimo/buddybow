@@ -97,8 +97,20 @@ export default async function MyPage() {
   modules.forEach((module) => {
     const trainingId = module.training.id;
     if (!trainingMap[trainingId]) {
-      // この研修の最初のモジュールの進捗を取得（追加日と期日を取得するため）
-      const firstModuleProgress = moduleProgresses.find((mp) => mp.moduleId === module.id);
+      // この研修のすべてのモジュール進捗を取得
+      const trainingModuleIds = module.training.modules.map((m) => m.id);
+      const trainingProgresses = moduleProgresses.filter((mp) => 
+        trainingModuleIds.includes(mp.moduleId)
+      );
+      
+      // 追加日は最初に作成されたモジュール進捗から取得
+      const earliestProgress = trainingProgresses.sort((a, b) => 
+        a.createdAt.getTime() - b.createdAt.getTime()
+      )[0];
+      
+      // 期日は設定されている最初のモジュール進捗から取得
+      const progressWithDeadline = trainingProgresses.find((mp) => mp.deadline);
+      
       trainingMap[trainingId] = {
         trainingId,
         trainingTitle: module.training.title,
@@ -107,8 +119,8 @@ export default async function MyPage() {
         totalModules: module.training.modules.length,
         completedModules: 0,
         progress: 0,
-        assignedAt: firstModuleProgress?.createdAt || new Date(),
-        deadline: firstModuleProgress?.deadline || null,
+        assignedAt: earliestProgress?.createdAt || new Date(),
+        deadline: progressWithDeadline?.deadline || null,
       };
     }
   });
