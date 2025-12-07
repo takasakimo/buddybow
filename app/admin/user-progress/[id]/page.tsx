@@ -846,45 +846,53 @@ export default function UserProgressDetailPage() {
               </div>
               <div className="space-y-3">
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <Map className="w-4 h-4 text-slate-500" />
-                      <span className="text-sm text-gray-600">ロードマップ</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                        <Map className="w-4 h-4 text-slate-700" />
+                      </div>
+                      <span className="text-sm text-slate-700 font-medium">ロードマップ</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-semibold text-slate-900">
                       {userDetail.roadmaps.length}件
                     </span>
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <FileText className="w-4 h-4 text-slate-500" />
-                      <span className="text-sm text-gray-600">日報</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                        <FileText className="w-4 h-4 text-slate-700" />
+                      </div>
+                      <span className="text-sm text-slate-700 font-medium">日報</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-semibold text-slate-900">
                       {userDetail.dailyReports.length}件
                     </span>
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <MessageSquare className="w-4 h-4 text-slate-500" />
-                      <span className="text-sm text-gray-600">相談</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                        <MessageSquare className="w-4 h-4 text-slate-700" />
+                      </div>
+                      <span className="text-sm text-slate-700 font-medium">相談</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-semibold text-slate-900">
                       {userDetail.consultations.length}件
                     </span>
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <Trophy className="w-4 h-4 text-slate-500" />
-                      <span className="text-sm text-gray-600">達成バッジ</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                        <Trophy className="w-4 h-4 text-slate-700" />
+                      </div>
+                      <span className="text-sm text-slate-700 font-medium">達成バッジ</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-semibold text-slate-900">
                       {userDetail.achievements.length}件
                     </span>
                   </div>
