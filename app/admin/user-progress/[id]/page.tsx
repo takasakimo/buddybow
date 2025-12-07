@@ -452,6 +452,72 @@ export default function UserProgressDetailPage() {
                   </button>
                 </div>
               </div>
+
+              {/* 追加済みの研修一覧 */}
+              {(() => {
+                const addedTrainings = userDetail.trainings.filter((training) => {
+                  // 既に追加されている研修（1つでもモジュールが進捗として追加されている場合）
+                  return training.modules.some((m) =>
+                    userDetail.moduleProgresses.some((mp) => mp.moduleId === m.id)
+                  );
+                });
+
+                if (addedTrainings.length === 0) {
+                  return null;
+                }
+
+                return (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-700 mb-3">
+                      追加済みの研修
+                    </h3>
+                    <div className="space-y-2">
+                      {addedTrainings.map((training) => {
+                        const completedModulesCount = training.modules.filter((m) =>
+                          userDetail.moduleProgresses.some((mp) => mp.moduleId === m.id && mp.completed)
+                        ).length;
+                        const totalModules = training.modules.length;
+                        const progress = totalModules > 0 ? (completedModulesCount / totalModules) * 100 : 0;
+                        const isCompleted = totalModules > 0 && completedModulesCount === totalModules;
+
+                        return (
+                          <div
+                            key={training.id}
+                            className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="text-sm font-medium text-gray-900 mb-1">
+                                  {training.title}
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <div className="flex-1">
+                                    <div className="flex justify-between text-xs text-gray-600 mb-1">
+                                      <span>進捗率</span>
+                                      <span className="font-medium">{Math.round(progress)}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                      <div
+                                        className={`h-1.5 rounded-full transition-all ${
+                                          isCompleted ? 'bg-green-500' : 'bg-blue-600'
+                                        }`}
+                                        style={{ width: `${progress}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="text-xs text-gray-600 min-w-[3rem] text-right">
+                                    {completedModulesCount}/{totalModules}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* ロードマップ管理 */}
