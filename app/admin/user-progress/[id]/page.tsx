@@ -76,7 +76,15 @@ interface UserDetail {
   interviews: Interview[];
   diagnoses: Diagnosis[];
   dailyReports: { id: string; date: Date; type: string }[];
-  consultations: { id: string; title: string; status: string }[];
+  consultations: { 
+    id: string; 
+    title: string; 
+    content: string;
+    status: string;
+    answer: string | null;
+    answeredAt: Date | null;
+    createdAt: Date;
+  }[];
   achievements: { id: string; title: string; badgeType: string }[];
 }
 
@@ -111,6 +119,9 @@ export default function UserProgressDetailPage() {
     pdfFile: null as File | null,
     comment: '',
   });
+  const [answeringConsultations, setAnsweringConsultations] = useState<Record<string, boolean>>({});
+  const [answerTexts, setAnswerTexts] = useState<Record<string, string>>({});
+  const [showAnswerForms, setShowAnswerForms] = useState<Record<string, boolean>>({});
 
   // ロールの後方互換性を確保
   const getUserRole = () => {
@@ -1038,6 +1049,166 @@ export default function UserProgressDetailPage() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 相談管理 */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <MessageSquare className="w-5 h-5 text-slate-700" />
+                <h2 className="text-xl font-semibold text-slate-900">相談管理</h2>
+              </div>
+
+              {/* 既存の相談一覧 */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  相談一覧
+                </h3>
+                {userDetail.consultations.length === 0 ? (
+                  <p className="text-gray-500 text-sm">相談がありません</p>
+                ) : (
+                  <div className="space-y-3">
+                    {userDetail.consultations.map((consultation) => {
+                      const handleAnswer = async () => {
+                        const answerText = answerTexts[consultation.id] || '';
+                        if (!answerText.trim()) {
+                          alert('回答を入力してください');
+                          return;
+                        }
+
+                        setAnsweringConsultations((prev) => ({ ...prev, [consultation.id]: true }));
+                        try {
+                          const response = await fetch('/api/admin/consultations/answer', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              consultationId: consultation.id,
+                              answer: answerText.trim(),
+                            }),
+                          });
+
+                          if (response.ok) {
+                            alert('回答を送信しました');
+                            setAnswerTexts((prev) => {
+                              const newState = { ...prev };
+                              delete newState[consultation.id];
+                              return newState;
+                            });
+                            setShowAnswerForms((prev) => {
+                              const newState = { ...prev };
+                              delete newState[consultation.id];
+                              return newState;
+                            });
+                            fetchUserDetail();
+                          } else {
+                            const data = await response.json();
+                            alert(data.error || '回答の送信に失敗しました');
+                          }
+                        } catch (error) {
+                          console.error('Failed to answer consultation:', error);
+                          alert('回答の送信に失敗しました');
+                        } finally {
+                          setAnsweringConsultations((prev) => {
+                            const newState = { ...prev };
+                            delete newState[consultation.id];
+                            return newState;
+                          });
+                        }
+                      };
+
+                      return (
+                        <div
+                          key={consultation.id}
+                          className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="text-sm font-semibold text-gray-900">
+                                  {consultation.title}
+                                </h4>
+                                <span
+                                  className={`px-2.5 py-1 text-xs rounded-full font-medium ${
+                                    consultation.status === 'answered'
+                                      ? 'bg-green-100 text-green-700'
+                                      : consultation.status === 'closed'
+                                      ? 'bg-gray-100 text-gray-700'
+                                      : 'bg-amber-100 text-amber-700'
+                                  }`}
+                                >
+                                  {consultation.status === 'answered' && '回答済み'}
+                                  {consultation.status === 'closed' && '完了'}
+                                  {consultation.status === 'pending' && '回答待ち'}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-3 whitespace-pre-wrap">
+                                {consultation.content}
+                              </p>
+                              <div className="text-xs text-gray-500 mb-3">
+                                {new Date(consultation.createdAt).toLocaleDateString('ja-JP')}
+                              </div>
+                              {consultation.answer && (
+                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <h5 className="text-sm font-semibold text-gray-900 mb-2">回答</h5>
+                                  <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                                    {consultation.answer}
+                                  </p>
+                                </div>
+                              )}
+                              {consultation.status === 'pending' && !showAnswerForms[consultation.id] && (
+                                <button
+                                  onClick={() => setShowAnswerForms((prev) => ({ ...prev, [consultation.id]: true }))}
+                                  className="mt-3 px-3 py-1.5 text-sm bg-buddybow-orange text-white rounded hover:bg-buddybow-orange-dark transition-colors"
+                                >
+                                  回答する
+                                </button>
+                              )}
+                              {showAnswerForms[consultation.id] && (
+                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <textarea
+                                    value={answerTexts[consultation.id] || ''}
+                                    onChange={(e) => setAnswerTexts((prev) => ({ ...prev, [consultation.id]: e.target.value }))}
+                                    rows={5}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-buddybow-orange focus:border-transparent text-gray-900 mb-2"
+                                    placeholder="回答を入力してください"
+                                  />
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={handleAnswer}
+                                      disabled={answeringConsultations[consultation.id]}
+                                      className="px-4 py-2 text-sm bg-buddybow-orange text-white rounded hover:bg-buddybow-orange-dark disabled:bg-gray-400 transition-colors"
+                                    >
+                                      {answeringConsultations[consultation.id] ? '送信中...' : '送信'}
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setShowAnswerForms((prev) => {
+                                          const newState = { ...prev };
+                                          delete newState[consultation.id];
+                                          return newState;
+                                        });
+                                        setAnswerTexts((prev) => {
+                                          const newState = { ...prev };
+                                          delete newState[consultation.id];
+                                          return newState;
+                                        });
+                                      }}
+                                      className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+                                    >
+                                      キャンセル
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -146,9 +146,17 @@ export async function GET(
       }),
       prisma.consultation.findMany({
         where: { userId },
-        select: { id: true, title: true, status: true },
+        select: { 
+          id: true, 
+          title: true, 
+          content: true,
+          status: true,
+          answer: true,
+          answeredAt: true,
+          createdAt: true,
+        },
         orderBy: { createdAt: 'desc' },
-        take: 10,
+        take: 20,
       }),
       prisma.achievement.findMany({
         where: { userId },
@@ -208,7 +216,15 @@ export async function GET(
         };
       }),
       dailyReports,
-      consultations,
+      consultations: consultations.map((c) => ({
+        id: c.id,
+        title: c.title,
+        content: c.content,
+        status: c.status,
+        answer: c.answer,
+        answeredAt: c.answeredAt,
+        createdAt: c.createdAt,
+      })),
       achievements,
     });
   } catch (error) {
