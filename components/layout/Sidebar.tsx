@@ -186,7 +186,7 @@ export default function Sidebar() {
             className="flex items-center gap-2.5 group"
             style={{ pointerEvents: 'auto' }}
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center group-hover:from-slate-800 group-hover:to-slate-600 transition-all">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center group-hover:from-blue-700 group-hover:to-blue-600 transition-all">
               <Target className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-semibold text-slate-900 tracking-tight">buddybow</span>
@@ -209,7 +209,7 @@ export default function Sidebar() {
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? 'bg-slate-900 text-white font-medium shadow-sm'
+                        ? 'bg-blue-600 text-white font-medium shadow-sm'
                         : 'text-slate-700 hover:bg-slate-100 active:bg-slate-200'
                     }`}
                     style={{ pointerEvents: 'auto' }}

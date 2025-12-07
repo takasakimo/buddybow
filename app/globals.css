@@ -48,8 +48,8 @@
 
   /* 洗練されたボタンスタイル */
   .btn-primary {
-    @apply px-5 py-2.5 bg-slate-900 text-white rounded-lg font-medium 
-           hover:bg-slate-800 active:bg-slate-950 transition-all duration-200 
+    @apply px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium 
+           hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 
            shadow-sm hover:shadow-md;
   }
 
