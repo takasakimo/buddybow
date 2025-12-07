@@ -161,11 +161,11 @@ export default function UserProgressDetailPage() {
       const allSuccess = results.every((r) => r.ok);
 
       if (allSuccess) {
-        alert(`${training.title}の全モジュール（${training.modules.length}件）の進捗を追加しました`);
+        alert(`${training.title}を受講者のマイページに追加しました`);
         fetchUserDetail();
         setSelectedTraining('');
       } else {
-        alert('一部の進捗の追加に失敗しました');
+        alert('研修の追加に失敗しました');
       }
     } catch (error) {
       console.error('Failed to add progress:', error);
@@ -175,77 +175,6 @@ export default function UserProgressDetailPage() {
     }
   };
 
-  const handleUpdateTrainingProgress = async (trainingId: string, completed: boolean) => {
-    const training = userDetail?.trainings.find((t) => t.id === trainingId);
-    if (!training || training.modules.length === 0) {
-      alert('この研修にはモジュールがありません');
-      return;
-    }
-
-    try {
-      // 選択された研修の全モジュールを一括更新
-      const promises = training.modules.map((module) =>
-        fetch('/api/admin/user-progress/module', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: params.id,
-            moduleId: module.id,
-            completed,
-          }),
-        })
-      );
-
-      const results = await Promise.all(promises);
-      const allSuccess = results.every((r) => r.ok);
-
-      if (allSuccess) {
-        fetchUserDetail();
-      } else {
-        alert('一部の進捗の更新に失敗しました');
-      }
-    } catch (error) {
-      console.error('Failed to update training progress:', error);
-      alert('進捗の更新に失敗しました');
-    }
-  };
-
-  // 研修単位でグループ化して進捗率を計算
-  const getTrainingProgress = () => {
-    if (!userDetail) return [];
-
-    const trainingMap = new Map<string, {
-      trainingId: string;
-      trainingTitle: string;
-      totalModules: number;
-      completedModules: number;
-      progress: number;
-      isCompleted: boolean;
-    }>();
-
-    // 各研修の情報を集計
-    userDetail.trainings.forEach((training) => {
-      const completedModules = training.modules.filter((m) =>
-        userDetail.moduleProgresses.some((mp) => mp.moduleId === m.id && mp.completed)
-      ).length;
-      const totalModules = training.modules.length;
-      const progress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0;
-      const isCompleted = totalModules > 0 && completedModules === totalModules;
-
-      trainingMap.set(training.id, {
-        trainingId: training.id,
-        trainingTitle: training.title,
-        totalModules,
-        completedModules,
-        progress,
-        isCompleted,
-      });
-    });
-
-    return Array.from(trainingMap.values());
-  };
 
   const handleAddRoadmap = async () => {
     if (!roadmapForm.title || !roadmapForm.startDate || !roadmapForm.endDate) {
@@ -469,14 +398,14 @@ export default function UserProgressDetailPage() {
               )}
             </div>
 
-            {/* 研修進捗管理 */}
+            {/* 研修ショートカット追加 */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">📚 研修進捗管理</h2>
+              <h2 className="text-xl font-semibold mb-4">📚 研修ショートカット追加</h2>
 
-              {/* 研修進捗を追加 */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              {/* 研修ショートカットを追加 */}
+              <div className="p-4 bg-gray-50 rounded-lg">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  研修進捗を追加
+                  受講者のマイページに研修を追加
                 </h3>
                 <div className="space-y-3">
                   <div>
@@ -509,7 +438,7 @@ export default function UserProgressDetailPage() {
                         const training = userDetail.trainings.find((t) => t.id === selectedTraining);
                         if (!training) return null;
                         const totalModules = training.modules.length;
-                        return `この研修には${totalModules}個のモジュールがあります。全モジュールを完了として追加します。`;
+                        return `この研修を受講者のマイページにショートカットとして追加します。全${totalModules}個のモジュールが追加されます。`;
                       })()}
                     </div>
                   )}
@@ -518,74 +447,9 @@ export default function UserProgressDetailPage() {
                     disabled={!selectedTraining || isAddingProgress}
                     className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
-                    {isAddingProgress ? '追加中...' : '進捗を追加'}
+                    {isAddingProgress ? '追加中...' : 'ショートカットを追加'}
                   </button>
                 </div>
-              </div>
-
-              {/* 既存の進捗一覧 */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  進捗一覧
-                </h3>
-                {(() => {
-                  const trainingProgresses = getTrainingProgress();
-                  if (trainingProgresses.length === 0) {
-                    return <p className="text-gray-500 text-sm">進捗情報がありません</p>;
-                  }
-                  return (
-                    <div className="space-y-3">
-                      {trainingProgresses.map((training) => (
-                        <div
-                          key={training.trainingId}
-                          className="p-4 bg-gray-50 rounded-lg border border-gray-200"
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex-1">
-                              <div className="text-sm font-semibold text-gray-900 mb-2">
-                                {training.trainingTitle}
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <div className="flex-1">
-                                  <div className="flex justify-between text-xs text-gray-600 mb-1.5">
-                                    <span>進捗率</span>
-                                    <span className="font-medium">{Math.round(training.progress)}%</span>
-                                  </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div
-                                      className={`h-2 rounded-full transition-all ${
-                                        training.isCompleted ? 'bg-green-500' : 'bg-blue-600'
-                                      }`}
-                                      style={{ width: `${training.progress}%` }}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="text-xs text-gray-600 min-w-[4rem] text-right">
-                                  {training.completedModules}/{training.totalModules}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="ml-4 flex items-center gap-2">
-                              <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={training.isCompleted}
-                                  onChange={(e) =>
-                                    handleUpdateTrainingProgress(training.trainingId, e.target.checked)
-                                  }
-                                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                                />
-                                <span className="text-sm text-gray-700 font-medium">
-                                  {training.isCompleted ? '完了' : '未完了'}
-                                </span>
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
               </div>
             </div>
 
