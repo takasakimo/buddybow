@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,13 +26,19 @@ export async function POST(request: Request) {
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl) {
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
       return NextResponse.json(
         { error: 'Supabase Storageの設定が不完全です' },
         { status: 500 }
       );
     }
+
+    // サーバー側でSupabaseクライアントを作成（サービスロールキー使用でRLSをバイパス）
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
     // ファイル名をサニタイズ（英数字、ハイフン、アンダースコア、ドットのみ許可）
     const sanitizeFileName = (name: string): string => {
@@ -48,16 +55,23 @@ export async function POST(request: Request) {
     const uniqueFileName = sanitizeFileName(fileName);
     const filePath = `diagnosis/${uniqueFileName}`;
 
-    // サーバー側でSupabase Storageに直接アップロード（サービスロールキーを使用してRLSをバイパス）
-    // ファイルはクライアント側から送られてくるため、このエンドポイントではファイルパスのみを返す
-    // 実際のアップロードは、クライアント側からSupabase Storageに直接行う
-    
-    // クライアント側から直接アップロードするため、Supabase Storageのバケットを公開設定にする必要がある
-    // または、RLSポリシーを適切に設定する必要がある
-    
+    // 署名付きURLを生成してクライアントから直接PUTアップロードできるようにする
+    const { data, error } = await supabase.storage
+      .from('files')
+      .createSignedUploadUrl(filePath);
+
+    if (error || !data?.signedUrl) {
+      console.error('Signed URL error:', error);
+      return NextResponse.json(
+        { error: '署名付きURLの生成に失敗しました' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       path: filePath,
-      publicUrl: `${supabaseUrl}/storage/v1/object/public/files/${filePath}`
+      signedUrl: data.signedUrl,
+      publicUrl: `${supabaseUrl}/storage/v1/object/public/files/${filePath}`,
     });
   } catch (error) {
     console.error('Signed URL error:', error);

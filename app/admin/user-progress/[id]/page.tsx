@@ -446,33 +446,23 @@ export default function UserProgressDetailPage() {
         throw new Error(errorData.error || 'ファイルパスの取得に失敗しました');
       }
 
-      const { path, publicUrl } = await pathResponse.json();
+      const { publicUrl, signedUrl } = await pathResponse.json();
 
-      // 2. クライアント側からSupabase Storageに直接アップロード
-      // 環境変数はクライアント側で直接使用できないため、APIから取得
-      const configResponse = await fetch('/api/upload/config');
-      if (!configResponse.ok) {
-        throw new Error('Supabase設定の取得に失敗しました');
-      }
-      const config = await configResponse.json();
-
-      if (!config.supabaseUrl || !config.supabaseAnonKey) {
-        throw new Error('Supabase Storageの設定が不完全です。環境変数を確認してください。');
+      if (!signedUrl) {
+        throw new Error('署名付きURLの取得に失敗しました');
       }
 
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
+      // 2. 署名付きURLを使ってクライアントから直接PUTアップロード（RLSを回避）
+      const uploadResponse = await fetch(signedUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type,
+        },
+        body: file,
+      });
 
-      const { error: uploadError } = await supabaseClient.storage
-        .from('files')
-        .upload(path, file, {
-          contentType: file.type,
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error('Supabase upload error:', uploadError);
-        throw new Error(`アップロードに失敗しました: ${uploadError.message}`);
+      if (!uploadResponse.ok) {
+        throw new Error('アップロードに失敗しました');
       }
 
       return publicUrl;
