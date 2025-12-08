@@ -429,22 +429,53 @@ export default function UserProgressDetailPage() {
 
     setIsUploadingPdf(true);
     try {
-      // サーバー側API経由でアップロード（RLSポリシーを回避）
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/upload', {
+      // 1. サーバー側でファイルパスを取得（認証チェック）
+      const pathResponse = await fetch('/api/upload/signed-url', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+        }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'アップロードに失敗しました' }));
-        throw new Error(errorData.error || 'アップロードに失敗しました');
+      if (!pathResponse.ok) {
+        const errorData = await pathResponse.json().catch(() => ({ error: 'ファイルパスの取得に失敗しました' }));
+        throw new Error(errorData.error || 'ファイルパスの取得に失敗しました');
       }
 
-      const data = await response.json();
-      return data.url;
+      const { path, publicUrl } = await pathResponse.json();
+
+      // 2. クライアント側からSupabase Storageに直接アップロード
+      // 環境変数はクライアント側で直接使用できないため、APIから取得
+      const configResponse = await fetch('/api/upload/config');
+      if (!configResponse.ok) {
+        throw new Error('Supabase設定の取得に失敗しました');
+      }
+      const config = await configResponse.json();
+
+      if (!config.supabaseUrl || !config.supabaseAnonKey) {
+        throw new Error('Supabase Storageの設定が不完全です。環境変数を確認してください。');
+      }
+
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from('files')
+        .upload(path, file, {
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error('Supabase upload error:', uploadError);
+        throw new Error(`アップロードに失敗しました: ${uploadError.message}`);
+      }
+
+      return publicUrl;
     } catch (error) {
       console.error('PDF upload error:', error);
       alert(error instanceof Error ? error.message : 'PDFのアップロードに失敗しました');
