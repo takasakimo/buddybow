@@ -39,9 +39,25 @@ export async function POST(request: Request) {
     // 診断結果をチェック
     await checkDiagnosisResult(userId, diagnosisUrl);
 
+    // 診断結果を再取得して返す
+    const diagnoses = await prisma.diagnosis.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        personalityType: true,
+        pdfUrl: true,
+        comment: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
     return NextResponse.json({
       success: true,
       message: '診断結果をチェックしました',
+      diagnoses,
+      checked: true,
     });
   } catch (error) {
     console.error('Diagnosis check error:', error);
