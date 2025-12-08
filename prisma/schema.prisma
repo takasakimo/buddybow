@@ -23,6 +23,7 @@ model User {
   // マイページ関連
   userProgress            UserProgress?
   diagnoses               Diagnosis[]
+  diagnosisUrls           DiagnosisUrl[]
   roadmaps                Roadmap[]
   dailyReports            DailyReport[]
   consultations           Consultation[]
@@ -95,6 +96,23 @@ model UserProgress {
   @@map("user_progress")
 }
 
+// 診断URL
+model DiagnosisUrl {
+  id              String   @id @default(cuid())
+  userId          Int      @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  url             String
+  status          String   @default("pending") // pending, processing, completed, failed
+  diagnosisId     String?  @map("diagnosis_id")
+  diagnosis       Diagnosis? @relation(fields: [diagnosisId], references: [id], onDelete: SetNull)
+  errorMessage    String?  @map("error_message")
+  lastCheckedAt   DateTime? @map("last_checked_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("diagnosis_urls")
+}
+
 // 診断結果
 model Diagnosis {
   id              String   @id @default(cuid())
@@ -107,6 +125,7 @@ model Diagnosis {
   recommendations Json?    @map("recommendations")
   pdfUrl          String?  @map("pdf_url")
   comment         String?  @map("comment")
+  diagnosisUrls   DiagnosisUrl[]
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 

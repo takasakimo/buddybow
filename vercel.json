@@ -1,0 +1,9 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/check-diagnosis",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
+
