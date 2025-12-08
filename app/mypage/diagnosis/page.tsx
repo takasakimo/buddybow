@@ -17,6 +17,7 @@ export default function DiagnosisPage() {
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isCheckingOnce, setIsCheckingOnce] = useState(false);
 
   // 固定の診断URL（環境変数から取得、デフォルト値）
   const DIAGNOSIS_BASE_URL = process.env.NEXT_PUBLIC_DIAGNOSIS_URL || 'https://buddybow-diagnosis-cb1bweb9y-aims-projects-264acc6a.vercel.app/diagnosis';
@@ -34,6 +35,29 @@ export default function DiagnosisPage() {
       })
       .catch(console.error);
   }, []);
+
+  // ページ表示時に1回だけ診断結果をバックエンドでチェック
+  useEffect(() => {
+    if (!userId || isCheckingOnce) return;
+    const run = async () => {
+      try {
+        setIsCheckingOnce(true);
+        const res = await fetch('/api/mypage/diagnosis/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId }),
+        });
+        if (res.ok) {
+          await fetchData();
+        }
+      } catch (error) {
+        console.error('Failed to check diagnosis once:', error);
+      } finally {
+        setIsCheckingOnce(true);
+      }
+    };
+    run();
+  }, [userId, isCheckingOnce]);
 
   const fetchData = async () => {
     try {
