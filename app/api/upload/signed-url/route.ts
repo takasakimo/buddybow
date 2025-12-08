@@ -28,15 +28,39 @@ export async function POST(request: Request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
+    // デバッグ用：どの環境変数が不足しているかを明確に表示
+    const missingVars: string[] = [];
+    if (!supabaseUrl) {
+      missingVars.push('NEXT_PUBLIC_SUPABASE_URL または SUPABASE_URL');
+    }
+    if (!supabaseServiceRoleKey) {
+      missingVars.push('SUPABASE_SERVICE_ROLE_KEY');
+    }
+
+    if (missingVars.length > 0) {
+      console.error('Missing environment variables:', missingVars);
+      console.error('Available env vars:', {
+        hasSupabaseUrl: !!supabaseUrl,
+        hasServiceRoleKey: !!supabaseServiceRoleKey,
+        supabaseUrlLength: supabaseUrl?.length || 0,
+        serviceRoleKeyLength: supabaseServiceRoleKey?.length || 0,
+      });
       return NextResponse.json(
-        { error: 'Supabase Storageの設定が不完全です' },
+        { 
+          error: 'Supabase Storageの設定が不完全です',
+          missing: missingVars,
+          details: `不足している環境変数: ${missingVars.join(', ')}`
+        },
         { status: 500 }
       );
     }
 
+    // この時点で、supabaseUrlとsupabaseServiceRoleKeyは確実に存在する
+    const url = supabaseUrl as string;
+    const key = supabaseServiceRoleKey as string;
+
     // サーバー側でSupabaseクライアントを作成（サービスロールキー使用でRLSをバイパス）
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+    const supabase = createClient(url, key, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
@@ -71,7 +95,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       path: filePath,
       signedUrl: data.signedUrl,
-      publicUrl: `${supabaseUrl}/storage/v1/object/public/files/${filePath}`,
+      publicUrl: `${url}/storage/v1/object/public/files/${filePath}`,
     });
   } catch (error) {
     console.error('Signed URL error:', error);

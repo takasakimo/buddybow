@@ -443,7 +443,10 @@ export default function UserProgressDetailPage() {
 
       if (!pathResponse.ok) {
         const errorData = await pathResponse.json().catch(() => ({ error: 'ファイルパスの取得に失敗しました' }));
-        throw new Error(errorData.error || 'ファイルパスの取得に失敗しました');
+        const errorMessage = errorData.details 
+          ? `${errorData.error}\n${errorData.details}` 
+          : errorData.error || 'ファイルパスの取得に失敗しました';
+        throw new Error(errorMessage);
       }
 
       const { publicUrl, signedUrl } = await pathResponse.json();
