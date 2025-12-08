@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Target, FileText, Calendar, ExternalLink, Loader2 } from 'lucide-react';
+import { Target, FileText, Calendar, ExternalLink } from 'lucide-react';
 
 interface Diagnosis {
   id: string;
@@ -16,7 +16,6 @@ interface Diagnosis {
 export default function DiagnosisPage() {
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isChecking, setIsChecking] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   // 固定の診断URL（環境変数から取得、デフォルト値）
@@ -67,7 +66,6 @@ export default function DiagnosisPage() {
       return;
     }
     
-    setIsChecking(true);
     try {
       const response = await fetch('/api/mypage/diagnosis/check', {
         method: 'POST',
@@ -98,8 +96,6 @@ export default function DiagnosisPage() {
     } catch (error) {
       console.error('Failed to check diagnosis result:', error);
       alert('診断結果のチェックに失敗しました。コンソールを確認してください。');
-    } finally {
-      setIsChecking(false);
     }
   };
 
@@ -144,26 +140,7 @@ export default function DiagnosisPage() {
                 <ExternalLink className="w-5 h-5" />
                 詳細診断を受ける
               </a>
-              <button
-                onClick={checkDiagnosisResult}
-                disabled={isChecking || !userId}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isChecking ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    チェック中...
-                  </>
-                ) : (
-                  '結果をチェック'
-                )}
-              </button>
             </div>
-            {userId && (
-              <p className="text-xs text-slate-500">
-                診断URL: <span className="font-mono break-all">{getDiagnosisUrl()}</span>
-              </p>
-            )}
           </div>
         </div>
 
