@@ -55,8 +55,12 @@ export async function POST(request: Request) {
 // 診断結果をチェックする関数
 async function checkDiagnosisResult(userId: number, url: string) {
   try {
+    console.log(`Checking diagnosis result for user ${userId}, URL: ${url}`);
+    
     // 診断結果を取得
     const diagnosisResult = await fetchDiagnosisResult(url);
+    
+    console.log(`Diagnosis result for user ${userId}:`, diagnosisResult ? 'Found' : 'Not found');
 
     if (diagnosisResult) {
       // 既に診断結果が存在するかチェック（同じURLから取得した結果）
@@ -89,9 +93,11 @@ async function checkDiagnosisResult(userId: number, url: string) {
               status: 'processing',
             },
           });
+          console.log(`Created diagnosis URL record: ${diagnosisUrlRecord.id}`);
         }
 
         // 診断結果を保存
+        console.log(`Creating diagnosis result for user ${userId}`);
         const diagnosis = await prisma.diagnosis.create({
           data: {
             userId,
@@ -136,57 +142,74 @@ interface DiagnosisResult {
 // 診断結果を取得する関数
 async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null> {
   try {
+    console.log(`Fetching diagnosis result from: ${url}`);
     const urlObj = new URL(url);
-    const diagnosisId = urlObj.searchParams.get('id') || urlObj.pathname.split('/').pop();
+    const userId = urlObj.searchParams.get('userId');
     
-    // APIエンドポイントを構築
-    const apiUrl = diagnosisId 
-      ? `${urlObj.origin}/api/diagnosis/${diagnosisId}`
-      : `${urlObj.origin}/api/diagnosis/result?url=${encodeURIComponent(url)}`;
+    // 方法1: 診断結果を取得するAPIエンドポイントを試す
+    // ユーザーIDから診断結果を取得するAPI
+    const apiEndpoints = [
+      `${urlObj.origin}/api/diagnosis/result?userId=${userId}`,
+      `${urlObj.origin}/api/diagnosis/user/${userId}`,
+      `${urlObj.origin}/api/diagnosis?userId=${userId}`,
+    ];
     
-    // まずAPIエンドポイントを試す
-    try {
-      const apiResponse = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'buddybow-member-site/1.0',
-        },
-        signal: AbortSignal.timeout(10000),
-      });
+    for (const apiUrl of apiEndpoints) {
+      try {
+        console.log(`Trying API endpoint: ${apiUrl}`);
+        const apiResponse = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'buddybow-member-site/1.0',
+          },
+          signal: AbortSignal.timeout(10000),
+        });
 
-      if (apiResponse.ok) {
-        const data = await apiResponse.json();
-        
-        if (data.status === 'completed' && data.result) {
-          return {
-            personalityType: data.result.personalityType || null,
-            skillMap: data.result.skillMap || null,
-            strengths: data.result.strengths || null,
-            weaknesses: data.result.weaknesses || null,
-            recommendations: data.result.recommendations || null,
-            pdfUrl: data.result.pdfUrl || null,
-            comment: data.result.comment || null,
-          };
-        }
+        console.log(`API response status: ${apiResponse.status}`);
 
-        if (data.personalityType || data.pdfUrl || data.comment) {
-          return {
-            personalityType: data.personalityType || null,
-            skillMap: data.skillMap || null,
-            strengths: data.strengths || null,
-            weaknesses: data.weaknesses || null,
-            recommendations: data.recommendations || null,
-            pdfUrl: data.pdfUrl || null,
-            comment: data.comment || null,
-          };
+        if (apiResponse.ok) {
+          const data = await apiResponse.json();
+          console.log('API response data:', JSON.stringify(data).substring(0, 200));
+          
+          if (data.status === 'completed' && data.result) {
+            return {
+              personalityType: data.result.personalityType || null,
+              skillMap: data.result.skillMap || null,
+              strengths: data.result.strengths || null,
+              weaknesses: data.result.weaknesses || null,
+              recommendations: data.result.recommendations || null,
+              pdfUrl: data.result.pdfUrl || null,
+              comment: data.result.comment || null,
+            };
+          }
+
+          if (data.personalityType || data.pdfUrl || data.comment) {
+            return {
+              personalityType: data.personalityType || null,
+              skillMap: data.skillMap || null,
+              strengths: data.strengths || null,
+              weaknesses: data.weaknesses || null,
+              recommendations: data.recommendations || null,
+              pdfUrl: data.pdfUrl || null,
+              comment: data.comment || null,
+            };
+          }
+          
+          // 診断結果がまだ準備できていない場合
+          if (data.status === 'pending' || data.status === 'processing') {
+            console.log('Diagnosis result is not ready yet');
+            return null;
+          }
         }
+      } catch (apiError) {
+        console.log(`API endpoint ${apiUrl} failed:`, apiError);
+        continue;
       }
-    } catch {
-      console.log('API endpoint not available, trying direct URL fetch');
     }
 
-    // APIエンドポイントが利用できない場合、URLを直接フェッチ
+    // 方法2: URLを直接フェッチ（HTMLレスポンスの場合）
+    console.log('Trying direct URL fetch');
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -196,17 +219,23 @@ async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null
       signal: AbortSignal.timeout(10000),
     });
 
+    console.log(`Direct URL response status: ${response.status}`);
+
     if (!response.ok) {
       if (response.status === 404) {
+        console.log('Diagnosis result not found (404)');
         return null;
       }
+      console.log(`Response not OK: ${response.status}`);
       return null;
     }
 
     const contentType = response.headers.get('content-type');
+    console.log(`Content-Type: ${contentType}`);
     
     if (contentType && contentType.includes('application/json')) {
       const data = await response.json();
+      console.log('Direct URL JSON data:', JSON.stringify(data).substring(0, 200));
       
       if (data.status === 'completed' && data.result) {
         return {
@@ -233,6 +262,7 @@ async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null
       }
     }
 
+    console.log('No diagnosis result found');
     return null;
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
