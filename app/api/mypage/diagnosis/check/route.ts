@@ -251,7 +251,7 @@ async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null
     
     if (contentType && contentType.includes('application/json')) {
       const data = await response.json();
-      console.log('Direct URL JSON data:', JSON.stringify(data).substring(0, 200));
+      console.log('Direct URL JSON data:', JSON.stringify(data).substring(0, 500));
       
       if (data.status === 'completed' && data.result) {
         return {
@@ -275,6 +275,65 @@ async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null
           pdfUrl: data.pdfUrl || null,
           comment: data.comment || null,
         };
+      }
+    }
+
+    // HTMLレスポンスの場合、診断結果が含まれている可能性がある
+    // 実際のHTML構造に合わせて調整が必要
+    if (contentType && contentType.includes('text/html')) {
+      const html = await response.text();
+      console.log('HTML response received, length:', html.length);
+      
+      // HTMLから診断結果を抽出する試み
+      // 実際のHTML構造に合わせて調整が必要
+      // 例: <script>タグ内のJSONデータ、data属性など
+      
+      // 方法1: <script>タグ内のJSONデータを探す
+      const scriptMatches = html.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
+      if (scriptMatches) {
+        for (const script of scriptMatches) {
+          // JSONデータを探す
+          const jsonMatch = script.match(/(?:diagnosis|result|data)\s*[:=]\s*({[^}]+})/i);
+          if (jsonMatch) {
+            try {
+              const jsonData = JSON.parse(jsonMatch[1]);
+              if (jsonData.personalityType || jsonData.pdfUrl || jsonData.comment) {
+                return {
+                  personalityType: jsonData.personalityType || null,
+                  skillMap: jsonData.skillMap || null,
+                  strengths: jsonData.strengths || null,
+                  weaknesses: jsonData.weaknesses || null,
+                  recommendations: jsonData.recommendations || null,
+                  pdfUrl: jsonData.pdfUrl || null,
+                  comment: jsonData.comment || null,
+                };
+              }
+            } catch {
+              console.log('Failed to parse JSON from script tag');
+            }
+          }
+        }
+      }
+      
+      // 方法2: data属性から診断結果を探す
+      const dataAttrMatch = html.match(/data-diagnosis-result=["']([^"']+)["']/i);
+      if (dataAttrMatch) {
+        try {
+          const jsonData = JSON.parse(decodeURIComponent(dataAttrMatch[1]));
+          if (jsonData.personalityType || jsonData.pdfUrl || jsonData.comment) {
+            return {
+              personalityType: jsonData.personalityType || null,
+              skillMap: jsonData.skillMap || null,
+              strengths: jsonData.strengths || null,
+              weaknesses: jsonData.weaknesses || null,
+              recommendations: jsonData.recommendations || null,
+              pdfUrl: jsonData.pdfUrl || null,
+              comment: jsonData.comment || null,
+            };
+          }
+        } catch {
+          console.log('Failed to parse JSON from data attribute');
+        }
       }
     }
 
