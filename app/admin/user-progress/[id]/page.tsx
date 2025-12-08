@@ -422,8 +422,8 @@ export default function UserProgressDetailPage() {
       return null;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      alert('ファイルサイズは10MB以下にしてください');
+    if (file.size > 50 * 1024 * 1024) {
+      alert('ファイルサイズは50MB以下にしてください');
       return null;
     }
 
