@@ -1,67 +1,59 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
-// Vercel Cron Job用のエンドポイント
-// このエンドポイントは定期的に呼び出され、pending状態の診断URLをチェックします
-export async function GET(request: Request) {
+// 診断結果をチェックするAPI
+export async function POST(request: Request) {
   try {
-    // 認証: Vercel Cron Jobからのリクエストか確認
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: '認証が必要です' },
         { status: 401 }
       );
     }
 
+    const body = await request.json();
+    const { userId: requestUserId } = body;
+
+    const sessionUserId = parseInt(session.user.id as string);
+    
+    // リクエストのuserIdとセッションのuserIdが一致するか確認
+    if (requestUserId && parseInt(requestUserId) !== sessionUserId) {
+      return NextResponse.json(
+        { error: '認証エラー' },
+        { status: 403 }
+      );
+    }
+
+    const userId = sessionUserId;
+
     // 固定の診断URL
     const DIAGNOSIS_BASE_URL = process.env.DIAGNOSIS_URL || 'https://buddybow-diagnosis-cb1bweb9y-aims-projects-264acc6a.vercel.app/diagnosis';
+    const diagnosisUrl = `${DIAGNOSIS_BASE_URL}?userId=${userId}`;
 
-    // 診断結果をチェックする必要があるユーザーを取得
-    // 最近診断URLにアクセスしたユーザー、または診断結果がないユーザー
-    const usersToCheck = await prisma.user.findMany({
-      where: {
-        role: 'USER',
-      },
-      select: {
-        id: true,
-      },
-      take: 100, // 一度に処理する最大数
-    });
-
-    console.log(`Checking diagnosis results for ${usersToCheck.length} users...`);
-
-    // 各ユーザーの診断結果をチェック
-    const results = await Promise.allSettled(
-      usersToCheck.map((user) => {
-        const diagnosisUrl = `${DIAGNOSIS_BASE_URL}?userId=${user.id}`;
-        return checkDiagnosisResultForUser(user.id, diagnosisUrl);
-      })
-    );
-
-    const successCount = results.filter((r) => r.status === 'fulfilled').length;
-    const failureCount = results.filter((r) => r.status === 'rejected').length;
+    // 診断結果をチェック
+    await checkDiagnosisResult(userId, diagnosisUrl);
 
     return NextResponse.json({
       success: true,
-      checked: usersToCheck.length,
-      successCount,
-      failureCount,
+      message: '診断結果をチェックしました',
     });
   } catch (error) {
-    console.error('Cron job error:', error);
+    console.error('Diagnosis check error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: '診断結果のチェックに失敗しました' },
       { status: 500 }
     );
   }
 }
 
-// 診断結果をチェックする関数（ユーザー単位）
-async function checkDiagnosisResultForUser(userId: number, url: string) {
+// 診断結果をチェックする関数
+async function checkDiagnosisResult(userId: number, url: string) {
   try {
     // 診断結果を取得
     const diagnosisResult = await fetchDiagnosisResult(url);
@@ -125,8 +117,8 @@ async function checkDiagnosisResultForUser(userId: number, url: string) {
       }
     }
   } catch (error) {
-    console.error(`Failed to check diagnosis result for user ${userId}:`, error);
-    // エラーが発生しても次のユーザーのチェックを続行
+    console.error('Failed to check diagnosis result:', error);
+    throw error;
   }
 }
 
@@ -142,22 +134,12 @@ interface DiagnosisResult {
 }
 
 // 診断結果を取得する関数
-// buddybow詳細診断のAPIエンドポイントに合わせて実装
 async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null> {
   try {
-    // URLから診断結果を取得
-    // buddybow詳細診断のURL形式: https://buddybow-diagnosis-*.vercel.app/diagnosis
-    
-    // 方法1: URLから診断IDを抽出してAPIエンドポイントを呼び出す
-    // 方法2: URLに直接アクセスしてHTMLから結果を抽出
-    // 方法3: APIエンドポイントを推測して呼び出す
-    
-    // URLから診断IDを抽出（例: /diagnosis?id=xxx または /diagnosis/xxx）
     const urlObj = new URL(url);
     const diagnosisId = urlObj.searchParams.get('id') || urlObj.pathname.split('/').pop();
     
-    // APIエンドポイントを構築（診断結果を取得するAPI）
-    // 実際のAPIエンドポイントに合わせて調整が必要
+    // APIエンドポイントを構築
     const apiUrl = diagnosisId 
       ? `${urlObj.origin}/api/diagnosis/${diagnosisId}`
       : `${urlObj.origin}/api/diagnosis/result?url=${encodeURIComponent(url)}`;
@@ -176,7 +158,6 @@ async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null
       if (apiResponse.ok) {
         const data = await apiResponse.json();
         
-        // 診断結果が準備できているかチェック
         if (data.status === 'completed' && data.result) {
           return {
             personalityType: data.result.personalityType || null,
@@ -189,7 +170,6 @@ async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null
           };
         }
 
-        // 直接結果が返される場合
         if (data.personalityType || data.pdfUrl || data.comment) {
           return {
             personalityType: data.personalityType || null,
@@ -217,17 +197,14 @@ async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null
     });
 
     if (!response.ok) {
-      // 結果がまだ準備できていない場合（404など）
       if (response.status === 404) {
         return null;
       }
-      // その他のエラー
       return null;
     }
 
     const contentType = response.headers.get('content-type');
     
-    // JSONレスポンスの場合
     if (contentType && contentType.includes('application/json')) {
       const data = await response.json();
       
@@ -256,12 +233,8 @@ async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null
       }
     }
 
-    // HTMLレスポンスの場合、診断結果が含まれている可能性がある
-    // 実際のHTML構造に合わせて調整が必要
-    // ここでは、診断結果が準備できていないと判断
     return null;
   } catch (error) {
-    // タイムアウトやネットワークエラーの場合
     if (error instanceof Error && error.name === 'AbortError') {
       console.error('Diagnosis result fetch timeout:', url);
       return null;
