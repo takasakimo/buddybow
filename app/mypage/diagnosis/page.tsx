@@ -35,17 +35,6 @@ export default function DiagnosisPage() {
       .catch(console.error);
   }, []);
 
-  useEffect(() => {
-    if (!userId) return;
-    
-    // 定期的に診断結果をチェック（30秒ごと）
-    const interval = setInterval(() => {
-      checkDiagnosisResult();
-    }, 30000); // 30秒ごと
-
-    return () => clearInterval(interval);
-  }, [userId]);
-
   const fetchData = async () => {
     try {
       const response = await fetch('/api/mypage/diagnoses');
@@ -57,45 +46,6 @@ export default function DiagnosisPage() {
       console.error('Failed to fetch data:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const checkDiagnosisResult = async () => {
-    if (!userId) {
-      alert('ユーザーIDが取得できませんでした。ページを再読み込みしてください。');
-      return;
-    }
-    
-    try {
-      const response = await fetch('/api/mypage/diagnosis/check', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        if (data.checked) {
-          // 診断結果を再取得
-          await fetchData();
-          if (data.diagnoses && data.diagnoses.length > 0) {
-            alert('診断結果が見つかりました！');
-          } else {
-            alert('診断結果はまだ準備できていません。しばらく待ってから再度チェックしてください。');
-          }
-        } else {
-          alert(data.message || '診断結果をチェックしました');
-          await fetchData();
-        }
-      } else {
-        alert(data.error || '診断結果のチェックに失敗しました');
-      }
-    } catch (error) {
-      console.error('Failed to check diagnosis result:', error);
-      alert('診断結果のチェックに失敗しました。コンソールを確認してください。');
     }
   };
 
