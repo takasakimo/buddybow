@@ -162,23 +162,73 @@ interface DiagnosisResult {
 async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null> {
   try {
     // URLから診断結果を取得
-    // 実際の実装では、buddybow詳細診断のAPIエンドポイントを使用します
+    // buddybow詳細診断のURL形式: https://buddybow-diagnosis-*.vercel.app/diagnosis
     
-    // 方法1: URLが直接診断結果を返す場合
-    // 方法2: URLから診断IDを抽出してAPIエンドポイントを呼び出す場合
+    // 方法1: URLから診断IDを抽出してAPIエンドポイントを呼び出す
+    // 方法2: URLに直接アクセスしてHTMLから結果を抽出
+    // 方法3: APIエンドポイントを推測して呼び出す
     
-    // 例: URLから診断IDを抽出
-    // const diagnosisId = extractDiagnosisIdFromUrl(url);
-    // const apiUrl = `${process.env.DIAGNOSIS_API_BASE_URL}/results/${diagnosisId}`;
+    // URLから診断IDを抽出（例: /diagnosis?id=xxx または /diagnosis/xxx）
+    const urlObj = new URL(url);
+    const diagnosisId = urlObj.searchParams.get('id') || urlObj.pathname.split('/').pop();
     
-    // 現在は、URLを直接フェッチして結果を取得する方法を実装
+    // APIエンドポイントを構築（診断結果を取得するAPI）
+    // 実際のAPIエンドポイントに合わせて調整が必要
+    const apiUrl = diagnosisId 
+      ? `${urlObj.origin}/api/diagnosis/${diagnosisId}`
+      : `${urlObj.origin}/api/diagnosis/result?url=${encodeURIComponent(url)}`;
+    
+    // まずAPIエンドポイントを試す
+    try {
+      const apiResponse = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'buddybow-member-site/1.0',
+        },
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (apiResponse.ok) {
+        const data = await apiResponse.json();
+        
+        // 診断結果が準備できているかチェック
+        if (data.status === 'completed' && data.result) {
+          return {
+            personalityType: data.result.personalityType || null,
+            skillMap: data.result.skillMap || null,
+            strengths: data.result.strengths || null,
+            weaknesses: data.result.weaknesses || null,
+            recommendations: data.result.recommendations || null,
+            pdfUrl: data.result.pdfUrl || null,
+            comment: data.result.comment || null,
+          };
+        }
+
+        // 直接結果が返される場合
+        if (data.personalityType || data.pdfUrl || data.comment) {
+          return {
+            personalityType: data.personalityType || null,
+            skillMap: data.skillMap || null,
+            strengths: data.strengths || null,
+            weaknesses: data.weaknesses || null,
+            recommendations: data.recommendations || null,
+            pdfUrl: data.pdfUrl || null,
+            comment: data.comment || null,
+          };
+        }
+      }
+    } catch {
+      console.log('API endpoint not available, trying direct URL fetch');
+    }
+
+    // APIエンドポイントが利用できない場合、URLを直接フェッチ
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        'Accept': 'text/html,application/json',
         'User-Agent': 'buddybow-member-site/1.0',
       },
-      // タイムアウトを設定（10秒）
       signal: AbortSignal.timeout(10000),
     });
 
@@ -188,38 +238,43 @@ async function fetchDiagnosisResult(url: string): Promise<DiagnosisResult | null
         return null;
       }
       // その他のエラー
-      throw new Error(`Failed to fetch diagnosis result: ${response.status}`);
+      return null;
     }
 
-    const data = await response.json();
+    const contentType = response.headers.get('content-type');
+    
+    // JSONレスポンスの場合
+    if (contentType && contentType.includes('application/json')) {
+      const data = await response.json();
+      
+      if (data.status === 'completed' && data.result) {
+        return {
+          personalityType: data.result.personalityType || null,
+          skillMap: data.result.skillMap || null,
+          strengths: data.result.strengths || null,
+          weaknesses: data.result.weaknesses || null,
+          recommendations: data.result.recommendations || null,
+          pdfUrl: data.result.pdfUrl || null,
+          comment: data.result.comment || null,
+        };
+      }
 
-    // 診断結果が準備できているかチェック
-    // 実際のAPIレスポンス形式に合わせて調整が必要
-    if (data.status === 'completed' && data.result) {
-      return {
-        personalityType: data.result.personalityType || null,
-        skillMap: data.result.skillMap || null,
-        strengths: data.result.strengths || null,
-        weaknesses: data.result.weaknesses || null,
-        recommendations: data.result.recommendations || null,
-        pdfUrl: data.result.pdfUrl || null,
-        comment: data.result.comment || null,
-      };
+      if (data.personalityType || data.pdfUrl || data.comment) {
+        return {
+          personalityType: data.personalityType || null,
+          skillMap: data.skillMap || null,
+          strengths: data.strengths || null,
+          weaknesses: data.weaknesses || null,
+          recommendations: data.recommendations || null,
+          pdfUrl: data.pdfUrl || null,
+          comment: data.comment || null,
+        };
+      }
     }
 
-    // 直接結果が返される場合
-    if (data.personalityType || data.pdfUrl || data.comment) {
-      return {
-        personalityType: data.personalityType || null,
-        skillMap: data.skillMap || null,
-        strengths: data.strengths || null,
-        weaknesses: data.weaknesses || null,
-        recommendations: data.recommendations || null,
-        pdfUrl: data.pdfUrl || null,
-        comment: data.comment || null,
-      };
-    }
-
+    // HTMLレスポンスの場合、診断結果が含まれている可能性がある
+    // 実際のHTML構造に合わせて調整が必要
+    // ここでは、診断結果が準備できていないと判断
     return null;
   } catch (error) {
     // タイムアウトやネットワークエラーの場合
