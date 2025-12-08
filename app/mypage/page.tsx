@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Target, Trophy, Map, FileText, MessageSquare, Calendar, TrendingUp, CheckCircle2, BookOpen } from 'lucide-react';
+import { Target, Trophy, Map, FileText, MessageSquare, Calendar, TrendingUp, CheckCircle2, BookOpen, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 
 interface TrainingProgress {
@@ -147,7 +147,7 @@ export default async function MyPage() {
   const userTrainings = Object.values(trainingMap);
 
   // 各種データ取得
-  const [roadmaps, interviews, recentReports, consultations, achievements, motivationMessages] = await Promise.all([
+  const [roadmaps, interviews, recentReports, consultations, achievements, motivationMessages, diagnoses] = await Promise.all([
     prisma.roadmap.findMany({
       where: { userId },
       include: { milestones: true },
@@ -177,6 +177,19 @@ export default async function MyPage() {
       where: { userId },
       orderBy: { createdAt: 'desc' },
       take: 1,
+    }),
+    prisma.diagnosis.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        personalityType: true,
+        pdfUrl: true,
+        comment: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
     }),
   ]);
 
@@ -466,7 +479,7 @@ export default async function MyPage() {
                   href="/mypage/diagnosis"
                   className="block w-full py-3 px-4 bg-white text-slate-700 rounded-lg hover:bg-slate-50 active:bg-slate-100 text-center font-medium text-sm transition-all duration-200 border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow"
                 >
-                  診断を見る
+                  詳細診断を見る
                 </Link>
               </div>
             </div>
@@ -511,6 +524,74 @@ export default async function MyPage() {
                       </p>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* 診断結果 */}
+            <div className="card p-6">
+              <div className="flex justify-between items-center mb-5">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-slate-700" />
+                  <h2 className="text-base font-semibold text-slate-900">診断結果</h2>
+                </div>
+                <Link href="/mypage/diagnosis" className="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">
+                  すべて見る →
+                </Link>
+              </div>
+              {diagnoses.length === 0 ? (
+                <div className="space-y-3">
+                  <p className="text-slate-500 text-sm py-2">まだ診断結果がありません</p>
+                  <Link
+                    href="/mypage/diagnosis"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark transition-colors text-sm font-medium"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    詳細診断を受ける
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {diagnoses.map((diagnosis) => (
+                    <div key={diagnosis.id} className="pb-3 border-b border-slate-200 last:border-b-0 last:pb-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                            <p className="text-xs text-slate-500">
+                              {new Date(diagnosis.createdAt).toLocaleDateString('ja-JP', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          </div>
+                          {diagnosis.comment && (
+                            <p className="text-sm text-slate-900 line-clamp-2 mb-2 leading-relaxed">
+                              {diagnosis.comment}
+                            </p>
+                          )}
+                          {diagnosis.pdfUrl && (
+                            <a
+                              href={diagnosis.pdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-buddybow-orange hover:text-buddybow-orange-dark font-medium transition-colors"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              PDFを表示
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <Link
+                    href="/mypage/diagnosis"
+                    className="block w-full py-2 px-4 bg-buddybow-beige-light text-slate-700 rounded-lg hover:bg-buddybow-beige-accent text-center text-xs font-medium transition-colors border border-slate-200"
+                  >
+                    詳細診断ページへ →
+                  </Link>
                 </div>
               )}
             </div>
