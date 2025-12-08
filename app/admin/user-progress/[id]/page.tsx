@@ -429,62 +429,22 @@ export default function UserProgressDetailPage() {
 
     setIsUploadingPdf(true);
     try {
-      // クライアント側から直接Supabase Storageにアップロード
-      // まず、Supabaseの設定を取得
-      const configResponse = await fetch('/api/upload/config');
-      if (!configResponse.ok) {
-        throw new Error('アップロード設定の取得に失敗しました');
+      // サーバー側API経由でアップロード（RLSポリシーを回避）
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'アップロードに失敗しました' }));
+        throw new Error(errorData.error || 'アップロードに失敗しました');
       }
-      const config = await configResponse.json();
 
-      if (config.useSupabase && config.supabaseUrl && config.supabaseAnonKey) {
-        // Supabase Storageに直接アップロード
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
-
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = `diagnosis/${fileName}`;
-
-        const { error } = await supabase.storage
-          .from('files')
-          .upload(filePath, file, {
-            contentType: file.type,
-            upsert: false,
-          });
-
-        if (error) {
-          console.error('Supabase upload error:', error);
-          throw new Error(`アップロードに失敗しました: ${error.message}`);
-        }
-
-        // 公開URLを取得
-        const { data: urlData } = supabase.storage
-          .from('files')
-          .getPublicUrl(filePath);
-
-        return urlData.publicUrl;
-      } else {
-        // Supabaseが設定されていない場合、従来のAPI経由でアップロード（4MB以下のみ）
-        if (file.size > 4 * 1024 * 1024) {
-          throw new Error('ファイルが大きすぎます。Supabase Storageの設定が必要です。');
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('アップロードに失敗しました');
-        }
-
-        const data = await response.json();
-        return data.url;
-      }
+      const data = await response.json();
+      return data.url;
     } catch (error) {
       console.error('PDF upload error:', error);
       alert(error instanceof Error ? error.message : 'PDFのアップロードに失敗しました');
