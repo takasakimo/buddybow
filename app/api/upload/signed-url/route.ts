@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,25 +25,27 @@ export async function POST(request: Request) {
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
+    if (!supabaseUrl) {
       return NextResponse.json(
         { error: 'Supabase Storageの設定が不完全です' },
         { status: 500 }
       );
     }
 
-    // サーバー側でSupabaseクライアントを作成（サービスロールキーを使用）
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    });
+    // ファイル名をサニタイズ（英数字、ハイフン、アンダースコア、ドットのみ許可）
+    const sanitizeFileName = (name: string): string => {
+      // 拡張子を取得
+      const ext = name.split('.').pop() || 'pdf';
+      // 拡張子をサニタイズ（英数字のみ）
+      const sanitizedExt = ext.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'pdf';
+      // ファイル名をタイムスタンプとランダム文字列で生成（日本語や特殊文字を回避）
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 15);
+      return `${timestamp}-${randomStr}.${sanitizedExt}`;
+    };
 
-    const fileExt = fileName.split('.').pop();
-    const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const uniqueFileName = sanitizeFileName(fileName);
     const filePath = `diagnosis/${uniqueFileName}`;
 
     // サーバー側でSupabase Storageに直接アップロード（サービスロールキーを使用してRLSをバイパス）
