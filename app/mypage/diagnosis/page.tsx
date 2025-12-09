@@ -16,48 +16,13 @@ interface Diagnosis {
 export default function DiagnosisPage() {
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isCheckingOnce, setIsCheckingOnce] = useState(false);
 
   // 固定の診断URL（環境変数から取得、デフォルト値）
   const DIAGNOSIS_BASE_URL = process.env.NEXT_PUBLIC_DIAGNOSIS_URL || 'https://buddybow-diagnosis-cb1bweb9y-aims-projects-264acc6a.vercel.app/diagnosis';
 
   useEffect(() => {
     fetchData();
-    
-    // ユーザーIDを取得
-    fetch('/api/mypage/user-id')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.userId) {
-          setUserId(data.userId);
-        }
-      })
-      .catch(console.error);
   }, []);
-
-  // ページ表示時に1回だけ診断結果をバックエンドでチェック
-  useEffect(() => {
-    if (!userId || isCheckingOnce) return;
-    const run = async () => {
-      try {
-        setIsCheckingOnce(true);
-        const res = await fetch('/api/mypage/diagnosis/check', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId }),
-        });
-        if (res.ok) {
-          await fetchData();
-        }
-      } catch (error) {
-        console.error('Failed to check diagnosis once:', error);
-      } finally {
-        setIsCheckingOnce(true);
-      }
-    };
-    run();
-  }, [userId, isCheckingOnce]);
 
   const fetchData = async () => {
     try {
@@ -71,14 +36,6 @@ export default function DiagnosisPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // 診断URLを生成（ユーザーIDをパラメータとして付与）
-  const getDiagnosisUrl = () => {
-    if (!userId) return DIAGNOSIS_BASE_URL;
-    const url = new URL(DIAGNOSIS_BASE_URL);
-    url.searchParams.set('userId', userId);
-    return url.toString();
   };
 
   return (
@@ -101,12 +58,12 @@ export default function DiagnosisPage() {
           </div>
           <div className="space-y-4">
             <p className="text-sm text-slate-600 leading-relaxed">
-              buddybow詳細診断を受けると、診断結果が自動的にマイページに保存されます。
-              診断完了後、結果が準備でき次第、自動的に表示されます。
+              buddybow詳細診断を受けると、診断結果が管理者によってマイページに追加されます。
+              診断完了後、管理者が結果を追加次第、こちらに表示されます。
             </p>
             <div className="flex items-center gap-3">
               <a
-                href={getDiagnosisUrl()}
+                href={DIAGNOSIS_BASE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-buddybow-orange text-white rounded-lg hover:bg-buddybow-orange-dark transition-colors font-medium"
@@ -130,7 +87,7 @@ export default function DiagnosisPage() {
             <div className="text-center py-8">
               <p className="text-slate-500 text-sm mb-4">診断結果はまだありません</p>
               <p className="text-xs text-slate-400">
-                上記の「詳細診断を受ける」ボタンから診断を受けてください
+                上記の「詳細診断を受ける」ボタンから診断を受けた後、管理者が結果を追加します
               </p>
             </div>
           ) : (
