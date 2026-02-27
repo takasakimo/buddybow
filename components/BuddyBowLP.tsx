@@ -47,9 +47,7 @@ import {
 
   MessageCircle,
 
-  Mail,
-
-  Star
+  Mail
 
 } from 'lucide-react';
 
