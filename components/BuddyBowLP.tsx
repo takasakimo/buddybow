@@ -45,7 +45,11 @@ import {
 
   PlayCircle,
 
-  MessageCircle
+  MessageCircle,
+
+  Mail,
+
+  Star
 
 } from 'lucide-react';
 
@@ -246,9 +250,17 @@ const BuddyBowLP = () => {
               <Link href="/consultation" className="px-8 py-4 bg-[#B08968] text-white rounded-full font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group inline-block">
 
                 <MessageCircle size={20} />
-                LINEで友だち追加して診断を受ける
+                LINEで無料診断を受ける
 
               </Link>
+
+              <a href="mailto:info@aims-ngy.com" className="px-8 py-4 bg-white border-2 border-[#B08968] text-[#B08968] rounded-full font-bold text-lg hover:bg-[#FFF8F0] transition-all flex items-center justify-center gap-2">
+
+                <Mail size={20} />
+
+                メールで相談する
+
+              </a>
 
             </div>
 
@@ -1030,6 +1042,10 @@ const BuddyBowLP = () => {
 
             {[
 
+              { q: "実際に収益を出すことはできますか？", a: "成果には個人差があり、一定の結果を保証することはできません。ただし、あなたの行動タイプや生活スタイルを診断した上で個別ロードマップを設計し、週次の伴走サポートで行動を継続できる仕組みを一緒に作ります。大切なのは、あなたの特性に合った正しい方向性で動き続けること。その環境をbuddybowが提供します。" },
+
+              { q: "費用はどのくらいかかりますか？", a: "無料診断・個別相談は完全無料です。その後、あなたの状況や目標に合わせた最適なプランをご提案します。費用はプランにより異なりますが、ご納得いただけた方のみ参加いただける仕組みです。まずはお気軽に無料診断からお申し込みください。" },
+
               { q: "副業の経験が全くありませんが大丈夫ですか？", a: "はい、全く問題ありません。むしろ変な癖がついていない初心者の方の方が、素直に吸収し成果が出やすい傾向にあります。あなたのレベルに合わせたロードマップを作成します。" },
 
               { q: "本業が忙しく、時間が取れるか不安です。", a: "1日30分〜1時間からでも始められるプランを設計します。「隙間時間の活用法」や「生活リズムの見直し」から一緒に考えましょう。" },
@@ -1077,6 +1093,116 @@ const BuddyBowLP = () => {
             ))}
 
           </div>
+
+        </div>
+
+      </section>
+
+
+
+      {/* Pricing Step Section */}
+
+      <section className="py-24 bg-white border-t border-stone-100">
+
+        <div className="container mx-auto px-6">
+
+          <div className="text-center max-w-2xl mx-auto mb-16">
+
+            <span className="text-[#B08968] font-bold tracking-wider uppercase text-sm">Plan</span>
+
+            <h2 className="text-3xl md:text-4xl font-bold text-stone-800 mt-2 mb-4">まずは無料診断から始まります</h2>
+
+            <p className="text-stone-600">費用が発生するのは本プログラム参加を決めた後だけ。<br/>無料診断・個別相談はすべて無料です。</p>
+
+          </div>
+
+          <div className="max-w-3xl mx-auto grid md:grid-cols-3 gap-4 items-center">
+
+            {[
+
+              {
+
+                step: "STEP 1",
+
+                title: "無料診断",
+
+                price: "¥0",
+
+                desc: "LINEで友だち追加後、行動タイプ診断を実施。あなたの強みと課題を特定します。",
+
+                highlight: false,
+
+              },
+
+              {
+
+                step: "STEP 2",
+
+                title: "個別プラン提案",
+
+                price: "無料",
+
+                desc: "診断結果をもとに、あなた専用の90日ロードマップと最適なプランをご提案します。",
+
+                highlight: true,
+
+              },
+
+              {
+
+                step: "STEP 3",
+
+                title: "本格スタート",
+
+                price: "詳細はご相談",
+
+                desc: "ご納得いただけた方のみ参加。費用はプランにより異なります。強引な勧誘は一切しません。",
+
+                highlight: false,
+
+              },
+
+            ].map((plan, i) => (
+
+              <div
+
+                key={i}
+
+                className={`rounded-3xl p-6 text-center flex flex-col gap-3 transition-all ${
+
+                  plan.highlight
+
+                    ? "bg-[#B08968] text-white shadow-2xl scale-105 z-10"
+
+                    : "bg-[#FAF9F6] border border-stone-100"
+
+                }`}
+
+              >
+
+                <span className={`text-xs font-bold tracking-widest uppercase ${plan.highlight ? "text-white/70" : "text-[#B08968]"}`}>
+
+                  {plan.step}
+
+                </span>
+
+                <h3 className={`text-xl font-bold ${plan.highlight ? "text-white" : "text-stone-800"}`}>{plan.title}</h3>
+
+                <p className={`text-2xl font-bold ${plan.highlight ? "text-white" : "text-[#B08968]"}`}>{plan.price}</p>
+
+                <p className={`text-sm leading-relaxed ${plan.highlight ? "text-white/90" : "text-stone-600"}`}>{plan.desc}</p>
+
+              </div>
+
+            ))}
+
+          </div>
+
+          <p className="text-center text-xs text-stone-400 mt-8">
+
+            ※ 無料診断・個別相談に費用は一切かかりません。強引な勧誘は行いません。
+
+          </p>
 
         </div>
 
@@ -1153,7 +1279,7 @@ const BuddyBowLP = () => {
 
               <MessageCircle size={24} />
 
-              LINEで友だち追加して診断を受ける
+              LINEで無料診断を受ける
 
             </Link>
 
@@ -1162,6 +1288,26 @@ const BuddyBowLP = () => {
               ※現在、申し込みが増加しており、毎月各地域5名様限定とさせていただいております。
 
             </p>
+
+            <div className="mt-4 pt-4 border-t border-stone-200">
+
+              <p className="text-xs text-stone-400 mb-3">LINEが難しい方はこちら</p>
+
+              <a
+
+                href="mailto:info@aims-ngy.com"
+
+                className="inline-flex items-center gap-2 text-sm text-[#B08968] hover:text-[#9c7858] transition-colors underline underline-offset-4"
+
+              >
+
+                <Mail size={16} />
+
+                メールでお問い合わせ（info@aims-ngy.com）
+
+              </a>
+
+            </div>
 
           </div>
 
