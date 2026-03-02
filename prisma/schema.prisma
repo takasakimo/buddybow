@@ -113,6 +113,19 @@ model DiagnosisUrl {
   @@map("diagnosis_urls")
 }
 
+// LP等からの匿名診断結果（会員登録前の顧客）
+model DiagnosisSubmission {
+  id              String   @id @default(cuid())
+  nickname        String   @map("nickname")
+  personalityType String?  @map("personality_type")
+  resultData      Json?    @map("result_data")
+  diagnosedAt     DateTime @map("diagnosed_at")
+  source          String?  @default("lp")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("diagnosis_submissions")
+}
+
 // 診断結果
 model Diagnosis {
   id              String   @id @default(cuid())

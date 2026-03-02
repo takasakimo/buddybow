@@ -109,6 +109,12 @@ export default function Sidebar() {
       icon: <BarChart3 className="w-5 h-5" />,
       allowedRoles: ['FULL_ADMIN', 'MANAGER'],
     },
+    {
+      name: '診断結果一覧',
+      href: '/admin/diagnosis-results',
+      icon: <Target className="w-5 h-5" />,
+      allowedRoles: ['FULL_ADMIN', 'MANAGER'],
+    },
   ];
 
   // ロールの後方互換性を確保（既存のadmin/userも動作するように）
