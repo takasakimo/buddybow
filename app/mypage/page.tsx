@@ -556,8 +556,8 @@ export default async function MyPage() {
                     <div key={diagnosis.id} className="pb-3 border-b border-slate-200 last:border-b-0 last:pb-0">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                             <p className="text-xs text-slate-500">
                               {new Date(diagnosis.createdAt).toLocaleDateString('ja-JP', {
                                 year: 'numeric',
@@ -565,6 +565,11 @@ export default async function MyPage() {
                                 day: 'numeric',
                               })}
                             </p>
+                            {diagnosis.personalityType && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-buddybow-beige-light text-buddybow-orange border border-buddybow-beige-accent">
+                                行動タイプ: {diagnosis.personalityType}
+                              </span>
+                            )}
                           </div>
                           {diagnosis.comment && (
                             <p className="text-sm text-slate-900 line-clamp-2 mb-2 leading-relaxed">

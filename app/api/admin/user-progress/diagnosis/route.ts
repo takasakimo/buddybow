@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { userId, pdfUrl, comment } = body;
+    const { userId, pdfUrl, comment, personalityType } = body;
 
     if (!userId) {
       return NextResponse.json(
@@ -52,6 +52,7 @@ export async function POST(request: Request) {
         userId: userIdNum,
         pdfUrl: pdfUrl || null,
         comment: comment || null,
+        personalityType: personalityType || null,
       },
     });
 
@@ -64,4 +65,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+
 

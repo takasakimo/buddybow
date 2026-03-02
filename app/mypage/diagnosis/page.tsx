@@ -97,7 +97,7 @@ export default function DiagnosisPage() {
                   key={diagnosis.id}
                   className="p-4 bg-slate-50 rounded-xl border border-slate-200"
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2 text-sm text-slate-600">
                       <Calendar className="w-4 h-4" />
                       <span>
@@ -108,6 +108,11 @@ export default function DiagnosisPage() {
                         })}
                       </span>
                     </div>
+                    {diagnosis.personalityType && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-buddybow-orange/10 text-buddybow-orange border border-buddybow-orange/30">
+                        行動タイプ: {diagnosis.personalityType}
+                      </span>
+                    )}
                   </div>
                   {diagnosis.comment && (
                     <div className="text-sm text-slate-900 mb-3 whitespace-pre-wrap leading-relaxed">

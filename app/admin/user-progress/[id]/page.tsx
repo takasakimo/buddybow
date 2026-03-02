@@ -122,6 +122,7 @@ export default function UserProgressDetailPage() {
   const [diagnosisForm, setDiagnosisForm] = useState({
     pdfFile: null as File | null,
     comment: '',
+    personalityType: '',
   });
   const [answeringConsultations, setAnsweringConsultations] = useState<Record<string, boolean>>({});
   const [answerTexts, setAnswerTexts] = useState<Record<string, string>>({});
@@ -565,6 +566,7 @@ export default function UserProgressDetailPage() {
           userId: params.id,
           pdfUrl,
           comment: diagnosisForm.comment.trim() || null,
+          personalityType: diagnosisForm.personalityType.trim() || null,
         }),
       });
 
@@ -576,6 +578,7 @@ export default function UserProgressDetailPage() {
         setDiagnosisForm({
           pdfFile: null,
           comment: '',
+          personalityType: '',
         });
       } else {
         console.error('Diagnosis creation error:', data);
@@ -1586,6 +1589,20 @@ export default function UserProgressDetailPage() {
                   <div className="space-y-3">
                   <div>
                     <label className="block text-sm text-gray-600 mb-1">
+                      行動タイプ（任意）
+                    </label>
+                    <input
+                      type="text"
+                      value={diagnosisForm.personalityType}
+                      onChange={(e) =>
+                        setDiagnosisForm({ ...diagnosisForm, personalityType: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="例: 分析型、行動派 など"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
                       コメント
                     </label>
                     <textarea
@@ -1659,6 +1676,13 @@ export default function UserProgressDetailPage() {
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
+                            {diagnosis.personalityType && (
+                              <div className="mb-2">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-buddybow-orange/10 text-buddybow-orange border border-buddybow-orange/30">
+                                  行動タイプ: {diagnosis.personalityType}
+                                </span>
+                              </div>
+                            )}
                             {diagnosis.comment && (
                               <div className="text-sm text-gray-900 mb-2 whitespace-pre-wrap">
                                 {diagnosis.comment}
