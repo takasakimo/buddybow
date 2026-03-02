@@ -1598,7 +1598,7 @@ export default function UserProgressDetailPage() {
                         setDiagnosisForm({ ...diagnosisForm, personalityType: e.target.value })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                      placeholder="例: 分析型、行動派 など"
+                      placeholder="例: 完璧主義、教材コレクター など"
                     />
                   </div>
                   <div>

@@ -45,7 +45,9 @@ import {
 
   PlayCircle,
 
-  MessageCircle
+  MessageCircle,
+
+  Target
 
 } from 'lucide-react';
 
@@ -143,9 +145,9 @@ const BuddyBowLP = () => {
 
             <button onClick={() => scrollToSection('method')} className="hover:text-[#B08968] transition-colors">独自メソッド</button>
 
-            <Link href="/consultation" className="px-5 py-2.5 bg-[#B08968] text-white rounded-full hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-md inline-block">
+            <Link href="/diagnosis?from=lp" className="px-5 py-2.5 bg-[#B08968] text-white rounded-full hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-md inline-block">
 
-              LINEで友だち追加して診断を受ける
+              無料診断を受ける
 
             </Link>
 
@@ -183,9 +185,9 @@ const BuddyBowLP = () => {
 
             <button onClick={() => scrollToSection('method')} className="text-left py-2 border-b border-stone-100">独自メソッド</button>
 
-            <Link href="/consultation" className="mt-4 w-full py-3 bg-[#B08968] text-white rounded-lg text-center font-bold block">
+            <Link href="/diagnosis?from=lp" className="mt-4 w-full py-3 bg-[#B08968] text-white rounded-lg text-center font-bold block">
 
-              LINEで友だち追加して診断を受ける
+              無料診断を受ける
 
             </Link>
 
@@ -243,10 +245,10 @@ const BuddyBowLP = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
 
-              <Link href="/consultation" className="px-8 py-4 bg-[#B08968] text-white rounded-full font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group inline-block">
+              <Link href="/diagnosis?from=lp" className="px-8 py-4 bg-[#B08968] text-white rounded-full font-bold text-lg hover:bg-[#9c7858] transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group inline-block">
 
-                <MessageCircle size={20} />
-                LINEで友だち追加して診断を受ける
+                <Target size={20} />
+                無料診断を受ける
 
               </Link>
 
@@ -700,21 +702,21 @@ const BuddyBowLP = () => {
 
                 <div>
 
-                  <h3 className="text-xl font-bold text-stone-800 mb-2">行動を止める「ブレーキ」の特定</h3>
+                  <h3 className="text-xl font-bold text-stone-800 mb-2">あなたの「動き方」を診断</h3>
 
                   <p className="text-stone-600 text-sm leading-relaxed">
 
-                    なぜ動けないのか？ 行動心理学に基づき、あなたの思考のクセや心理的バリアを診断します。
+                    行動心理学に基づき、あなたの考え方や行動パターンの傾向を診断。自分を知る第一歩です。
 
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
 
-                    <a href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" target="_blank" rel="noopener noreferrer" className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600 hover:bg-[#B08968] hover:text-white hover:border-[#B08968] transition-all cursor-pointer">行動タイプ診断</a>
+                    <Link href="/diagnosis?from=lp" className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600 hover:bg-[#B08968] hover:text-white hover:border-[#B08968] transition-all cursor-pointer">行動タイプ診断</Link>
 
-                    <a href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" target="_blank" rel="noopener noreferrer" className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600 hover:bg-[#B08968] hover:text-white hover:border-[#B08968] transition-all cursor-pointer">認知パターン診断</a>
+                    <Link href="/diagnosis?from=lp&type=cognitive" className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600 hover:bg-[#B08968] hover:text-white hover:border-[#B08968] transition-all cursor-pointer">認知パターン診断</Link>
 
-                    <a href="https://buddybow-diagnosis-5fjlkwasp-aims-projects-264acc6a.vercel.app/diagnosis?from=lp" target="_blank" rel="noopener noreferrer" className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600 hover:bg-[#B08968] hover:text-white hover:border-[#B08968] transition-all cursor-pointer">生活リズム診断</a>
+                    <Link href="/diagnosis?from=lp&type=rhythm" className="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs text-stone-600 hover:bg-[#B08968] hover:text-white hover:border-[#B08968] transition-all cursor-pointer">生活リズム診断</Link>
 
                   </div>
 
@@ -1034,7 +1036,7 @@ const BuddyBowLP = () => {
 
               { q: "本業が忙しく、時間が取れるか不安です。", a: "1日30分〜1時間からでも始められるプランを設計します。「隙間時間の活用法」や「生活リズムの見直し」から一緒に考えましょう。" },
 
-              { q: "無料診断では何をしますか？売り込みはされませんか？", a: "あなたの現状のヒアリング、行動タイプ診断の簡易版、そしてロードマップの提案を行います。強引な勧誘は一切行いませんので、安心してお話しください。" },
+              { q: "無料診断では何をしますか？売り込みはされませんか？", a: "行動タイプ診断（8問）で、あなたの考え方・動き方の傾向をお伝えします。強引な勧誘は一切行いませんので、安心してお試しください。" },
 
               { q: "パソコンスキルに自信がありません。", a: "スマホだけで完結できるジャンル（SNS運用など）もご用意しています。また、ツールの使い方も画面共有しながら丁寧にサポートします。" }
 
@@ -1105,9 +1107,9 @@ const BuddyBowLP = () => {
 
             <p className="text-lg text-stone-600 mb-8 max-w-2xl mx-auto leading-relaxed">
 
-              90日後、あなたはどうなっていたいですか？<br/>
+              8つの質問に答えるだけ。あなたの行動パターンがわかります。<br/>
 
-              その未来への最短ルートを、一緒に描きましょう。
+              無料・すぐできる・強引な勧誘なし。
 
             </p>
 
@@ -1115,7 +1117,7 @@ const BuddyBowLP = () => {
 
             <div className="bg-white rounded-2xl p-6 mb-8 max-w-lg mx-auto shadow-sm text-left">
 
-              <h3 className="font-bold text-stone-800 mb-4 text-center border-b border-stone-100 pb-2">無料診断で得られるもの</h3>
+              <h3 className="font-bold text-stone-800 mb-4 text-center border-b border-stone-100 pb-2">診断で分かること</h3>
 
               <ul className="space-y-3">
 
@@ -1123,7 +1125,7 @@ const BuddyBowLP = () => {
 
                   <CheckCircle2 size={18} className="text-[#B08968] shrink-0 mt-0.5" />
 
-                  <span>現状の「行動ブレーキ」の特定</span>
+                  <span>あなたの行動タイプ（完璧主義・教材コレクター・一匹狼・気分屋サーファー）</span>
 
                 </li>
 
@@ -1131,7 +1133,7 @@ const BuddyBowLP = () => {
 
                   <CheckCircle2 size={18} className="text-[#B08968] shrink-0 mt-0.5" />
 
-                  <span>あなたに合った副業ジャンルの提案</span>
+                  <span>自分に合った進め方のヒント</span>
 
                 </li>
 
@@ -1139,7 +1141,7 @@ const BuddyBowLP = () => {
 
                   <CheckCircle2 size={18} className="text-[#B08968] shrink-0 mt-0.5" />
 
-                  <span>90日間のリブートロードマップ案</span>
+                  <span>続けやすさを高める考え方</span>
 
                 </li>
 
@@ -1149,13 +1151,25 @@ const BuddyBowLP = () => {
 
             
 
-            <Link href="/consultation" className="px-10 py-5 bg-[#B08968] text-white rounded-full font-bold text-xl hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 mx-auto w-full md:w-auto animate-pulse inline-block">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-4">
 
-              <MessageCircle size={24} />
+              <Link href="/diagnosis?from=lp" className="px-10 py-5 bg-[#B08968] text-white rounded-full font-bold text-xl hover:bg-[#9c7858] transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 w-full md:w-auto">
 
-              LINEで友だち追加して診断を受ける
+                <Target size={24} />
 
-            </Link>
+                今すぐWebで診断する
+
+              </Link>
+
+              <Link href="/consultation" className="px-10 py-5 bg-white border-2 border-[#B08968] text-[#B08968] rounded-full font-bold text-xl hover:bg-[#FFF8F0] transition-all flex items-center justify-center gap-3 w-full md:w-auto">
+
+                <MessageCircle size={24} />
+
+                詳細はLINEで受け取る
+
+              </Link>
+
+            </div>
 
             <p className="text-xs text-stone-500 mt-6">
 

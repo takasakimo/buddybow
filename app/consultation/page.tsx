@@ -42,27 +42,27 @@ export default function ConsultationPage() {
               <CheckCircle2 size={48} className="text-green-600" />
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-4">
-              診断を開始します
+              LINEに移動します
             </h2>
             <p className="text-stone-600 mb-8 text-lg">
-              公式LINEに友だち追加していただくと、<br />
-              無料診断フォームが表示されます。
+              公式LINEに友だち追加いただくと、<br />
+              詳細情報や個別のヒントをお届けします。
             </p>
 
             <div className="bg-[#FAF9F6] rounded-2xl p-6 mb-8 text-left">
-              <h3 className="font-bold text-stone-800 mb-4 text-center">診断で分かること</h3>
+              <h3 className="font-bold text-stone-800 mb-4 text-center">LINEで受け取れるもの</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2 text-sm text-stone-600">
                   <CheckCircle2 size={18} className="text-[#B08968] shrink-0 mt-0.5" />
-                  <span>現状の「行動ブレーキ」の特定</span>
+                  <span>診断タイプ別の深掘り解説</span>
                 </li>
                 <li className="flex items-start gap-2 text-sm text-stone-600">
                   <CheckCircle2 size={18} className="text-[#B08968] shrink-0 mt-0.5" />
-                  <span>あなたに合った副業ジャンルの提案</span>
+                  <span>あなたに合った進め方のヒント</span>
                 </li>
                 <li className="flex items-start gap-2 text-sm text-stone-600">
                   <CheckCircle2 size={18} className="text-[#B08968] shrink-0 mt-0.5" />
-                  <span>90日間のリブートロードマップ案</span>
+                  <span>最新情報やお知らせ</span>
                 </li>
               </ul>
             </div>
@@ -103,43 +103,50 @@ export default function ConsultationPage() {
 
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <div className="max-w-2xl mx-auto">
-          {/* 成功メッセージ */}
+          {/* メインCTA: Web診断 */}
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-stone-100 text-center mb-8">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 size={48} className="text-green-600" />
+            <div className="w-20 h-20 bg-[#E6CCB2] rounded-full flex items-center justify-center mx-auto mb-4">
+              <Compass size={48} className="text-[#B08968]" />
             </div>
-            <h2 className="text-2xl font-bold text-stone-800 mb-2">無料診断へようこそ</h2>
+            <h2 className="text-2xl font-bold text-stone-800 mb-2">行動タイプ診断へようこそ</h2>
             <p className="text-stone-600 mb-6">
-              公式LINEに登録して、あなたの「行動ブレーキ」を診断しましょう
+              8つの質問に答えて、あなたの「動き方」の傾向をチェックしましょう
             </p>
+            <Link
+              href="/diagnosis?from=consultation"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#B08968] text-white rounded-xl font-bold hover:bg-[#9c7858] transition-all"
+            >
+              <ArrowRight size={20} />
+              今すぐWebで診断する
+            </Link>
           </div>
 
-          {/* 診断で得られるもの */}
+          {/* 診断で分かること */}
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-stone-100 mb-8">
             <h3 className="text-xl font-bold text-stone-800 mb-6 flex items-center gap-2">
               <Compass className="text-[#B08968]" size={24} />
-              無料診断で得られるもの
+              診断で分かること
             </h3>
             <div className="space-y-4">
               <div className="flex items-start gap-4 p-4 bg-[#FAF9F6] rounded-xl">
                 <div className="w-10 h-10 bg-[#B08968] text-white rounded-full flex items-center justify-center shrink-0 font-bold">1</div>
                 <div>
-                  <h4 className="font-bold text-stone-800 mb-1">現状の「行動ブレーキ」の特定</h4>
-                  <p className="text-sm text-stone-600">なぜ動けないのか？行動心理学に基づき、あなたの思考のクセや心理的バリアを診断します。</p>
+                  <h4 className="font-bold text-stone-800 mb-1">あなたの行動タイプ</h4>
+                  <p className="text-sm text-stone-600">完璧主義・教材コレクター・一匹狼・気分屋サーファー。動けない原因につながる4タイプから、あなたに合う傾向をお伝えします。</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 p-4 bg-[#FAF9F6] rounded-xl">
                 <div className="w-10 h-10 bg-[#B08968] text-white rounded-full flex items-center justify-center shrink-0 font-bold">2</div>
                 <div>
-                  <h4 className="font-bold text-stone-800 mb-1">あなたに合った副業ジャンルの提案</h4>
-                  <p className="text-sm text-stone-600">あなたの特性に合わせて、最適な副業ジャンルを提案します。</p>
+                  <h4 className="font-bold text-stone-800 mb-1">自分に合った進め方</h4>
+                  <p className="text-sm text-stone-600">タイプごとに、続けやすさを高めるヒントをお伝えします。</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 p-4 bg-[#FAF9F6] rounded-xl">
                 <div className="w-10 h-10 bg-[#B08968] text-white rounded-full flex items-center justify-center shrink-0 font-bold">3</div>
                 <div>
-                  <h4 className="font-bold text-stone-800 mb-1">90日間のリブートロードマップ案</h4>
-                  <p className="text-sm text-stone-600">診断結果に基づき、あなた専用の90日間の行動計画を提案します。</p>
+                  <h4 className="font-bold text-stone-800 mb-1">次のステップの案内</h4>
+                  <p className="text-sm text-stone-600">もっと詳しく知りたい方には、LINEで個別の情報をお届けします。</p>
                 </div>
               </div>
             </div>
@@ -150,10 +157,10 @@ export default function ConsultationPage() {
             <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <MessageCircle size={32} />
-                <h3 className="text-2xl md:text-3xl font-bold">公式LINEに登録して無料診断を受ける</h3>
+                <h3 className="text-2xl md:text-3xl font-bold">公式LINEで詳細を受け取る</h3>
               </div>
               <p className="text-white/90 text-lg mb-6">
-                相談の詳細や診断結果、最新の情報をお届けします
+                診断の深掘り、あなたに合った進め方、最新情報などをお届けします
               </p>
             </div>
             
@@ -162,12 +169,12 @@ export default function ConsultationPage() {
               className="w-full py-5 bg-white text-[#06C755] rounded-xl font-bold text-xl hover:bg-white/90 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3"
             >
               <MessageCircle size={24} />
-              診断を開始する
-              <ArrowRight size={20} />
+              LINEで友だち追加する
+              <ExternalLink size={20} />
             </button>
             
             <p className="text-xs text-white/80 mt-6 text-center">
-              ※ 診断は完全無料です。強引な勧誘は一切行いません。
+              ※ 強引な勧誘は一切行いません。
             </p>
           </div>
 
@@ -175,20 +182,20 @@ export default function ConsultationPage() {
           <div className="mt-8 bg-[#FFF8F0] border border-[#E6CCB2] rounded-2xl p-6">
             <h4 className="font-bold text-stone-800 mb-3 flex items-center gap-2">
               <Target size={18} className="text-[#B08968]" />
-              診断について
+              ご利用について
             </h4>
             <ul className="space-y-2 text-sm text-stone-600">
               <li className="flex items-start gap-2">
                 <span className="text-[#B08968] mt-1">•</span>
-                <span>診断は完全無料です。強引な勧誘は一切行いません。</span>
+                <span>診断もLINE登録も無料。強引な勧誘は一切行いません。</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#B08968] mt-1">•</span>
-                <span>診断結果は、あなたの特性に合わせた個別のロードマップとして提供されます。</span>
+                <span>LINEでは、あなたに合った進め方のヒントをお届けします。</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#B08968] mt-1">•</span>
-                <span>ご不明な点がございましたら、LINEからお気軽にお問い合わせください。</span>
+                <span>ご不明な点は、LINEからお気軽にお問い合わせください。</span>
               </li>
             </ul>
           </div>
