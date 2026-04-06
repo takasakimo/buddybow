@@ -4,8 +4,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Target, Calendar, User, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import {
+  Target, Calendar, User, ChevronLeft, ChevronRight,
+  MessageCircle, ChevronDown, ChevronUp, BookOpen, TrendingUp, Lock,
+} from 'lucide-react';
 import { AXIS_LABELS, type Axis } from '@/lib/diagnosis/ai-questions';
+import { ADMIN_ADVICE, type AdminAdvice } from '@/lib/diagnosis/report-content';
 
 // ---- 型定義 ----
 interface ResultData {
@@ -49,14 +53,70 @@ function AxisMiniChart({ axisScores }: { axisScores: Record<Axis, number> }) {
           <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full"
-              style={{
-                width: `${axisScores[ax]}%`,
-                backgroundColor: '#B08968',
-              }}
+              style={{ width: `${axisScores[ax]}%`, backgroundColor: '#B08968' }}
             />
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ---- 管理者専用アドバイスパネル ----
+function AdminAdvicePanel({ advice, nickname }: { advice: AdminAdvice; nickname: string }) {
+  return (
+    <div className="p-5 bg-slate-900 rounded-xl space-y-5">
+      {/* 管理者専用バッジ */}
+      <div className="flex items-center gap-2">
+        <Lock className="w-3.5 h-3.5 text-red-400" />
+        <span className="text-xs font-bold text-red-400 tracking-wide uppercase">
+          管理者専用 — 受講者には表示されません
+        </span>
+      </div>
+
+      {/* 講師アドバイス */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <BookOpen className="w-4 h-4 text-sky-400" />
+          <h4 className="text-sm font-bold text-sky-300">
+            講師としての対応アドバイス
+          </h4>
+          <span className="text-[10px] text-sky-500 ml-1">（{nickname}さん向け）</span>
+        </div>
+        <ul className="space-y-2">
+          {advice.instructorTips.map((tip, i) => (
+            <li key={i} className="flex gap-2.5">
+              <span className="mt-0.5 w-5 h-5 rounded-full bg-sky-900 text-sky-300 text-[10px] font-bold flex items-center justify-center shrink-0">
+                {i + 1}
+              </span>
+              <p className="text-sm text-slate-200 leading-relaxed">{tip}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="border-t border-slate-700" />
+
+      {/* 営業アドバイス */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <TrendingUp className="w-4 h-4 text-emerald-400" />
+          <h4 className="text-sm font-bold text-emerald-300">
+            営業・クロージングアドバイス
+          </h4>
+          <span className="text-[10px] text-emerald-500 ml-1">（{nickname}さん向け）</span>
+        </div>
+        <ul className="space-y-2">
+          {advice.salesTips.map((tip, i) => (
+            <li key={i} className="flex gap-2.5">
+              <span className="mt-0.5 w-5 h-5 rounded-full bg-emerald-900 text-emerald-300 text-[10px] font-bold flex items-center justify-center shrink-0">
+                {i + 1}
+              </span>
+              <p className="text-sm text-slate-200 leading-relaxed">{tip}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
@@ -84,6 +144,7 @@ export default function DiagnosisResultsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const getUserRole = () => {
     const role = session?.user?.role || 'user';
@@ -119,6 +180,10 @@ export default function DiagnosisResultsPage() {
     fetchSubmissions();
   }, [session, router, fetchSubmissions]);
 
+  const toggleExpand = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
@@ -152,6 +217,7 @@ export default function DiagnosisResultsPage() {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">8軸スコア</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">LINE</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">流入</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">詳細</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -159,95 +225,130 @@ export default function DiagnosisResultsPage() {
                       const rd = s.resultData;
                       const typeKey = rd?.type;
                       const typeStyle = typeKey ? (TYPE_STYLE[typeKey] ?? TYPE_STYLE.C) : null;
+                      const advice = typeKey ? ADMIN_ADVICE[typeKey] : null;
+                      const isExpanded = expandedId === s.id;
 
                       return (
-                        <tr
-                          key={s.id}
-                          className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors align-top"
-                        >
-                          {/* 日時 */}
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                              {new Date(s.diagnosedAt).toLocaleString('ja-JP', {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </div>
-                          </td>
-
-                          {/* 名前 */}
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-900">
-                              <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                              {s.nickname}
-                            </div>
-                          </td>
-
-                          {/* タイプ + スコア */}
-                          <td className="px-4 py-3">
-                            {typeKey && typeStyle ? (
-                              <div className="space-y-1.5">
-                                <span
-                                  className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold border ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border}`}
-                                >
-                                  タイプ {typeKey}
-                                </span>
-                                {rd?.label && (
-                                  <p className="text-xs text-slate-500 leading-tight">{rd.label}</p>
-                                )}
-                                {rd?.totalScore != null && (
-                                  <p className="text-lg font-bold text-[#B08968] leading-none">
-                                    {rd.totalScore}
-                                    <span className="text-xs font-normal text-slate-400 ml-0.5">点</span>
-                                  </p>
-                                )}
+                        <>
+                          {/* メイン行 */}
+                          <tr
+                            key={s.id}
+                            className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors align-top"
+                          >
+                            {/* 日時 */}
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                {new Date(s.diagnosedAt).toLocaleString('ja-JP', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
                               </div>
-                            ) : (
-                              <span className="text-slate-400 text-sm">-</span>
-                            )}
-                          </td>
+                            </td>
 
-                          {/* 8軸スコア */}
-                          <td className="px-4 py-3">
-                            {rd?.axisScores ? (
-                              <AxisMiniChart axisScores={rd.axisScores} />
-                            ) : (
-                              <span className="text-slate-400 text-sm">-</span>
-                            )}
-                          </td>
+                            {/* 名前 */}
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-1.5 text-sm font-medium text-slate-900">
+                                <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                {s.nickname}
+                              </div>
+                            </td>
 
-                          {/* LINE連携 */}
-                          <td className="px-4 py-3">
-                            {s.lineUserId ? (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1">
-                                  <MessageCircle className="w-3.5 h-3.5 text-green-500" />
-                                  <span className="text-xs font-medium text-green-600">連携済み</span>
+                            {/* タイプ + スコア */}
+                            <td className="px-4 py-3">
+                              {typeKey && typeStyle ? (
+                                <div className="space-y-1.5">
+                                  <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold border ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border}`}>
+                                    タイプ {typeKey}
+                                  </span>
+                                  {rd?.label && (
+                                    <p className="text-xs text-slate-500 leading-tight">{rd.label}</p>
+                                  )}
+                                  {rd?.totalScore != null && (
+                                    <p className="text-lg font-bold text-[#B08968] leading-none">
+                                      {rd.totalScore}
+                                      <span className="text-xs font-normal text-slate-400 ml-0.5">点</span>
+                                    </p>
+                                  )}
                                 </div>
-                                {s.lineReportSentAt && (
-                                  <p className="text-[10px] text-slate-400">
-                                    送信: {new Date(s.lineReportSentAt).toLocaleString('ja-JP', {
-                                      month: 'short',
-                                      day: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-xs text-slate-400">未連携</span>
-                            )}
-                          </td>
+                              ) : (
+                                <span className="text-slate-400 text-sm">-</span>
+                              )}
+                            </td>
 
-                          {/* 流入元 */}
-                          <td className="px-4 py-3">
-                            <SourceBadge source={s.source} />
-                          </td>
-                        </tr>
+                            {/* 8軸スコア */}
+                            <td className="px-4 py-3">
+                              {rd?.axisScores ? (
+                                <AxisMiniChart axisScores={rd.axisScores} />
+                              ) : (
+                                <span className="text-slate-400 text-sm">-</span>
+                              )}
+                            </td>
+
+                            {/* LINE連携 */}
+                            <td className="px-4 py-3">
+                              {s.lineUserId ? (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1">
+                                    <MessageCircle className="w-3.5 h-3.5 text-green-500" />
+                                    <span className="text-xs font-medium text-green-600">連携済み</span>
+                                  </div>
+                                  {s.lineReportSentAt && (
+                                    <p className="text-[10px] text-slate-400">
+                                      送信: {new Date(s.lineReportSentAt).toLocaleString('ja-JP', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </p>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-xs text-slate-400">未連携</span>
+                              )}
+                            </td>
+
+                            {/* 流入元 */}
+                            <td className="px-4 py-3">
+                              <SourceBadge source={s.source} />
+                            </td>
+
+                            {/* 詳細ボタン */}
+                            <td className="px-4 py-3">
+                              {advice ? (
+                                <button
+                                  onClick={() => toggleExpand(s.id)}
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                                    isExpanded
+                                      ? 'bg-slate-800 text-white border-slate-700'
+                                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                                  }`}
+                                >
+                                  <Lock className="w-3 h-3" />
+                                  管理者メモ
+                                  {isExpanded
+                                    ? <ChevronUp className="w-3 h-3" />
+                                    : <ChevronDown className="w-3 h-3" />
+                                  }
+                                </button>
+                              ) : (
+                                <span className="text-slate-400 text-xs">-</span>
+                              )}
+                            </td>
+                          </tr>
+
+                          {/* 展開パネル行 */}
+                          {isExpanded && advice && (
+                            <tr key={`${s.id}-detail`} className="border-b border-slate-200 bg-slate-800/5">
+                              <td colSpan={7} className="px-4 py-4">
+                                <AdminAdvicePanel advice={advice} nickname={s.nickname} />
+                              </td>
+                            </tr>
+                          )}
+                        </>
                       );
                     })}
                   </tbody>
