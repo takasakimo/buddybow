@@ -13,7 +13,6 @@ import {
   type DiagnosisResult,
 } from '@/lib/diagnosis/ai-questions';
 
-const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || 'https://lin.ee/XXXXXXX';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://buddybow.vercel.app';
 
 function trackEvent(name: string, params?: Record<string, unknown>) {
