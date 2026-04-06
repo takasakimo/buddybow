@@ -115,15 +115,29 @@ model DiagnosisUrl {
 
 // LP等からの匿名診断結果（会員登録前の顧客）
 model DiagnosisSubmission {
-  id              String   @id @default(cuid())
-  nickname        String   @map("nickname")
-  personalityType String?  @map("personality_type")
-  resultData      Json?    @map("result_data")
-  diagnosedAt     DateTime @map("diagnosed_at")
-  source          String?  @default("lp")
-  createdAt       DateTime @default(now()) @map("created_at")
+  id              String           @id @default(cuid())
+  nickname        String           @map("nickname")
+  personalityType String?          @map("personality_type")
+  resultData      Json?            @map("result_data")
+  diagnosedAt     DateTime         @map("diagnosed_at")
+  source          String?          @default("lp")
+  lineUserId      String?          @map("line_user_id")
+  lineReportSentAt DateTime?       @map("line_report_sent_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  meetingBookings MeetingBooking[]
 
   @@map("diagnosis_submissions")
+}
+
+// LINEログインOAuth中の一時state管理
+model LineOAuthState {
+  id           String   @id @default(cuid())
+  state        String   @unique
+  diagnosisId  String   @map("diagnosis_id")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("line_oauth_states")
 }
 
 // 診断結果
@@ -162,11 +176,12 @@ model Roadmap {
   @@map("roadmaps")
 }
 
-// マイルストーン
+// マイルストーン（月別 ToDo、targetMonths に合わせて 1〜N ヶ月目）
 model Milestone {
   id          String   @id @default(cuid())
   roadmapId   String   @map("roadmap_id")
   roadmap     Roadmap  @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  month       Int      @default(1) @map("month") // 1, 2, 3... ヶ月目
   title       String
   description String?
   targetDate  DateTime @map("target_date")
@@ -175,8 +190,94 @@ model Milestone {
   order       Int
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
+  traineeEntry MilestoneTraineeEntry?
+  subItems    MilestoneSubItem[]
 
   @@map("milestones")
+}
+
+// マイルストーンのサブ項目（ツリー型・多階層）
+model MilestoneSubItem {
+  id          String   @id @default(cuid())
+  milestoneId String   @map("milestone_id")
+  milestone   Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  parentId    String?  @map("parent_id") // null = トップレベル
+  parent      MilestoneSubItem? @relation("SubItemTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children    MilestoneSubItem[] @relation("SubItemTree")
+  title       String
+  description String?  @map("description") @db.Text
+  order       Int      @default(0)
+  completed   Boolean  @default(false)
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  traineeEntry SubItemTraineeEntry?
+
+  @@map("milestone_sub_items")
+}
+
+// サブ項目の受講生記入（進捗・メモ・思ったこと・質問 ＋ 管理者コメント）
+model SubItemTraineeEntry {
+  id                   String   @id @default(cuid())
+  subItemId            String   @unique @map("sub_item_id")
+  subItem              MilestoneSubItem @relation(fields: [subItemId], references: [id], onDelete: Cascade)
+  progress             String?  @map("progress") @db.Text
+  memo                 String?  @map("memo") @db.Text
+  thought              String?  @map("thought") @db.Text
+  question             String?  @map("question") @db.Text
+  adminProgressReply   String?  @map("admin_progress_reply") @db.Text
+  adminMemoReply       String?  @map("admin_memo_reply") @db.Text
+  adminThoughtReply    String?  @map("admin_thought_reply") @db.Text
+  adminQuestionReply   String?  @map("admin_question_reply") @db.Text
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@map("sub_item_trainee_entries")
+}
+
+// 受講生のマイルストーン記入（進捗・メモ・思ったこと・質問 ＋ 管理者コメント）
+model MilestoneTraineeEntry {
+  id                   String   @id @default(cuid())
+  milestoneId          String   @unique @map("milestone_id")
+  milestone            Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  progress             String?  @map("progress") @db.Text
+  memo                 String?  @map("memo") @db.Text
+  thought              String?  @map("thought") @db.Text
+  question             String?  @map("question") @db.Text
+  adminProgressReply   String?  @map("admin_progress_reply") @db.Text
+  adminMemoReply       String?  @map("admin_memo_reply") @db.Text
+  adminThoughtReply    String?  @map("admin_thought_reply") @db.Text
+  adminQuestionReply   String?  @map("admin_question_reply") @db.Text
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@map("milestone_trainee_entries")
+}
+
+// ロードマップテンプレート（管理者が月別ゴールを登録・編集）
+model RoadmapTemplate {
+  id        String   @id @default(cuid())
+  name      String   @map("name")
+  items     RoadmapTemplateItem[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("roadmap_templates")
+}
+
+// テンプレートの月別アイテム（マイルストーンひな形）
+model RoadmapTemplateItem {
+  id          String           @id @default(cuid())
+  templateId  String           @map("template_id")
+  template    RoadmapTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  month       Int              @map("month")
+  title       String           @map("title")
+  description String?          @map("description") @db.Text
+  order       Int              @default(0)
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  @@map("roadmap_template_items")
 }
 
 // 日報・週報
@@ -305,4 +406,37 @@ model Interview {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("interviews")
+}
+
+// 面談スケジュール枠（管理者が○×で設定）
+model MeetingSlot {
+  id          String   @id @default(cuid())
+  slotDate    DateTime @map("slot_date") // 日付（00:00:00）
+  timeSlot    String   @map("time_slot") // "10:00", "11:00" 等
+  isAvailable Boolean  @default(true) @map("is_available") // ○=true, ×=false
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  bookings    MeetingBooking[]
+
+  @@unique([slotDate, timeSlot])
+  @@map("meeting_slots")
+}
+
+// 面談予約（LPからの無料相談申込）
+model MeetingBooking {
+  id                      String              @id @default(cuid())
+  slotId                  String              @map("slot_id")
+  slot                    MeetingSlot         @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  diagnosisSubmissionId    String?             @map("diagnosis_submission_id")
+  diagnosisSubmission     DiagnosisSubmission? @relation(fields: [diagnosisSubmissionId], references: [id], onDelete: SetNull)
+  name                    String
+  email                   String
+  phone                   String?
+  message                 String?
+  status                  String              @default("pending") // pending, confirmed, cancelled
+  adminReadAt             DateTime?           @map("admin_read_at") // 管理者が確認した日時（null=未読）
+  createdAt               DateTime            @default(now()) @map("created_at")
+  updatedAt               DateTime            @updatedAt @map("updated_at")
+
+  @@map("meeting_bookings")
 }

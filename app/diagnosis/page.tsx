@@ -370,7 +370,7 @@ function DiagnosisContent() {
               <AxisBars scores={result.axisScores} />
             </div>
 
-            {/* Radar chart (blurred → LINE CTA) */}
+            {/* Radar chart (blurred → LINE OAuth CTA) */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 mb-4">
               <h3 className="text-sm font-semibold text-stone-700 mb-4">レーダーチャート</h3>
               <div className="relative flex justify-center">
@@ -379,19 +379,24 @@ function DiagnosisContent() {
                 </div>
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                   <p className="text-xs text-stone-600 bg-white/90 px-3 py-1 rounded-full shadow-sm">
-                    LINE登録で詳細レポートを受け取れます
+                    LINE連携で詳細レポートが届きます
                   </p>
-                  <a
-                    href={LINE_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackEvent('line_click', { context: 'radar_unlock' })}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white shadow-md hover:opacity-90 transition"
-                    style={{ backgroundColor: '#06C755' }}
-                  >
-                    LINE登録して全部見る
-                    <ChevronRight size={16} />
-                  </a>
+                  {diagnosisId ? (
+                    <a
+                      href={`/api/auth/line?diagnosisId=${diagnosisId}`}
+                      onClick={() => trackEvent('line_click', { context: 'radar_unlock' })}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white shadow-md hover:opacity-90 transition"
+                      style={{ backgroundColor: '#06C755' }}
+                    >
+                      LINEで受け取る
+                      <ChevronRight size={16} />
+                    </a>
+                  ) : (
+                    <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white opacity-60 cursor-wait"
+                      style={{ backgroundColor: '#06C755' }}>
+                      送信中...
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
