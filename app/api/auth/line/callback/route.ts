@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { AXIS_LABELS, AI_TYPES, type Axis, type DiagnosisType } from '@/lib/diagnosis/ai-questions';
+import { REPORT_CONTENT } from '@/lib/diagnosis/report-content';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://buddybow.vercel.app';
 
@@ -12,7 +13,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://buddybow.vercel.ap
  * 2. codeをLINE APIでアクセストークンに交換
  * 3. プロフィール取得（userId）
  * 4. DiagnosisSubmissionにlineUserId紐付け
- * 5. Messaging APIで詳細レポートをプッシュ送信
+ * 5. Messaging APIで詳細レポートをプッシュ送信（4枚カルーセル）
  * 6. thanks画面へリダイレクト
  */
 export async function GET(request: Request) {
@@ -24,11 +25,9 @@ export async function GET(request: Request) {
   const siteUrl = SITE_URL;
   const redirectBase = `${siteUrl}/diagnosis/thanks`;
 
-  // LINEログインキャンセル
   if (errorParam) {
     return NextResponse.redirect(`${redirectBase}?status=cancelled`);
   }
-
   if (!code || !state) {
     return NextResponse.redirect(`${redirectBase}?status=error&reason=missing_params`);
   }
@@ -41,8 +40,6 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${redirectBase}?status=error&reason=state_expired`);
     }
     const { diagnosisId } = oauthState;
-
-    // stateは使い捨て
     await prisma.lineOAuthState.delete({ where: { state } });
 
     // ② codeをアクセストークンに交換
@@ -58,21 +55,15 @@ export async function GET(request: Request) {
         client_secret: process.env.LINE_LOGIN_CHANNEL_SECRET!,
       }),
     });
-    if (!tokenRes.ok) {
-      throw new Error(`Token exchange failed: ${tokenRes.status}`);
-    }
-    const tokenData = await tokenRes.json();
-    const accessToken: string = tokenData.access_token;
+    if (!tokenRes.ok) throw new Error(`Token exchange failed: ${tokenRes.status}`);
+    const { access_token: accessToken } = await tokenRes.json();
 
     // ③ プロフィール取得（LINE userId）
     const profileRes = await fetch('https://api.line.me/v2/profile', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    if (!profileRes.ok) {
-      throw new Error(`Profile fetch failed: ${profileRes.status}`);
-    }
-    const profile = await profileRes.json();
-    const lineUserId: string = profile.userId;
+    if (!profileRes.ok) throw new Error(`Profile fetch failed: ${profileRes.status}`);
+    const { userId: lineUserId } = await profileRes.json();
 
     // ④ DiagnosisSubmissionを更新
     const submission = await prisma.diagnosisSubmission.update({
@@ -80,7 +71,7 @@ export async function GET(request: Request) {
       data: { lineUserId },
     });
 
-    // ⑤ Messaging APIでレポートをプッシュ送信
+    // ⑤ 詳細レポートをプッシュ送信
     const messagingToken = process.env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN;
     if (messagingToken && submission.resultData) {
       const result = submission.resultData as {
@@ -90,7 +81,7 @@ export async function GET(request: Request) {
         axisScores: Record<Axis, number>;
       };
 
-      const pushOk = await sendLineReport({
+      const pushOk = await sendDetailedReport({
         lineUserId,
         nickname: submission.nickname,
         diagnosisId,
@@ -114,9 +105,11 @@ export async function GET(request: Request) {
   }
 }
 
-// ---- LINE Messaging API ----
+// ================================================================
+// LINE Messaging API — 詳細レポート（4枚カルーセル）
+// ================================================================
 
-async function sendLineReport(opts: {
+async function sendDetailedReport(opts: {
   lineUserId: string;
   nickname: string;
   diagnosisId: string;
@@ -127,125 +120,182 @@ async function sendLineReport(opts: {
   const { lineUserId, nickname, diagnosisId, result, messagingToken, siteUrl } = opts;
 
   const typeInfo = AI_TYPES[result.type];
+  const reportContent = REPORT_CONTENT[result.type];
+
+  // ---- Bubble 1: 診断サマリー + 8軸スコア ----
   const axisRows = (Object.keys(AXIS_LABELS) as Axis[]).map((ax) => ({
     type: 'box',
     layout: 'horizontal',
+    margin: 'sm',
     contents: [
       { type: 'text', text: AXIS_LABELS[ax], size: 'xs', color: '#555555', flex: 4 },
+      { type: 'text', text: scoreBar(result.axisScores[ax]), size: 'xs', color: '#B08968', flex: 5, margin: 'sm' },
+      { type: 'text', text: `${result.axisScores[ax]}`, size: 'xs', color: '#B08968', weight: 'bold', align: 'end', flex: 2 },
+    ],
+  }));
+
+  const bubble1 = {
+    type: 'bubble',
+    size: 'mega',
+    header: header(`タイプ ${result.type}`, typeInfo.label, '1 / 4　診断サマリー'),
+    body: {
+      type: 'box',
+      layout: 'vertical',
+      paddingAll: '18px',
+      contents: [
+        row('総合スコア', `${result.totalScore}点`),
+        { type: 'separator', margin: 'md' },
+        {
+          type: 'text',
+          text: typeInfo.desc,
+          size: 'xs',
+          color: '#555555',
+          wrap: true,
+          margin: 'md',
+        },
+        { type: 'separator', margin: 'md' },
+        { type: 'text', text: '8軸スコア', size: 'sm', weight: 'bold', color: '#333333', margin: 'md' },
+        ...axisRows,
+      ],
+    },
+  };
+
+  // ---- Bubble 2: 性格的な傾向 ----
+  const bubble2 = {
+    type: 'bubble',
+    size: 'mega',
+    header: header('あなたの', '性格的な傾向', '2 / 4　パーソナリティ'),
+    body: {
+      type: 'box',
+      layout: 'vertical',
+      paddingAll: '18px',
+      contents: [
+        {
+          type: 'text',
+          text: reportContent.personality,
+          size: 'sm',
+          color: '#333333',
+          wrap: true,
+          lineSpacing: '6px',
+        },
+      ],
+    },
+  };
+
+  // ---- Bubble 3: 向いている副業 ----
+  const jobItems = reportContent.suitableJobs.map((job, i) => ({
+    type: 'box',
+    layout: 'horizontal',
+    margin: 'md',
+    contents: [
       {
-        type: 'text',
-        text: `${result.axisScores[ax]}`,
-        size: 'xs',
-        color: '#B08968',
-        weight: 'bold',
-        align: 'end',
-        flex: 1,
+        type: 'box',
+        layout: 'vertical',
+        contents: [{ type: 'text', text: `${i + 1}`, size: 'xs', color: '#ffffff', align: 'center' }],
+        width: '22px',
+        height: '22px',
+        backgroundColor: '#B08968',
+        cornerRadius: '11px',
+        justifyContent: 'center',
       },
       {
         type: 'text',
-        text: scoreBar(result.axisScores[ax]),
-        size: 'xs',
-        color: '#B08968',
-        flex: 5,
+        text: job,
+        size: 'sm',
+        color: '#333333',
+        wrap: true,
+        flex: 1,
         margin: 'sm',
       },
     ],
-    margin: 'sm',
   }));
 
-  const flexMessage = {
+  const bubble3 = {
+    type: 'bubble',
+    size: 'mega',
+    header: header('向いている', '副業スタイル', '3 / 4　おすすめ副業'),
+    body: {
+      type: 'box',
+      layout: 'vertical',
+      paddingAll: '18px',
+      contents: [
+        {
+          type: 'text',
+          text: `${nickname}さんのタイプに合った副業を厳選しました`,
+          size: 'xs',
+          color: '#888888',
+          wrap: true,
+        },
+        ...jobItems,
+      ],
+    },
+  };
+
+  // ---- Bubble 4: 成功への挑戦方法 + CTA ----
+  const bubble4 = {
+    type: 'bubble',
+    size: 'mega',
+    header: header('成功しやすい', '挑戦方法', '4 / 4　アクションプラン'),
+    body: {
+      type: 'box',
+      layout: 'vertical',
+      paddingAll: '18px',
+      contents: [
+        {
+          type: 'text',
+          text: reportContent.howToSucceed,
+          size: 'sm',
+          color: '#333333',
+          wrap: true,
+          lineSpacing: '6px',
+        },
+      ],
+    },
+    footer: {
+      type: 'box',
+      layout: 'vertical',
+      paddingAll: '16px',
+      backgroundColor: '#FFF8F0',
+      contents: [
+        {
+          type: 'text',
+          text: '診断結果をもとに個別プランを一緒に考えます',
+          size: 'xs',
+          color: '#888888',
+          wrap: true,
+          align: 'center',
+          margin: 'none',
+        },
+        {
+          type: 'button',
+          action: {
+            type: 'uri',
+            label: '無料面談を予約する →',
+            uri: `${siteUrl}/lp/meeting?diagnosisId=${diagnosisId}`,
+          },
+          style: 'primary',
+          color: '#B08968',
+          height: 'sm',
+          margin: 'md',
+        },
+        {
+          type: 'text',
+          text: '強引な勧誘は一切行いません',
+          size: 'xxs',
+          color: '#aaaaaa',
+          align: 'center',
+          margin: 'sm',
+        },
+      ],
+    },
+  };
+
+  const carouselMessage = {
     type: 'flex',
-    altText: `📊 ${nickname}さんのAI活用スタイル診断レポートが届きました`,
+    altText: `📊 ${nickname}さんの詳細診断レポートが届きました（全4ページ）`,
     contents: {
-      type: 'bubble',
-      size: 'mega',
-      header: {
-        type: 'box',
-        layout: 'vertical',
-        backgroundColor: '#B08968',
-        paddingAll: '20px',
-        contents: [
-          {
-            type: 'text',
-            text: 'AI活用スタイル診断レポート',
-            size: 'xs',
-            color: '#ffffff',
-            weight: 'bold',
-          },
-          {
-            type: 'text',
-            text: `タイプ ${result.type}：${typeInfo.label}`,
-            size: 'lg',
-            color: '#ffffff',
-            weight: 'bold',
-            wrap: true,
-            margin: 'sm',
-          },
-        ],
-      },
-      body: {
-        type: 'box',
-        layout: 'vertical',
-        paddingAll: '20px',
-        contents: [
-          // 総合スコア
-          {
-            type: 'box',
-            layout: 'horizontal',
-            contents: [
-              { type: 'text', text: '総合スコア', size: 'sm', color: '#555555' },
-              {
-                type: 'text',
-                text: `${result.totalScore}点`,
-                size: 'sm',
-                color: '#B08968',
-                weight: 'bold',
-                align: 'end',
-              },
-            ],
-          },
-          { type: 'separator', margin: 'md' },
-          // タイプ説明
-          {
-            type: 'text',
-            text: typeInfo.desc,
-            size: 'xs',
-            color: '#555555',
-            wrap: true,
-            margin: 'md',
-          },
-          { type: 'separator', margin: 'md' },
-          // 8軸スコア
-          { type: 'text', text: '8軸スコア', size: 'sm', weight: 'bold', color: '#333333', margin: 'md' },
-          ...axisRows,
-        ],
-      },
-      footer: {
-        type: 'box',
-        layout: 'vertical',
-        paddingAll: '16px',
-        contents: [
-          {
-            type: 'button',
-            action: {
-              type: 'uri',
-              label: '無料面談を予約する',
-              uri: `${siteUrl}/lp/meeting?diagnosisId=${diagnosisId}`,
-            },
-            style: 'primary',
-            color: '#B08968',
-            height: 'sm',
-          },
-          {
-            type: 'text',
-            text: '強引な勧誘は一切行いません',
-            size: 'xxs',
-            color: '#aaaaaa',
-            align: 'center',
-            margin: 'sm',
-          },
-        ],
-      },
+      type: 'carousel',
+      contents: [bubble1, bubble2, bubble3, bubble4],
     },
   };
 
@@ -256,10 +306,7 @@ async function sendLineReport(opts: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${messagingToken}`,
       },
-      body: JSON.stringify({
-        to: lineUserId,
-        messages: [flexMessage],
-      }),
+      body: JSON.stringify({ to: lineUserId, messages: [carouselMessage] }),
     });
     return res.ok;
   } catch {
@@ -267,7 +314,33 @@ async function sendLineReport(opts: {
   }
 }
 
-/** スコアを簡易バー表示に変換（例: 75 → "████████░░"） */
+// ---- ヘルパー ----
+
+function header(line1: string, line2: string, badge: string) {
+  return {
+    type: 'box',
+    layout: 'vertical',
+    backgroundColor: '#B08968',
+    paddingAll: '18px',
+    contents: [
+      { type: 'text', text: badge, size: 'xxs', color: '#f5e6d8' },
+      { type: 'text', text: line1, size: 'sm', color: '#ffffff', margin: 'sm' },
+      { type: 'text', text: line2, size: 'xl', color: '#ffffff', weight: 'bold', wrap: true },
+    ],
+  };
+}
+
+function row(label: string, value: string) {
+  return {
+    type: 'box',
+    layout: 'horizontal',
+    contents: [
+      { type: 'text', text: label, size: 'sm', color: '#555555' },
+      { type: 'text', text: value, size: 'sm', color: '#B08968', weight: 'bold', align: 'end' },
+    ],
+  };
+}
+
 function scoreBar(score: number): string {
   const filled = Math.round(score / 10);
   return '█'.repeat(filled) + '░'.repeat(10 - filled);
