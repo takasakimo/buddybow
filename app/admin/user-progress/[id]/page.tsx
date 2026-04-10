@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Target, BookOpen, Map, MessageSquare, FileText, BarChart3, Trophy } from 'lucide-react';
+import { Target, BookOpen, Map, MessageSquare, FileText, BarChart3, Trophy, Lock } from 'lucide-react';
 
 interface UserProgress {
   currentPhase: string;
@@ -67,10 +67,19 @@ interface Diagnosis {
   updatedAt: Date;
 }
 
+interface InternalProfile {
+  hearingNotes: string | null;
+  background: string | null;
+  mindset: string | null;
+  currentGoals: string | null;
+  diagnosisNotes: string | null;
+}
+
 interface UserDetail {
   id: number;
   name: string;
   email: string;
+  internalProfile?: InternalProfile | null;
   userProgress: UserProgress | null;
   trainings: Training[];
   moduleProgresses: ModuleProgress[];
@@ -141,6 +150,14 @@ export default function UserProgressDetailPage() {
   const [showInterviewList, setShowInterviewList] = useState(false);
   const [showConsultationList, setShowConsultationList] = useState(false);
   const [showDiagnosisList, setShowDiagnosisList] = useState(false);
+  const [internalNotesForm, setInternalNotesForm] = useState({
+    hearingNotes: '',
+    background: '',
+    mindset: '',
+    currentGoals: '',
+    diagnosisNotes: '',
+  });
+  const [savingInternalNotes, setSavingInternalNotes] = useState(false);
 
   // ロールの後方互換性を確保
   const getUserRole = () => {
@@ -164,6 +181,27 @@ export default function UserProgressDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, router, params.id]);
 
+  useEffect(() => {
+    if (!userDetail || typeof window === 'undefined') return;
+    if (window.location.hash !== '#internal-profile') return;
+    const t = setTimeout(() => {
+      document.getElementById('internal-profile')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [userDetail]);
+
+  useEffect(() => {
+    if (!userDetail) return;
+    const p = userDetail.internalProfile;
+    setInternalNotesForm({
+      hearingNotes: p?.hearingNotes ?? '',
+      background: p?.background ?? '',
+      mindset: p?.mindset ?? '',
+      currentGoals: p?.currentGoals ?? '',
+      diagnosisNotes: p?.diagnosisNotes ?? '',
+    });
+  }, [userDetail]);
+
   const fetchUserDetail = async () => {
     try {
       const response = await fetch(`/api/admin/user-progress/${params.id}`);
@@ -175,6 +213,28 @@ export default function UserProgressDetailPage() {
       console.error('Failed to fetch user detail:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveInternalNotes = async () => {
+    setSavingInternalNotes(true);
+    try {
+      const res = await fetch(`/api/admin/user-progress/${params.id}/internal-notes`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(internalNotesForm),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        alert('内部プロフィールを保存しました');
+        await fetchUserDetail();
+      } else {
+        alert((data as { error?: string }).error || '保存に失敗しました');
+      }
+    } catch {
+      alert('保存に失敗しました');
+    } finally {
+      setSavingInternalNotes(false);
     }
   };
 
@@ -672,6 +732,86 @@ export default function UserProgressDetailPage() {
           </h1>
           <p className="text-gray-600">{userDetail.email}</p>
         </header>
+
+        <section
+          id="internal-profile"
+          className="mb-6 rounded-xl border-2 border-amber-200/90 bg-gradient-to-br from-amber-50/90 to-orange-50/40 p-6 shadow-sm scroll-mt-6"
+        >
+          <div className="flex items-start gap-3 mb-5">
+            <div className="rounded-lg bg-amber-100 p-2">
+              <Lock className="w-5 h-5 text-amber-900" aria-hidden />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg font-semibold text-gray-900">受講生プロフィール（管理者・担当メンターのみ）</h2>
+              <p className="text-sm text-amber-950/75 mt-1 leading-relaxed">
+                面談・ヒアリングで得た情報、バックグラウンド、考え方・マインド、今やりたいこと、診断結果の補足や所見などを記録できます。
+                <span className="font-medium text-amber-950"> 受講生のマイページには表示されません。</span>
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-800 mb-1">面談・ヒアリングメモ</label>
+              <textarea
+                value={internalNotesForm.hearingNotes}
+                onChange={(e) => setInternalNotesForm((f) => ({ ...f, hearingNotes: e.target.value }))}
+                rows={4}
+                className="w-full px-3 py-2 border border-amber-200/80 rounded-lg text-gray-900 text-sm bg-white/90 focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                placeholder="面談で聞いたこと、気づき、次回フォローしたい点など"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-800 mb-1">バックグラウンド</label>
+              <textarea
+                value={internalNotesForm.background}
+                onChange={(e) => setInternalNotesForm((f) => ({ ...f, background: e.target.value }))}
+                rows={4}
+                className="w-full px-3 py-2 border border-amber-200/80 rounded-lg text-gray-900 text-sm bg-white/90 focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                placeholder="職歴・家庭・制約・スキル経験など"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-800 mb-1">考え方・マインド</label>
+              <textarea
+                value={internalNotesForm.mindset}
+                onChange={(e) => setInternalNotesForm((f) => ({ ...f, mindset: e.target.value }))}
+                rows={4}
+                className="w-full px-3 py-2 border border-amber-200/80 rounded-lg text-gray-900 text-sm bg-white/90 focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                placeholder="価値観、不安やモチベーションの傾向など"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-800 mb-1">今やりたいこと・志向</label>
+              <textarea
+                value={internalNotesForm.currentGoals}
+                onChange={(e) => setInternalNotesForm((f) => ({ ...f, currentGoals: e.target.value }))}
+                rows={3}
+                className="w-full px-3 py-2 border border-amber-200/80 rounded-lg text-gray-900 text-sm bg-white/90 focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                placeholder="短期・中期で目指していること、興味のある領域"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-800 mb-1">診断結果の補足・メモ</label>
+              <textarea
+                value={internalNotesForm.diagnosisNotes}
+                onChange={(e) => setInternalNotesForm((f) => ({ ...f, diagnosisNotes: e.target.value }))}
+                rows={3}
+                className="w-full px-3 py-2 border border-amber-200/80 rounded-lg text-gray-900 text-sm bg-white/90 focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                placeholder="タイプの解釈、現場での見え方、本人への伝え方のメモなど（下の診断履歴とは別のメンター用メモ）"
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={handleSaveInternalNotes}
+              disabled={savingInternalNotes}
+              className="px-5 py-2.5 rounded-lg bg-amber-800 text-white text-sm font-medium hover:bg-amber-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {savingInternalNotes ? '保存中…' : '内部プロフィールを保存'}
+            </button>
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 左カラム */}

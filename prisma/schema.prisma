@@ -32,6 +32,14 @@ model User {
   studySessionParticipants StudySessionParticipant[]
   interviews              Interview[]
 
+  /// 面談ヒアリング等（管理者・担当メンターのみ。受講生には非表示）
+  adminHearingNotes   String? @db.Text @map("admin_hearing_notes")
+  adminBackground     String? @db.Text @map("admin_background")
+  adminMindset        String? @db.Text @map("admin_mindset")
+  adminCurrentGoals   String? @db.Text @map("admin_current_goals")
+  /// 診断結果の補足・メンター所見など（受講生には非表示）
+  adminDiagnosisNotes String? @db.Text @map("admin_diagnosis_notes")
+
   @@map("users")
 }
 

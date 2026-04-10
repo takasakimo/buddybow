@@ -176,6 +176,13 @@ export async function GET(
       id: user.id,
       name: user.name,
       email: user.email,
+      internalProfile: {
+        hearingNotes: user.adminHearingNotes ?? null,
+        background: user.adminBackground ?? null,
+        mindset: user.adminMindset ?? null,
+        currentGoals: user.adminCurrentGoals ?? null,
+        diagnosisNotes: user.adminDiagnosisNotes ?? null,
+      },
       userProgress: user.userProgress,
       trainings: trainings.map((t) => ({
         id: t.id,
