@@ -12,7 +12,6 @@ import {
   DIMENSION_ORDER,
   calculateP256Result,
   type P256Result,
-  type DimensionId,
 } from '@/lib/diagnosis/p256';
 
 const PART_RANGES = [
@@ -21,8 +20,6 @@ const PART_RANGES = [
   { label: 'Part 3', from: 20, to: 29, theme: '創造・自律' },
   { label: 'Part 4', from: 30, to: 39, theme: 'ビジネス感覚' },
 ];
-
-const LEVEL_BAR_W: Record<number, string> = { 5: '25%', 6: '30%', 7: '35%', 8: '40%', 9: '45%', 10: '50%', 11: '55%', 12: '60%', 13: '65%', 14: '70%', 15: '75%', 16: '80%', 17: '85%', 18: '90%', 19: '95%', 20: '100%' };
 
 export default function DetailedDiagnosisPage() {
   const { status } = useSession();
