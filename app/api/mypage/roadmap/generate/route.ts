@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import OpenAI from 'openai';
 import { DIMENSION_LABELS, DIMENSION_ORDER, type DimensionId } from '@/lib/diagnosis/p256';
 
 export const dynamic = 'force-dynamic';
@@ -79,9 +78,7 @@ ${dims}
 `;
     }
 
-    // ── OpenAIプロンプト ──────────────────────────────────
-    const openai = new OpenAI({ apiKey });
-
+    // ── OpenAI API呼び出し（fetchベース）─────────────────
     const prompt = `あなたは副業コーチです。以下の情報に基づき、${months}ヶ月で目標を達成するための具体的なロードマップ（マインドマップ形式）を作成してください。
 ${diagnosisContext}
 【目標（${months}ヶ月後のゴール）】
@@ -123,14 +120,28 @@ ${goal.trim()}
 - subItems は各月5〜12個程度、実行可能な粒度で（最大3階層）
 - 必ず有効なJSONのみ出力すること`;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
+    const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' },
+        temperature: 0.7,
+      }),
     });
 
-    const content = completion.choices[0]?.message?.content;
+    if (!aiRes.ok) {
+      const errText = await aiRes.text().catch(() => '');
+      console.error('OpenAI API error:', errText);
+      return NextResponse.json({ error: 'AIの呼び出しに失敗しました' }, { status: 500 });
+    }
+
+    const aiJson = await aiRes.json() as { choices?: { message?: { content?: string } }[] };
+    const content = aiJson.choices?.[0]?.message?.content;
     if (!content) {
       return NextResponse.json({ error: 'AIの応答を取得できませんでした' }, { status: 500 });
     }
