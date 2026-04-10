@@ -160,6 +160,8 @@ model Diagnosis {
   recommendations Json?    @map("recommendations")
   pdfUrl          String?  @map("pdf_url")
   comment         String?  @map("comment")
+  /// 管理者・メンターのみ。伸ばし方・伝えること・注意事項など（AI生成可）。受講生APIでは返さない
+  adminStaffCoachingInsight Json? @map("admin_staff_coaching_insight")
   diagnosisUrls   DiagnosisUrl[]
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")

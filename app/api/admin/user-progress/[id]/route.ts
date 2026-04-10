@@ -221,6 +221,11 @@ export async function GET(
           personalityType: string | null;
           pdfUrl?: string | null;
           comment?: string | null;
+          strengths?: unknown;
+          weaknesses?: unknown;
+          recommendations?: unknown;
+          skillMap?: unknown;
+          adminStaffCoachingInsight?: unknown;
           createdAt: Date;
           updatedAt: Date;
         };
@@ -229,6 +234,11 @@ export async function GET(
           personalityType: diagnosis.personalityType || null,
           pdfUrl: diagnosis.pdfUrl || null,
           comment: diagnosis.comment || null,
+          strengths: diagnosis.strengths ?? null,
+          weaknesses: diagnosis.weaknesses ?? null,
+          recommendations: diagnosis.recommendations ?? null,
+          skillMap: diagnosis.skillMap ?? null,
+          adminStaffCoachingInsight: diagnosis.adminStaffCoachingInsight ?? null,
           createdAt: diagnosis.createdAt,
           updatedAt: diagnosis.updatedAt,
         };

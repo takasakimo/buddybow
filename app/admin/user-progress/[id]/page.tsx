@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Target, BookOpen, Map, MessageSquare, FileText, BarChart3, Trophy, Lock } from 'lucide-react';
+import { Target, BookOpen, Map, MessageSquare, FileText, BarChart3, Trophy, Lock, Sparkles } from 'lucide-react';
 
 interface UserProgress {
   currentPhase: string;
@@ -58,13 +58,101 @@ interface Interview {
   createdAt: Date;
 }
 
+interface StaffCoachingInsight {
+  developmentApproach: string;
+  keyMessages: string;
+  precautions: string;
+  generatedAt?: string;
+}
+
 interface Diagnosis {
   id: string;
   personalityType: string | null;
   pdfUrl: string | null;
   comment: string | null;
+  strengths?: unknown;
+  weaknesses?: unknown;
+  recommendations?: unknown;
+  skillMap?: unknown;
+  adminStaffCoachingInsight?: StaffCoachingInsight | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+function DiagnosisDetailFields({ diagnosis }: { diagnosis: Diagnosis }) {
+  const strList = (v: unknown): string[] | null => {
+    if (!Array.isArray(v)) return null;
+    const xs = v.filter((x): x is string => typeof x === 'string');
+    return xs.length ? xs : null;
+  };
+  const strengths = strList(diagnosis.strengths);
+  const weaknesses = strList(diagnosis.weaknesses);
+  const recommendations = strList(diagnosis.recommendations);
+  const hasAnyRaw =
+    diagnosis.skillMap != null ||
+    diagnosis.strengths != null ||
+    diagnosis.weaknesses != null ||
+    diagnosis.recommendations != null;
+
+  if (!strengths?.length && !weaknesses?.length && !recommendations?.length && !hasAnyRaw) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3 pt-3 border-t border-dashed border-slate-200">
+      <p className="text-xs font-semibold text-slate-600 mb-2 flex items-center gap-1">
+        <Lock className="w-3.5 h-3.5" aria-hidden />
+        管理者・メンター向け：診断の詳細データ
+      </p>
+      {strengths && strengths.length > 0 && (
+        <div className="mb-2">
+          <p className="text-xs font-medium text-slate-600 mb-1">強み</p>
+          <ul className="text-xs text-gray-800 list-disc pl-4 space-y-0.5">
+            {strengths.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {weaknesses && weaknesses.length > 0 && (
+        <div className="mb-2">
+          <p className="text-xs font-medium text-slate-600 mb-1">弱み・課題</p>
+          <ul className="text-xs text-gray-800 list-disc pl-4 space-y-0.5">
+            {weaknesses.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {recommendations && recommendations.length > 0 && (
+        <div className="mb-2">
+          <p className="text-xs font-medium text-slate-600 mb-1">推奨</p>
+          <ul className="text-xs text-gray-800 list-disc pl-4 space-y-0.5">
+            {recommendations.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {hasAnyRaw && (
+        <details className="text-xs">
+          <summary className="cursor-pointer text-slate-600 font-medium">スキルマップ・生データ（JSON）</summary>
+          <pre className="mt-1 p-2 bg-slate-100 rounded overflow-x-auto max-h-40 text-[11px]">
+            {JSON.stringify(
+              {
+                skillMap: diagnosis.skillMap,
+                strengths: diagnosis.strengths,
+                weaknesses: diagnosis.weaknesses,
+                recommendations: diagnosis.recommendations,
+              },
+              null,
+              2
+            )}
+          </pre>
+        </details>
+      )}
+    </div>
+  );
 }
 
 interface InternalProfile {
@@ -128,6 +216,7 @@ export default function UserProgressDetailPage() {
   });
   const [isUploadingPdf, setIsUploadingPdf] = useState(false);
   const [isAddingDiagnosis, setIsAddingDiagnosis] = useState(false);
+  const [generatingStaffInsightId, setGeneratingStaffInsightId] = useState<string | null>(null);
   const [diagnosisForm, setDiagnosisForm] = useState({
     pdfFile: null as File | null,
     comment: '',
@@ -649,6 +738,37 @@ export default function UserProgressDetailPage() {
       alert('診断結果の追加に失敗しました。コンソールを確認してください。');
     } finally {
       setIsAddingDiagnosis(false);
+    }
+  };
+
+  const handleGenerateStaffInsight = async (diagnosisId: string) => {
+    setGeneratingStaffInsightId(diagnosisId);
+    try {
+      const res = await fetch(`/api/admin/user-progress/diagnosis/${diagnosisId}/staff-insight`, {
+        method: 'POST',
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        insight?: StaffCoachingInsight;
+      };
+      if (res.ok && data.insight) {
+        setUserDetail((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            diagnoses: prev.diagnoses.map((d) =>
+              d.id === diagnosisId ? { ...d, adminStaffCoachingInsight: data.insight! } : d
+            ),
+          };
+        });
+        alert('スタッフ向けAIアドバイスを保存しました');
+      } else {
+        alert(data.error || '生成に失敗しました');
+      }
+    } catch {
+      alert('生成に失敗しました');
+    } finally {
+      setGeneratingStaffInsightId(null);
     }
   };
 
@@ -1704,7 +1824,7 @@ export default function UserProgressDetailPage() {
               )}
             </div>
 
-            {/* 診断結果管理 */}
+            {/* 診断結果管理（詳細・AIは管理者・担当メンターのみ） */}
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -1814,8 +1934,8 @@ export default function UserProgressDetailPage() {
                         key={diagnosis.id}
                         className="p-4 bg-gray-50 rounded-lg border border-gray-200"
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex-1 min-w-0">
                             {diagnosis.personalityType && (
                               <div className="mb-2">
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-buddybow-orange/10 text-buddybow-orange border border-buddybow-orange/30">
@@ -1841,6 +1961,62 @@ export default function UserProgressDetailPage() {
                             )}
                             <div className="text-xs text-gray-500 mt-2">
                               作成日: {new Date(diagnosis.createdAt).toLocaleDateString('ja-JP')}
+                            </div>
+                            <DiagnosisDetailFields diagnosis={diagnosis} />
+                            <div className="mt-3 p-3 rounded-lg border border-amber-200/90 bg-amber-50/60">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                                <p className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                                  <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                                  スタッフ専用：AI伴走アドバイス（受講生マイページには表示されません）
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => handleGenerateStaffInsight(diagnosis.id)}
+                                  disabled={generatingStaffInsightId === diagnosis.id}
+                                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-900 text-white text-xs font-medium hover:bg-amber-950 disabled:opacity-50 shrink-0"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5" aria-hidden />
+                                  {generatingStaffInsightId === diagnosis.id
+                                    ? '生成中…'
+                                    : diagnosis.adminStaffCoachingInsight
+                                      ? 'AIで再生成'
+                                      : 'AIで生成'}
+                                </button>
+                              </div>
+                              {diagnosis.adminStaffCoachingInsight ? (
+                                <div className="space-y-3 text-xs text-gray-900">
+                                  <div>
+                                    <p className="font-semibold text-amber-950 mb-1">伸ばし方・育成の方向性</p>
+                                    <p className="whitespace-pre-wrap leading-relaxed">
+                                      {diagnosis.adminStaffCoachingInsight.developmentApproach}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="font-semibold text-amber-950 mb-1">本人に伝えるとよいこと</p>
+                                    <p className="whitespace-pre-wrap leading-relaxed">
+                                      {diagnosis.adminStaffCoachingInsight.keyMessages}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="font-semibold text-amber-950 mb-1">注意事項</p>
+                                    <p className="whitespace-pre-wrap leading-relaxed">
+                                      {diagnosis.adminStaffCoachingInsight.precautions}
+                                    </p>
+                                  </div>
+                                  {diagnosis.adminStaffCoachingInsight.generatedAt && (
+                                    <p className="text-[10px] text-amber-900/70">
+                                      生成日時:{' '}
+                                      {new Date(diagnosis.adminStaffCoachingInsight.generatedAt).toLocaleString(
+                                        'ja-JP'
+                                      )}
+                                    </p>
+                                  )}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-amber-900/80">
+                                  上のボタンで、この診断結果をもとにメンター向けの提案をAIが作成します（OpenAI利用・数十分はかかりませんが数十秒かかることがあります）。
+                                </p>
+                              )}
                             </div>
                           </div>
                         </div>
