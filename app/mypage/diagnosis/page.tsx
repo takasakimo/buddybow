@@ -73,11 +73,11 @@ export default function DiagnosisPage() {
         <div className="card p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Target className="w-5 h-5 text-slate-700" />
-            <h2 className="text-lg font-semibold text-slate-900">256パターン副業適性診断</h2>
+            <h2 className="text-lg font-semibold text-slate-900">buddybow 256パターン副業適性診断</h2>
           </div>
           <p className="text-sm text-slate-600 leading-relaxed mb-4">
-            ビッグファイブ心理学をベースにした40問の診断で、
-            8軸 × H/L = 256通りのパーソナリティタイプを判定します。
+            ビッグファイブ心理学をベースにした<strong>40問</strong>の診断で、
+            8軸 × H/L = <strong>256通り</strong>のパーソナリティタイプを判定します。
             向いている副業やパーソナライズアドバイスも確認できます。
           </p>
           <Link
