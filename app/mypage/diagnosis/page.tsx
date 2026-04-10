@@ -6,18 +6,12 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
 import { Target, Calendar, ArrowRight } from 'lucide-react';
-import { AXIS_LABELS, AI_TYPES, type Axis } from '@/lib/diagnosis/ai-questions';
-
-const TYPE_STYLE: Record<string, { bg: string; text: string; border: string }> = {
-  S: { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-300' },
-  A: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-300' },
-  B: { bg: 'bg-stone-50',  text: 'text-stone-600',  border: 'border-stone-300' },
-  C: { bg: 'bg-slate-50',  text: 'text-slate-500',  border: 'border-slate-300' },
-};
+import { DIMENSION_LABELS, DIMENSION_ORDER, type DimensionId } from '@/lib/diagnosis/p256';
 
 interface SkillMap {
   totalScore?: number;
-  axisScores?: Record<Axis, number>;
+  axisScores?: Record<string, number>;
+  system?: string;
 }
 
 interface Diagnosis {
@@ -39,18 +33,13 @@ export default function DiagnosisPage() {
       router.replace('/login');
       return;
     }
-    if (status === 'authenticated') {
-      fetchData();
-    }
+    if (status === 'authenticated') fetchData();
   }, [status, router]);
 
   const fetchData = async () => {
     try {
       const response = await fetch('/api/mypage/diagnoses');
-      if (response.ok) {
-        const data = await response.json();
-        setDiagnoses(data);
-      }
+      if (response.ok) setDiagnoses(await response.json());
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
@@ -61,39 +50,35 @@ export default function DiagnosisPage() {
   if (status === 'loading' || status === 'unauthenticated') {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <p className="text-slate-500">
-          {status === 'loading' ? '読み込み中...' : 'リダイレクト中...'}
-        </p>
+        <p className="text-slate-500">{status === 'loading' ? '読み込み中...' : 'リダイレクト中...'}</p>
       </div>
     );
   }
 
-  // 最新の診断結果（新フォーマット判定: skillMapあり）
-  const latestNew = diagnoses.find(
-    (d) => d.skillMap && (d.skillMap as SkillMap).axisScores
-  );
+  // p256フォーマットの最新診断
+  const latest = diagnoses.find((d) => {
+    const sm = d.skillMap as SkillMap | null;
+    return sm?.system === 'p256' || (d.personalityType && d.personalityType.length === 8 && /^[HL]+$/.test(d.personalityType));
+  });
 
   return (
     <DashboardLayout>
       <div className="max-w-2xl mx-auto">
         <header className="mb-10">
-          <h1 className="text-3xl font-semibold text-slate-900 mb-2 tracking-tight">
-            診断
-          </h1>
-          <p className="text-slate-600 text-sm">
-            あなたのAI活用タイプを診断します
-          </p>
+          <h1 className="text-3xl font-semibold text-slate-900 mb-2 tracking-tight">診断</h1>
+          <p className="text-slate-600 text-sm">8つの心理学的特性から、あなたの副業適性を256パターンで判定します</p>
         </header>
 
-        {/* 診断へのリンク */}
+        {/* 診断カード */}
         <div className="card p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Target className="w-5 h-5 text-slate-700" />
-            <h2 className="text-lg font-semibold text-slate-900">buddybow AI活用診断</h2>
+            <h2 className="text-lg font-semibold text-slate-900">256パターン副業適性診断</h2>
           </div>
           <p className="text-sm text-slate-600 leading-relaxed mb-4">
-            30問の質問で、あなたのAI活用タイプ（S / A / B / C）を診断します。
-            8つの軸でスコアを算出し、向いている副業や成功のヒントをお伝えします。
+            ビッグファイブ心理学をベースにした40問の診断で、
+            8軸 × H/L = 256通りのパーソナリティタイプを判定します。
+            向いている副業やパーソナライズアドバイスも確認できます。
           </p>
           <Link
             href="/mypage/diagnosis/detailed"
@@ -101,92 +86,98 @@ export default function DiagnosisPage() {
             style={{ backgroundColor: '#B08968' }}
           >
             <ArrowRight className="w-5 h-5" />
-            診断を受ける
+            {latest ? '再診断する' : '診断を受ける'}
           </Link>
         </div>
 
-        {/* 最新診断結果 */}
+        {/* 最新結果 */}
         <div className="card p-6">
           <div className="flex items-center gap-2 mb-5">
             <Target className="w-5 h-5 text-slate-700" />
-            <h2 className="text-lg font-semibold text-slate-900">診断結果</h2>
+            <h2 className="text-lg font-semibold text-slate-900">最新の診断結果</h2>
           </div>
 
           {isLoading ? (
             <p className="text-slate-500 text-sm py-4">読み込み中...</p>
-          ) : !latestNew ? (
+          ) : !latest ? (
             <div className="text-center py-8">
               <p className="text-slate-500 text-sm mb-2">診断結果はまだありません</p>
-              <p className="text-xs text-slate-400">
-                「診断を受ける」から診断を受けると、結果がここに表示されます
-              </p>
+              <p className="text-xs text-slate-400">「診断を受ける」から診断を受けると結果がここに表示されます</p>
             </div>
-          ) : (() => {
-            const type = latestNew.personalityType ?? 'C';
-            const style = TYPE_STYLE[type] ?? TYPE_STYLE.C;
-            const typeInfo = AI_TYPES[type as keyof typeof AI_TYPES];
-            const sm = latestNew.skillMap as SkillMap;
-            const axes = Object.keys(AXIS_LABELS) as Axis[];
-
-            return (
-              <div className="space-y-5">
-                {/* ヘッダー */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className={`inline-flex px-3 py-1 rounded-full text-sm font-bold border ${style.bg} ${style.text} ${style.border}`}>
-                    タイプ {type}
-                  </span>
-                  {typeInfo && (
-                    <span className="text-base font-semibold text-slate-800">{typeInfo.label}</span>
-                  )}
-                  {sm.totalScore != null && (
-                    <span className="text-2xl font-bold text-[#B08968] ml-auto">
-                      {sm.totalScore}
-                      <span className="text-sm font-normal text-slate-400 ml-0.5">点</span>
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {new Date(latestNew.createdAt).toLocaleDateString('ja-JP', {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                  })}
-                </div>
-
-                {/* 8軸スコア */}
-                {sm.axisScores && (
-                  <div className="grid grid-cols-1 gap-2.5">
-                    {axes.map((ax) => (
-                      <div key={ax}>
-                        <div className="flex justify-between text-xs text-slate-500 mb-1">
-                          <span>{AXIS_LABELS[ax]}</span>
-                          <span className="font-medium text-slate-600">{sm.axisScores![ax]}</span>
-                        </div>
-                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full"
-                            style={{ width: `${sm.axisScores![ax]}%`, backgroundColor: '#B08968' }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* 再診断 */}
-                <div className="pt-2">
-                  <Link
-                    href="/mypage/diagnosis/detailed"
-                    className="text-xs text-slate-500 hover:text-slate-700 underline underline-offset-2"
-                  >
-                    再診断する
-                  </Link>
-                </div>
-              </div>
-            );
-          })()}
+          ) : (
+            <LatestResult diagnosis={latest} />
+          )}
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+function LatestResult({ diagnosis }: { diagnosis: Diagnosis }) {
+  const key = diagnosis.personalityType ?? '';
+  const sm = diagnosis.skillMap as SkillMap | null;
+  const axisScores = sm?.axisScores ?? {};
+  const archetype = diagnosis.comment ?? '';
+
+  return (
+    <div className="space-y-5">
+      {/* タイプキー + アーキタイプ */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs text-slate-400 font-mono mb-1">{key}</p>
+          <p className="text-xl font-bold text-slate-900">{archetype}</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <Calendar className="w-3.5 h-3.5" />
+          {new Date(diagnosis.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </div>
+      </div>
+
+      {/* H/Lタグ */}
+      {key.length === 8 && (
+        <div className="grid grid-cols-2 gap-2">
+          {DIMENSION_ORDER.map((dim, i) => {
+            const level = key[i] as 'H' | 'L';
+            const label = DIMENSION_LABELS[dim];
+            return (
+              <div
+                key={dim}
+                className={`px-3 py-2 rounded-lg text-xs flex justify-between items-center ${
+                  level === 'H' ? 'bg-[#B08968]/10 text-[#B08968]' : 'bg-slate-100 text-slate-500'
+                }`}
+              >
+                <span>{label.ja}</span>
+                <span className="font-bold">{label[level === 'H' ? 'Hlabel' : 'Llabel']}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 8軸スコアバー */}
+      {Object.keys(axisScores).length > 0 && (
+        <div className="space-y-2.5">
+          {DIMENSION_ORDER.map((dim, i) => {
+            const score = axisScores[dim] ?? 0;
+            const level = key[i] as 'H' | 'L' | undefined;
+            const pct = ((score - 5) / 15) * 100;
+            return (
+              <div key={dim}>
+                <div className="flex justify-between text-xs text-slate-500 mb-1">
+                  <span>{DIMENSION_LABELS[dim].ja}</span>
+                  <span className="text-slate-400">{score}/20</span>
+                </div>
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${pct}%`, backgroundColor: level === 'H' ? '#B08968' : '#cbd5e1' }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
