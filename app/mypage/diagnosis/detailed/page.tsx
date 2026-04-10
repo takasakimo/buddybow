@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ChevronRight, Map, Loader2 } from 'lucide-react';
 import {
   P256_QUESTIONS,
   DIMENSION_LABELS,
@@ -234,6 +234,143 @@ export default function DetailedDiagnosisPage() {
   );
 }
 
+// ── ロードマップ生成コンポーネント ───────────────────────────
+
+function RoadmapGenerator({ result }: { result: P256Result }) {
+  const router = useRouter();
+  const [goal, setGoal]         = useState('');
+  const [firstStep, setFirst]   = useState('');
+  const [months, setMonths]     = useState(3);
+  const [status, setStatus]     = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMsg, setError]    = useState('');
+
+  const generate = async () => {
+    if (!goal.trim()) return;
+    setStatus('loading');
+    setError('');
+    try {
+      const res = await fetch('/api/mypage/roadmap/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal: goal.trim(),
+          firstStep: firstStep.trim() || undefined,
+          targetMonths: months,
+          diagnosisKey: result.key,
+          archetype: result.archetype.title,
+          dimensionScores: Object.fromEntries(
+            result.dimensionScores.map((d) => [d.dimensionId, { rawScore: d.rawScore, level: d.level }])
+          ),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        setStatus('success');
+        setTimeout(() => router.push('/mypage/roadmap'), 1200);
+      } else {
+        setError(data.error ?? 'ロードマップの生成に失敗しました');
+        setStatus('error');
+      }
+    } catch {
+      setError('通信エラーが発生しました');
+      setStatus('error');
+    }
+  };
+
+  if (status === 'success') {
+    return (
+      <div className="card p-6 text-center space-y-3">
+        <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto" />
+        <p className="font-semibold text-slate-800">ロードマップを作成しました！</p>
+        <p className="text-sm text-slate-500">ロードマップページへ移動します...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card p-6 space-y-5">
+      <div className="flex items-center gap-2">
+        <Map className="w-5 h-5 text-[#B08968]" />
+        <h3 className="text-base font-bold text-slate-900">このタイプに合ったロードマップを作成する</h3>
+      </div>
+      <p className="text-xs text-slate-500 -mt-2">
+        診断結果（{result.archetype.title}）をAIに渡して、あなた専用のロードマップを自動生成します。
+      </p>
+
+      {/* ゴール */}
+      <div>
+        <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+          達成したいゴール <span className="text-red-400">*</span>
+        </label>
+        <textarea
+          value={goal}
+          onChange={(e) => setGoal(e.target.value)}
+          placeholder="例：副業で月5万円を安定的に稼ぐ / SNS運用代行の案件を獲得する"
+          rows={2}
+          className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#B08968] resize-none"
+        />
+      </div>
+
+      {/* 最初の一歩 */}
+      <div>
+        <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+          最初の一歩（任意）
+        </label>
+        <input
+          type="text"
+          value={firstStep}
+          onChange={(e) => setFirst(e.target.value)}
+          placeholder="例：ChatGPTで記事を1本書いてみる（空欄の場合はAIが提案）"
+          className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#B08968]"
+        />
+      </div>
+
+      {/* 期間 */}
+      <div>
+        <label className="block text-xs font-semibold text-slate-700 mb-1.5">ロードマップ期間</label>
+        <div className="flex gap-2">
+          {[1, 2, 3, 4, 5, 6].map((m) => (
+            <button
+              key={m}
+              onClick={() => setMonths(m)}
+              className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-all ${
+                months === m
+                  ? 'bg-[#B08968] text-white border-[#B08968]'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-[#B08968]'
+              }`}
+            >
+              {m}ヶ月
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {status === 'error' && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{errorMsg}</p>
+      )}
+
+      <button
+        onClick={generate}
+        disabled={!goal.trim() || status === 'loading'}
+        className="w-full py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ backgroundColor: '#B08968' }}
+      >
+        {status === 'loading' ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            AIがロードマップを生成中...（30秒ほどかかります）
+          </>
+        ) : (
+          <>
+            <Map className="w-4 h-4" />
+            ロードマップを自動生成する
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
 // ── 結果コンポーネント ─────────────────────────────────────
 
 function ResultView({
@@ -379,13 +516,15 @@ function ResultView({
         </div>
       </div>
 
+      {/* ロードマップ生成 */}
+      <RoadmapGenerator result={result} />
+
       <div className="pt-2 text-center">
         <Link
           href="/mypage/diagnosis"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium"
-          style={{ backgroundColor: '#B08968' }}
+          className="text-sm text-slate-500 hover:text-slate-700 underline underline-offset-2"
         >
-          診断結果一覧へ
+          診断結果一覧へ戻る
         </Link>
       </div>
     </div>
